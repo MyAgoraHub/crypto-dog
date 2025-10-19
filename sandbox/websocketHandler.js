@@ -1,0 +1,18 @@
+import { CryptoDogWebSocketHandler } from "../core/clients/cryptoDogWebsocketHandler.js";
+
+const wsHandler = new CryptoDogWebSocketHandler({
+  testnet: false,  // or false for live
+  throttleMs: 5000
+});
+
+wsHandler.subscribeToTopics(['tickers.BTCUSDT'], 'spot');
+
+wsHandler.onUpdate((data) => {
+  console.log('Received data:', JSON.stringify(data, null, 2));
+});
+
+wsHandler.onException((err) => {
+  console.error('WebSocket error:', err);
+});
+
+// The connection starts automatically when subscribing
