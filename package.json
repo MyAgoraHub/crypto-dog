@@ -1,0 +1,38 @@
+{
+  "name": "crypto-dog",
+  "version": "1.0.0",
+  "description": "Crypto Trading & Data Analysis Tool",
+  "main": "index.js",
+  "bin": {
+    "crypto-dog": "./crypto-dog-cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "node server.js",
+    "dev": "node server.js",
+    "portal:dev": "cd portal && npm run dev",
+    "sandbox:requestHandler": "node sandbox/requestHandler.js",
+    "sandbox:websocketHandler": "node sandbox/websocketHandler.js",
+    "sandbox:dbRuntimes": "node sandbox/dbRuntimes.js",
+    "sandbox:indicatorExploration":"node sandbox/indicatorExploration.js",
+    "start:processManager":"node core/cryptoDogSignalProcessor.js",
+    "cli": "node crypto-dog-cli.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bybit-api": "^4.4.0",
+    "chalk": "^5.6.2",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "lowdb": "^7.0.1",
+    "node-super-trend": "^1.5.0",
+    "ora": "^9.0.0",
+    "technicalindicators": "^3.1.0",
+    "ws": "^8.18.3"
+  },
+  "type": "module"
+}
