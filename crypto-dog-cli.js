@@ -4,16 +4,12 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
+import { spawn } from 'child_process';
 import {
     getInstrumentsInfo,
     getTickers,
-    getKlineCandles,
-    getIntervals,
-    getInterval,
-    getOrderBook
+    getIntervals
 } from './core/clients/cryptoDogRequestHandler.js';
-import { loadCandleData } from './core/cryptoDogAgent.js';
-import { CryptoDogWebSocketHandler } from './core/clients/cryptoDogWebsocketHandler.js';
 
 const program = new Command();
 
@@ -97,182 +93,107 @@ program
         }
     });
 
-// Command: Get kline/candle data
+// Command: Stop-Loss & Profit Target Calculator
 program
-    .command('candles')
-    .description('Get historical candle data')
-    .requiredOption('-c, --category <category>', 'Market category (spot, linear, inverse)')
-    .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
-    .requiredOption('-i, --interval <interval>', 'Time interval (e.g., 1, 5, 15, 60, 240, D, W)')
-    .option('-l, --limit <limit>', 'Number of candles to fetch', '10')
-    .action(async (options) => {
-        const spinner = ora('Fetching candle data...').start();
-        try {
-            const klineData = await getKlineCandles(
-                options.category,
-                options.symbol,
-                options.interval,
-                null,
-                null,
-                parseInt(options.limit)
-            );
-            spinner.succeed('Candle data fetched successfully!');
-
-            const table = new Table({
-                head: [
-                    chalk.cyan('Time'),
-                    chalk.cyan('Open'),
-                    chalk.cyan('High'),
-                    chalk.cyan('Low'),
-                    chalk.cyan('Close'),
-                    chalk.cyan('Volume')
-                ],
-                colWidths: [20, 12, 12, 12, 12, 15]
-            });
-
-            if (klineData.result && klineData.result.list) {
-                klineData.result.list.forEach(candle => {
-                    const [timestamp, open, high, low, close, volume] = candle;
-                    const date = new Date(parseInt(timestamp)).toISOString();
-                    const priceChange = parseFloat(close) - parseFloat(open);
-                    const closeColor = priceChange >= 0 ? chalk.green : chalk.red;
-
-                    table.push([
-                        date.slice(0, 19).replace('T', ' '),
-                        open,
-                        high,
-                        low,
-                        closeColor(close),
-                        volume
-                    ]);
-                });
-            }
-
-            console.log(chalk.green(`\n📈 Candle Data for ${options.symbol}:\n`));
-            console.log(table.toString());
-        } catch (error) {
-            spinner.fail('Failed to fetch candle data');
-            console.error(chalk.red(error.message));
-        }
-    });
-
-// Command: Load historical candles
-program
-    .command('load-history')
-    .description('Load historical candle data with multiple iterations')
-    .requiredOption('-c, --category <category>', 'Market category (spot, linear, inverse)')
-    .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
-    .requiredOption('-i, --interval <interval>', 'Time interval (e.g., 1, 5, 15, 60, 240)')
-    .option('-n, --iterations <iterations>', 'Number of iterations to fetch', '5')
-    .option('-l, --limit <limit>', 'Candles per request', '200')
-    .action(async (options) => {
-        const spinner = ora('Loading historical candle data...').start();
-        try {
-            const candleBuffer = await loadCandleData(
-                options.category,
-                options.symbol,
-                options.interval,
-                parseInt(options.iterations),
-                parseInt(options.limit)
-            );
-            spinner.succeed(`Loaded ${candleBuffer.length} candles successfully!`);
-
-            console.log(chalk.green(`\n📊 Historical Data Summary:`));
-            console.log(chalk.cyan(`  Symbol: ${options.symbol}`));
-            console.log(chalk.cyan(`  Interval: ${options.interval}`));
-            console.log(chalk.cyan(`  Total Candles: ${candleBuffer.length}`));
-            
-            if (candleBuffer.length > 0) {
-                const firstCandle = new Date(parseInt(candleBuffer[candleBuffer.length - 1][0]));
-                const lastCandle = new Date(parseInt(candleBuffer[0][0]));
-                console.log(chalk.cyan(`  Date Range: ${firstCandle.toISOString()} to ${lastCandle.toISOString()}`));
-            }
-        } catch (error) {
-            spinner.fail('Failed to load historical data');
-            console.error(chalk.red(error.message));
-        }
-    });
-
-// Command: Get orderbook
-program
-    .command('orderbook')
-    .description('Get current orderbook data')
-    .requiredOption('-c, --category <category>', 'Market category (spot, linear, inverse)')
-    .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
-    .option('-l, --limit <limit>', 'Depth limit (max 50)', '10')
-    .action(async (options) => {
-        const spinner = ora('Fetching orderbook...').start();
-        try {
-            const orderBook = await getOrderBook(
-                options.category,
-                options.symbol,
-                parseInt(options.limit)
-            );
-            spinner.succeed('Orderbook fetched successfully!');
-
-            const bidsTable = new Table({
-                head: [chalk.green('Bid Price'), chalk.green('Bid Size')],
-                colWidths: [20, 20]
-            });
-
-            const asksTable = new Table({
-                head: [chalk.red('Ask Price'), chalk.red('Ask Size')],
-                colWidths: [20, 20]
-            });
-
-            if (orderBook.result) {
-                const { b: bids, a: asks } = orderBook.result;
-                
-                bids.slice(0, parseInt(options.limit)).forEach(([price, size]) => {
-                    bidsTable.push([chalk.green(price), size]);
-                });
-
-                asks.slice(0, parseInt(options.limit)).forEach(([price, size]) => {
-                    asksTable.push([chalk.red(price), size]);
-                });
-            }
-
-            console.log(chalk.green(`\n📖 Order Book for ${options.symbol}:\n`));
-            console.log(chalk.red('ASKS (Sell Orders):'));
-            console.log(asksTable.toString());
-            console.log(chalk.green('\nBIDS (Buy Orders):'));
-            console.log(bidsTable.toString());
-        } catch (error) {
-            spinner.fail('Failed to fetch orderbook');
-            console.error(chalk.red(error.message));
-        }
-    });
-
-// Command: WebSocket streaming
-program
-    .command('stream')
-    .description('Stream live market data via WebSocket')
-    .requiredOption('-c, --category <category>', 'Market category (spot, linear, inverse, option)')
-    .requiredOption('-t, --topics <topics...>', 'Topics to subscribe (e.g., tickers.BTCUSDT orderbook.50.ETHUSDT)')
-    .option('--throttle <ms>', 'Throttle updates (ms)', '1000')
-    .option('--testnet', 'Use testnet instead of mainnet')
+    .command('calculate')
+    .description('Calculate stop-loss and profit targets')
+    .requiredOption('-e, --entry <price>', 'Entry price')
+    .requiredOption('-t, --type <type>', 'Position type (long/short)')
+    .option('-s, --stop-loss <percentage>', 'Stop-loss percentage', '2')
+    .option('-p, --profit <percentage>', 'Profit target percentage', '5')
+    .option('-a, --amount <amount>', 'Position size', '100')
     .action((options) => {
-        console.log(chalk.green('\n🔴 Starting WebSocket stream...\n'));
-        console.log(chalk.cyan(`Category: ${options.category}`));
-        console.log(chalk.cyan(`Topics: ${options.topics.join(', ')}`));
-        console.log(chalk.cyan(`Throttle: ${options.throttle}ms`));
-        console.log(chalk.yellow('\nPress Ctrl+C to stop streaming\n'));
+        const entry = parseFloat(options.entry);
+        const stopLossPercent = parseFloat(options.stopLoss);
+        const profitPercent = parseFloat(options.profit);
+        const amount = parseFloat(options.amount);
+        const isLong = options.type.toLowerCase() === 'long';
 
-        const wsHandler = new CryptoDogWebSocketHandler({
-            testnet: options.testnet || false,
-            throttleMs: parseInt(options.throttle)
+        let stopLoss, profitTarget, stopLossAmount, profitAmount;
+
+        if (isLong) {
+            stopLoss = entry * (1 - stopLossPercent / 100);
+            profitTarget = entry * (1 + profitPercent / 100);
+        } else {
+            stopLoss = entry * (1 + stopLossPercent / 100);
+            profitTarget = entry * (1 - profitPercent / 100);
+        }
+
+        stopLossAmount = Math.abs(entry - stopLoss) * amount / entry;
+        profitAmount = Math.abs(profitTarget - entry) * amount / entry;
+
+        const riskRewardRatio = profitAmount / stopLossAmount;
+
+        console.log(chalk.green('\n� Trading Calculator Results:\n'));
+        console.log(chalk.cyan('Position Details:'));
+        console.log(`  Type: ${chalk.bold(isLong ? 'LONG' : 'SHORT')}`);
+        console.log(`  Entry Price: ${chalk.yellow('$' + entry.toFixed(2))}`);
+        console.log(`  Position Size: ${chalk.yellow('$' + amount.toFixed(2))}`);
+        
+        console.log(chalk.cyan('\nStop-Loss:'));
+        console.log(`  Price: ${chalk.red('$' + stopLoss.toFixed(2))}`);
+        console.log(`  Distance: ${chalk.red(stopLossPercent + '%')}`);
+        console.log(`  Loss Amount: ${chalk.red('-$' + stopLossAmount.toFixed(2))}`);
+        
+        console.log(chalk.cyan('\nProfit Target:'));
+        console.log(`  Price: ${chalk.green('$' + profitTarget.toFixed(2))}`);
+        console.log(`  Distance: ${chalk.green(profitPercent + '%')}`);
+        console.log(`  Profit Amount: ${chalk.green('+$' + profitAmount.toFixed(2))}`);
+        
+        console.log(chalk.cyan('\nRisk/Reward:'));
+        console.log(`  Ratio: ${chalk.bold(riskRewardRatio.toFixed(2) + ':1')}`);
+        
+        const riskColor = riskRewardRatio >= 2 ? chalk.green : riskRewardRatio >= 1.5 ? chalk.yellow : chalk.red;
+        console.log(`  Rating: ${riskColor(riskRewardRatio >= 2 ? 'Excellent ✓' : riskRewardRatio >= 1.5 ? 'Good' : 'Poor ✗')}\n`);
+    });
+
+// Command: Start Signal Process Manager
+program
+    .command('start-monitor')
+    .description('Start the signal monitoring process')
+    .option('-d, --daemon', 'Run in background (daemon mode)')
+    .action((options) => {
+        console.log(chalk.green('\n🚀 Starting Signal Process Manager...\n'));
+        
+        const processArgs = ['core/cryptoDogSignalProcessor.js'];
+        const processOptions = {
+            stdio: options.daemon ? 'ignore' : 'inherit',
+            detached: options.daemon
+        };
+
+        const child = spawn('node', processArgs, processOptions);
+
+        if (options.daemon) {
+            child.unref();
+            console.log(chalk.green(`✓ Signal monitor started in background (PID: ${child.pid})`));
+            console.log(chalk.cyan(`  Use 'kill ${child.pid}' to stop it\n`));
+        } else {
+            console.log(chalk.cyan('Signal monitor is running... Press Ctrl+C to stop\n'));
+        }
+
+        child.on('error', (error) => {
+            console.error(chalk.red('Failed to start process:'), error.message);
+        });
+    });
+
+// Command: Start Web Server
+program
+    .command('start-server')
+    .description('Start the API server and portal')
+    .option('-p, --port <port>', 'Server port', '3000')
+    .action((options) => {
+        console.log(chalk.green('\n🌐 Starting API Server...\n'));
+        
+        const child = spawn('node', ['server.js'], {
+            stdio: 'inherit',
+            env: { ...process.env, PORT: options.port }
         });
 
-        wsHandler.subscribeToTopics(options.topics, options.category);
+        console.log(chalk.cyan(`API Server running on http://localhost:${options.port}`));
+        console.log(chalk.cyan('Press Ctrl+C to stop\n'));
 
-        wsHandler.onUpdate((data) => {
-            console.log(chalk.green('━'.repeat(60)));
-            console.log(chalk.cyan(`[${new Date().toISOString()}]`));
-            console.log(JSON.stringify(data, null, 2));
-        });
-
-        wsHandler.onException((err) => {
-            console.error(chalk.red('WebSocket error:'), err.message);
+        child.on('error', (error) => {
+            console.error(chalk.red('Failed to start server:'), error.message);
         });
     });
 
