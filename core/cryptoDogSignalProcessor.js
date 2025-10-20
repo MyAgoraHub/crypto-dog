@@ -9,22 +9,26 @@ const INTERVAL = (1000 * 60 ); // 1 minute
 
 // Detect if running in Termux environment
 const isTermux = () => {
-    return process.env.PREFIX && process.env.PREFIX.includes('com.termux');
+    // Check multiple indicators
+    return (
+        process.env.PREFIX?.includes('com.termux') ||
+        process.env.TERMUX_VERSION !== undefined ||
+        process.env.ANDROID_ROOT !== undefined ||
+        process.env.SHELL?.includes('termux')
+    );
 };
 
-// Send Termux notification
+// Send Termux notification (tries regardless of detection)
 const sendTermuxNotification = async (title, content, priority = 'default') => {
-    if (!isTermux()) {
-        console.log('Not in Termux environment, skipping notification');
-        return;
-    }
-
     try {
         const command = `termux-notification --title "${title}" --content "${content}" --priority ${priority} --sound`;
         await execAsync(command);
         console.log('✓ Notification sent:', title);
     } catch (error) {
-        console.error('Failed to send notification:', error.message);
+        // Silently fail if termux-notification not available
+        if (isTermux()) {
+            console.log('Termux detected but notification failed. Install termux-api: pkg install termux-api');
+        }
     }
 };
 import {
@@ -98,9 +102,29 @@ const process = async () => {
         console.log(currentSignal)
         let result = await processSignal(currentSignal);
         if(result.signal === true) {
+           // Build detailed notification message
+           let notificationContent = `${currentSignal.symbol} | ${currentSignal.timeframe}\n`;
+           
+           // Add indicator-specific details
+           if (currentSignal.signalType.includes('RSI')) {
+               notificationContent += `RSI: ${result.data?.value?.toFixed(2) || 'N/A'}\n`;
+           } else if (currentSignal.signalType.includes('PRICE_ACTION')) {
+               notificationContent += `Price: $${result.data?.value?.toFixed(2) || 'N/A'} (Target: $${currentSignal.value})\n`;
+           } else if (currentSignal.signalType.includes('SuperTrend')) {
+               notificationContent += `Trend: ${result.trend || result.data?.trend || 'N/A'}\n`;
+           } else if (currentSignal.signalType.includes('MULTI_DIV')) {
+               const divs = result.divergence || [];
+               notificationContent += `Divergences: ${Array.isArray(divs) ? divs.join(', ') : divs}\n`;
+           } else if (currentSignal.signalType.includes('Crocodile') || currentSignal.signalType.includes('Cross')) {
+               notificationContent += `Pattern detected!\n`;
+           } else if (currentSignal.signalType.includes('Woodies')) {
+               notificationContent += `Level: ${result.type || 'pivot detected'}\n`;
+           }
+           
+           notificationContent += `Trigger: ${currentSignal.triggerCount + 1}/${currentSignal.maxTriggerTimes}`;
+           
            // Send Termux notification
-           const notificationTitle = `🚨 Signal Triggered: ${currentSignal.symbol}`;
-           const notificationContent = `${currentSignal.signalType} - ${currentSignal.timeframe} | Trigger: ${currentSignal.triggerCount + 1}/${currentSignal.maxTriggerTimes}`;
+           const notificationTitle = `🚨 ${currentSignal.signalType.replace('INDICATOR_', '').replace('Signal', '').replace(/_/g, ' ')}`;
            await sendTermuxNotification(notificationTitle, notificationContent, 'high');
            
            // Update Signals   
@@ -109,8 +133,8 @@ const process = async () => {
             currentSignal.isActive = false;
             // Send final notification
             await sendTermuxNotification(
-                `✓ Signal Completed: ${currentSignal.symbol}`,
-                `${currentSignal.signalType} reached max triggers (${currentSignal.maxTriggerTimes})`,
+                `✓ Signal Completed`,
+                `${currentSignal.symbol} ${currentSignal.signalType}\nReached max triggers (${currentSignal.maxTriggerTimes})`,
                 'default'
             );
            }
