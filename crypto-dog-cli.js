@@ -212,43 +212,49 @@ program
         });
     });
 
+// Command: List Signal Types
+program
+    .command('signal-types')
+    .description('List all available signal types')
+    .action(() => {
+        console.log(chalk.green('\n📋 Available Signal Types:\n'));
+        console.log(chalk.cyan('Indicator-Based Signals:'));
+        console.log('  rsi-ob          - RSI Overbought (requires --value, e.g., 70)');
+        console.log('  rsi-os          - RSI Oversold (requires --value, e.g., 30)');
+        console.log('  crocodile-dive  - Crocodile Dive (Bearish EMA pattern)');
+        console.log('  crocodile       - Crocodile (Bullish EMA pattern)');
+        console.log('  cross-up        - EMA Cross Up');
+        console.log('  cross-down      - EMA Cross Down');
+        console.log('  multi-div       - Multi Divergence Detector');
+        console.log('  uptrend         - Uptrend Signal');
+        console.log('  downtrend       - Downtrend Signal');
+        console.log('  woodies         - Woodies Pivot Signal');
+        console.log('  supertrend-long - SuperTrend Long');
+        console.log('  supertrend-short- SuperTrend Short');
+        
+        console.log(chalk.cyan('\nPrice Action Signals:'));
+        console.log('  price-gt        - Price Greater Than (requires --value)');
+        console.log('  price-lt        - Price Less Than (requires --value)');
+        console.log('  price-gte       - Price Greater Than or Equal (requires --value)');
+        console.log('  price-lte       - Price Less Than or Equal (requires --value)');
+        console.log('  price-eq        - Price Equal (requires --value)');
+        
+        console.log(chalk.green('\n💡 Example Usage:'));
+        console.log(chalk.gray('  crypto-dog create-signal -s BTCUSDT -i 1h -t rsi-ob -v 70'));
+        console.log(chalk.gray('  crypto-dog create-signal -s ETHUSDT -i 15m -t cross-up'));
+        console.log(chalk.gray('  crypto-dog create-signal -s ADAUSDT -i 5m -t price-gt -v 0.5\n'));
+    });
+
 // Command: Create Signal
 program
     .command('create-signal')
     .description('Create a new trading signal')
     .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
     .requiredOption('-i, --interval <interval>', 'Time interval (e.g., 1m, 5m, 15m, 1h, 4h)')
-    .requiredOption('-t, --type <type>', 'Signal type (see --list-types)')
+    .requiredOption('-t, --type <type>', 'Signal type (use "crypto-dog signal-types" to list)')
     .option('-v, --value <value>', 'Signal value (for RSI, price action, etc.)')
     .option('-m, --max-triggers <number>', 'Max trigger times', '3')
-    .option('--list-types', 'List all available signal types')
     .action(async (options) => {
-        if (options.listTypes) {
-            console.log(chalk.green('\n📋 Available Signal Types:\n'));
-            console.log(chalk.cyan('Indicator-Based Signals:'));
-            console.log('  rsi-ob          - RSI Overbought (requires --value, e.g., 70)');
-            console.log('  rsi-os          - RSI Oversold (requires --value, e.g., 30)');
-            console.log('  crocodile-dive  - Crocodile Dive (Bearish EMA pattern)');
-            console.log('  crocodile       - Crocodile (Bullish EMA pattern)');
-            console.log('  cross-up        - EMA Cross Up');
-            console.log('  cross-down      - EMA Cross Down');
-            console.log('  multi-div       - Multi Divergence Detector');
-            console.log('  uptrend         - Uptrend Signal');
-            console.log('  downtrend       - Downtrend Signal');
-            console.log('  woodies         - Woodies Pivot Signal');
-            console.log('  supertrend-long - SuperTrend Long');
-            console.log('  supertrend-short- SuperTrend Short');
-            
-            console.log(chalk.cyan('\nPrice Action Signals:'));
-            console.log('  price-gt        - Price Greater Than (requires --value)');
-            console.log('  price-lt        - Price Less Than (requires --value)');
-            console.log('  price-gte       - Price Greater Than or Equal (requires --value)');
-            console.log('  price-lte       - Price Less Than or Equal (requires --value)');
-            console.log('  price-eq        - Price Equal (requires --value)');
-            console.log('');
-            return;
-        }
-
         const spinner = ora('Creating signal...').start();
         
         try {
