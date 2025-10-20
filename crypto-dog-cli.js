@@ -4,16 +4,27 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
+import { spawn } from 'child_process';
 import {
     getInstrumentsInfo,
     getTickers,
-    getKlineCandles,
-    getIntervals,
-    getInterval,
-    getOrderBook
+    getIntervals
 } from './core/clients/cryptoDogRequestHandler.js';
-import { loadCandleData } from './core/cryptoDogAgent.js';
-import { CryptoDogWebSocketHandler } from './core/clients/cryptoDogWebsocketHandler.js';
+import {
+    createRsiObSignal, 
+    createRsiOsSignal, 
+    createCrocodileDiveSignal, 
+    createCrocodileSignal,
+    createCrossUpSignal,
+    createCrossDownSignal,
+    createPriceActionSignal,
+    createMultiDivSignal,
+    createUptrendSignal,
+    createDownTrendSignal,
+    createWoodiesSignal,
+    createSuperTrendSignal
+} from './core/cryptoDogSignalManager.js';
+import { getAllSignals, deleteAll } from './core/repository/dbManager.js';
 
 const program = new Command();
 
@@ -97,183 +108,348 @@ program
         }
     });
 
-// Command: Get kline/candle data
+// Command: Stop-Loss & Profit Target Calculator
 program
-    .command('candles')
-    .description('Get historical candle data')
-    .requiredOption('-c, --category <category>', 'Market category (spot, linear, inverse)')
-    .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
-    .requiredOption('-i, --interval <interval>', 'Time interval (e.g., 1, 5, 15, 60, 240, D, W)')
-    .option('-l, --limit <limit>', 'Number of candles to fetch', '10')
-    .action(async (options) => {
-        const spinner = ora('Fetching candle data...').start();
-        try {
-            const klineData = await getKlineCandles(
-                options.category,
-                options.symbol,
-                options.interval,
-                null,
-                null,
-                parseInt(options.limit)
-            );
-            spinner.succeed('Candle data fetched successfully!');
+    .command('calculate')
+    .description('Calculate stop-loss and profit targets')
+    .requiredOption('-e, --entry <price>', 'Entry price')
+    .requiredOption('-t, --type <type>', 'Position type (long/short)')
+    .option('-s, --stop-loss <percentage>', 'Stop-loss percentage', '2')
+    .option('-p, --profit <percentage>', 'Profit target percentage', '5')
+    .option('-a, --amount <amount>', 'Position size', '100')
+    .action((options) => {
+        const entry = parseFloat(options.entry);
+        const stopLossPercent = parseFloat(options.stopLoss);
+        const profitPercent = parseFloat(options.profit);
+        const amount = parseFloat(options.amount);
+        const isLong = options.type.toLowerCase() === 'long';
 
+        let stopLoss, profitTarget, stopLossAmount, profitAmount;
+
+        if (isLong) {
+            stopLoss = entry * (1 - stopLossPercent / 100);
+            profitTarget = entry * (1 + profitPercent / 100);
+        } else {
+            stopLoss = entry * (1 + stopLossPercent / 100);
+            profitTarget = entry * (1 - profitPercent / 100);
+        }
+
+        stopLossAmount = Math.abs(entry - stopLoss) * amount / entry;
+        profitAmount = Math.abs(profitTarget - entry) * amount / entry;
+
+        const riskRewardRatio = profitAmount / stopLossAmount;
+
+        console.log(chalk.green('\n� Trading Calculator Results:\n'));
+        console.log(chalk.cyan('Position Details:'));
+        console.log(`  Type: ${chalk.bold(isLong ? 'LONG' : 'SHORT')}`);
+        console.log(`  Entry Price: ${chalk.yellow('$' + entry.toFixed(2))}`);
+        console.log(`  Position Size: ${chalk.yellow('$' + amount.toFixed(2))}`);
+        
+        console.log(chalk.cyan('\nStop-Loss:'));
+        console.log(`  Price: ${chalk.red('$' + stopLoss.toFixed(2))}`);
+        console.log(`  Distance: ${chalk.red(stopLossPercent + '%')}`);
+        console.log(`  Loss Amount: ${chalk.red('-$' + stopLossAmount.toFixed(2))}`);
+        
+        console.log(chalk.cyan('\nProfit Target:'));
+        console.log(`  Price: ${chalk.green('$' + profitTarget.toFixed(2))}`);
+        console.log(`  Distance: ${chalk.green(profitPercent + '%')}`);
+        console.log(`  Profit Amount: ${chalk.green('+$' + profitAmount.toFixed(2))}`);
+        
+        console.log(chalk.cyan('\nRisk/Reward:'));
+        console.log(`  Ratio: ${chalk.bold(riskRewardRatio.toFixed(2) + ':1')}`);
+        
+        const riskColor = riskRewardRatio >= 2 ? chalk.green : riskRewardRatio >= 1.5 ? chalk.yellow : chalk.red;
+        console.log(`  Rating: ${riskColor(riskRewardRatio >= 2 ? 'Excellent ✓' : riskRewardRatio >= 1.5 ? 'Good' : 'Poor ✗')}\n`);
+    });
+
+// Command: Start Signal Process Manager
+program
+    .command('start-monitor')
+    .description('Start the signal monitoring process')
+    .option('-d, --daemon', 'Run in background (daemon mode)')
+    .action((options) => {
+        console.log(chalk.green('\n🚀 Starting Signal Process Manager...\n'));
+        
+        const processArgs = ['core/cryptoDogSignalProcessor.js'];
+        const processOptions = {
+            stdio: options.daemon ? 'ignore' : 'inherit',
+            detached: options.daemon
+        };
+
+        const child = spawn('node', processArgs, processOptions);
+
+        if (options.daemon) {
+            child.unref();
+            console.log(chalk.green(`✓ Signal monitor started in background (PID: ${child.pid})`));
+            console.log(chalk.cyan(`  Use 'kill ${child.pid}' to stop it\n`));
+        } else {
+            console.log(chalk.cyan('Signal monitor is running... Press Ctrl+C to stop\n'));
+        }
+
+        child.on('error', (error) => {
+            console.error(chalk.red('Failed to start process:'), error.message);
+        });
+    });
+
+// Command: Start Web Server
+program
+    .command('start-server')
+    .description('Start the API server and portal')
+    .option('-p, --port <port>', 'Server port', '3000')
+    .action((options) => {
+        console.log(chalk.green('\n🌐 Starting API Server...\n'));
+        
+        const child = spawn('node', ['server.js'], {
+            stdio: 'inherit',
+            env: { ...process.env, PORT: options.port }
+        });
+
+        console.log(chalk.cyan(`API Server running on http://localhost:${options.port}`));
+        console.log(chalk.cyan('Press Ctrl+C to stop\n'));
+
+        child.on('error', (error) => {
+            console.error(chalk.red('Failed to start server:'), error.message);
+        });
+    });
+
+// Command: Create Signal
+program
+    .command('create-signal')
+    .description('Create a new trading signal')
+    .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
+    .requiredOption('-i, --interval <interval>', 'Time interval (e.g., 1m, 5m, 15m, 1h, 4h)')
+    .requiredOption('-t, --type <type>', 'Signal type (see --list-types)')
+    .option('-v, --value <value>', 'Signal value (for RSI, price action, etc.)')
+    .option('-m, --max-triggers <number>', 'Max trigger times', '3')
+    .option('--list-types', 'List all available signal types')
+    .action(async (options) => {
+        if (options.listTypes) {
+            console.log(chalk.green('\n📋 Available Signal Types:\n'));
+            console.log(chalk.cyan('Indicator-Based Signals:'));
+            console.log('  rsi-ob          - RSI Overbought (requires --value, e.g., 70)');
+            console.log('  rsi-os          - RSI Oversold (requires --value, e.g., 30)');
+            console.log('  crocodile-dive  - Crocodile Dive (Bearish EMA pattern)');
+            console.log('  crocodile       - Crocodile (Bullish EMA pattern)');
+            console.log('  cross-up        - EMA Cross Up');
+            console.log('  cross-down      - EMA Cross Down');
+            console.log('  multi-div       - Multi Divergence Detector');
+            console.log('  uptrend         - Uptrend Signal');
+            console.log('  downtrend       - Downtrend Signal');
+            console.log('  woodies         - Woodies Pivot Signal');
+            console.log('  supertrend-long - SuperTrend Long');
+            console.log('  supertrend-short- SuperTrend Short');
+            
+            console.log(chalk.cyan('\nPrice Action Signals:'));
+            console.log('  price-gt        - Price Greater Than (requires --value)');
+            console.log('  price-lt        - Price Less Than (requires --value)');
+            console.log('  price-gte       - Price Greater Than or Equal (requires --value)');
+            console.log('  price-lte       - Price Less Than or Equal (requires --value)');
+            console.log('  price-eq        - Price Equal (requires --value)');
+            console.log('');
+            return;
+        }
+
+        const spinner = ora('Creating signal...').start();
+        
+        try {
+            const symbol = options.symbol.toUpperCase();
+            const interval = options.interval;
+            const maxTriggers = parseInt(options.maxTriggers);
+            const value = options.value ? parseFloat(options.value) : 0;
+
+            let created = false;
+
+            switch (options.type.toLowerCase()) {
+                case 'rsi-ob':
+                    if (!options.value) throw new Error('--value required for RSI Overbought (e.g., 70)');
+                    await createRsiObSignal(symbol, interval, value, {});
+                    created = true;
+                    break;
+                
+                case 'rsi-os':
+                    if (!options.value) throw new Error('--value required for RSI Oversold (e.g., 30)');
+                    await createRsiOsSignal(symbol, interval, value, {});
+                    created = true;
+                    break;
+                
+                case 'crocodile-dive':
+                    await createCrocodileDiveSignal(symbol, interval, 0, {});
+                    created = true;
+                    break;
+                
+                case 'crocodile':
+                    await createCrocodileSignal(symbol, interval, 0, {});
+                    created = true;
+                    break;
+                
+                case 'cross-up':
+                    await createCrossUpSignal(symbol, interval, 0, { period: 200 });
+                    created = true;
+                    break;
+                
+                case 'cross-down':
+                    await createCrossDownSignal(symbol, interval, 0, { period: 200 });
+                    created = true;
+                    break;
+                
+                case 'multi-div':
+                    await createMultiDivSignal(symbol, interval, 0, {});
+                    created = true;
+                    break;
+                
+                case 'uptrend':
+                    await createUptrendSignal(symbol, interval, 0, {});
+                    created = true;
+                    break;
+                
+                case 'downtrend':
+                    await createDownTrendSignal(symbol, interval, 0, {});
+                    created = true;
+                    break;
+                
+                case 'woodies':
+                    await createWoodiesSignal(symbol, interval, 0, {});
+                    created = true;
+                    break;
+                
+                case 'supertrend-long':
+                    await createSuperTrendSignal(symbol, interval, 'long', {});
+                    created = true;
+                    break;
+                
+                case 'supertrend-short':
+                    await createSuperTrendSignal(symbol, interval, 'short', {});
+                    created = true;
+                    break;
+                
+                case 'price-gt':
+                    if (!options.value) throw new Error('--value required for price-gt');
+                    await createPriceActionSignal(symbol, interval, value, 'gt');
+                    created = true;
+                    break;
+                
+                case 'price-lt':
+                    if (!options.value) throw new Error('--value required for price-lt');
+                    await createPriceActionSignal(symbol, interval, value, 'lt');
+                    created = true;
+                    break;
+                
+                case 'price-gte':
+                    if (!options.value) throw new Error('--value required for price-gte');
+                    await createPriceActionSignal(symbol, interval, value, 'gte');
+                    created = true;
+                    break;
+                
+                case 'price-lte':
+                    if (!options.value) throw new Error('--value required for price-lte');
+                    await createPriceActionSignal(symbol, interval, value, 'lte');
+                    created = true;
+                    break;
+                
+                case 'price-eq':
+                    if (!options.value) throw new Error('--value required for price-eq');
+                    await createPriceActionSignal(symbol, interval, value, 'eq');
+                    created = true;
+                    break;
+                
+                default:
+                    throw new Error(`Unknown signal type: ${options.type}. Use --list-types to see available types.`);
+            }
+
+            if (created) {
+                spinner.succeed(chalk.green(`✓ Signal created successfully!`));
+                console.log(chalk.cyan(`  Symbol: ${symbol}`));
+                console.log(chalk.cyan(`  Interval: ${interval}`));
+                console.log(chalk.cyan(`  Type: ${options.type}`));
+                if (options.value) console.log(chalk.cyan(`  Value: ${value}`));
+                console.log(chalk.cyan(`  Max Triggers: ${maxTriggers}\n`));
+            }
+        } catch (error) {
+            spinner.fail('Failed to create signal');
+            console.error(chalk.red(error.message));
+        }
+    });
+
+// Command: List Signals
+program
+    .command('list-signals')
+    .description('List all configured signals')
+    .option('-a, --active', 'Show only active signals')
+    .option('-t, --triggered', 'Show only triggered signals')
+    .action(async (options) => {
+        const spinner = ora('Fetching signals...').start();
+        
+        try {
+            let signals = await getAllSignals();
+            
+            if (options.active) {
+                signals = signals.filter(s => s.isActive);
+            }
+            
+            if (options.triggered) {
+                signals = signals.filter(s => s.triggerCount > 0);
+            }
+            
+            spinner.succeed(`Found ${signals.length} signal(s)`);
+            
+            if (signals.length === 0) {
+                console.log(chalk.yellow('\nNo signals found. Create one with: crypto-dog create-signal\n'));
+                return;
+            }
+            
             const table = new Table({
                 head: [
-                    chalk.cyan('Time'),
-                    chalk.cyan('Open'),
-                    chalk.cyan('High'),
-                    chalk.cyan('Low'),
-                    chalk.cyan('Close'),
-                    chalk.cyan('Volume')
+                    chalk.cyan('Symbol'),
+                    chalk.cyan('Interval'),
+                    chalk.cyan('Type'),
+                    chalk.cyan('Triggers'),
+                    chalk.cyan('Status')
                 ],
-                colWidths: [20, 12, 12, 12, 12, 15]
+                colWidths: [12, 10, 30, 12, 10]
             });
-
-            if (klineData.result && klineData.result.list) {
-                klineData.result.list.forEach(candle => {
-                    const [timestamp, open, high, low, close, volume] = candle;
-                    const date = new Date(parseInt(timestamp)).toISOString();
-                    const priceChange = parseFloat(close) - parseFloat(open);
-                    const closeColor = priceChange >= 0 ? chalk.green : chalk.red;
-
-                    table.push([
-                        date.slice(0, 19).replace('T', ' '),
-                        open,
-                        high,
-                        low,
-                        closeColor(close),
-                        volume
-                    ]);
-                });
-            }
-
-            console.log(chalk.green(`\n📈 Candle Data for ${options.symbol}:\n`));
-            console.log(table.toString());
-        } catch (error) {
-            spinner.fail('Failed to fetch candle data');
-            console.error(chalk.red(error.message));
-        }
-    });
-
-// Command: Load historical candles
-program
-    .command('load-history')
-    .description('Load historical candle data with multiple iterations')
-    .requiredOption('-c, --category <category>', 'Market category (spot, linear, inverse)')
-    .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
-    .requiredOption('-i, --interval <interval>', 'Time interval (e.g., 1, 5, 15, 60, 240)')
-    .option('-n, --iterations <iterations>', 'Number of iterations to fetch', '5')
-    .option('-l, --limit <limit>', 'Candles per request', '200')
-    .action(async (options) => {
-        const spinner = ora('Loading historical candle data...').start();
-        try {
-            const candleBuffer = await loadCandleData(
-                options.category,
-                options.symbol,
-                options.interval,
-                parseInt(options.iterations),
-                parseInt(options.limit)
-            );
-            spinner.succeed(`Loaded ${candleBuffer.length} candles successfully!`);
-
-            console.log(chalk.green(`\n📊 Historical Data Summary:`));
-            console.log(chalk.cyan(`  Symbol: ${options.symbol}`));
-            console.log(chalk.cyan(`  Interval: ${options.interval}`));
-            console.log(chalk.cyan(`  Total Candles: ${candleBuffer.length}`));
             
-            if (candleBuffer.length > 0) {
-                const firstCandle = new Date(parseInt(candleBuffer[candleBuffer.length - 1][0]));
-                const lastCandle = new Date(parseInt(candleBuffer[0][0]));
-                console.log(chalk.cyan(`  Date Range: ${firstCandle.toISOString()} to ${lastCandle.toISOString()}`));
-            }
-        } catch (error) {
-            spinner.fail('Failed to load historical data');
-            console.error(chalk.red(error.message));
-        }
-    });
-
-// Command: Get orderbook
-program
-    .command('orderbook')
-    .description('Get current orderbook data')
-    .requiredOption('-c, --category <category>', 'Market category (spot, linear, inverse)')
-    .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
-    .option('-l, --limit <limit>', 'Depth limit (max 50)', '10')
-    .action(async (options) => {
-        const spinner = ora('Fetching orderbook...').start();
-        try {
-            const orderBook = await getOrderBook(
-                options.category,
-                options.symbol,
-                parseInt(options.limit)
-            );
-            spinner.succeed('Orderbook fetched successfully!');
-
-            const bidsTable = new Table({
-                head: [chalk.green('Bid Price'), chalk.green('Bid Size')],
-                colWidths: [20, 20]
-            });
-
-            const asksTable = new Table({
-                head: [chalk.red('Ask Price'), chalk.red('Ask Size')],
-                colWidths: [20, 20]
-            });
-
-            if (orderBook.result) {
-                const { b: bids, a: asks } = orderBook.result;
+            signals.forEach(signal => {
+                const statusColor = signal.isActive ? chalk.green : chalk.gray;
+                const triggerColor = signal.triggerCount > 0 ? chalk.yellow : chalk.gray;
                 
-                bids.slice(0, parseInt(options.limit)).forEach(([price, size]) => {
-                    bidsTable.push([chalk.green(price), size]);
-                });
-
-                asks.slice(0, parseInt(options.limit)).forEach(([price, size]) => {
-                    asksTable.push([chalk.red(price), size]);
-                });
-            }
-
-            console.log(chalk.green(`\n📖 Order Book for ${options.symbol}:\n`));
-            console.log(chalk.red('ASKS (Sell Orders):'));
-            console.log(asksTable.toString());
-            console.log(chalk.green('\nBIDS (Buy Orders):'));
-            console.log(bidsTable.toString());
+                table.push([
+                    signal.symbol,
+                    signal.timeframe,
+                    signal.signalType,
+                    triggerColor(`${signal.triggerCount}/${signal.maxTriggerTimes}`),
+                    statusColor(signal.isActive ? 'Active' : 'Inactive')
+                ]);
+            });
+            
+            console.log(chalk.green('\n📊 Configured Signals:\n'));
+            console.log(table.toString());
+            console.log('');
         } catch (error) {
-            spinner.fail('Failed to fetch orderbook');
+            spinner.fail('Failed to fetch signals');
             console.error(chalk.red(error.message));
         }
     });
 
-// Command: WebSocket streaming
+// Command: Delete All Signals
 program
-    .command('stream')
-    .description('Stream live market data via WebSocket')
-    .requiredOption('-c, --category <category>', 'Market category (spot, linear, inverse, option)')
-    .requiredOption('-t, --topics <topics...>', 'Topics to subscribe (e.g., tickers.BTCUSDT orderbook.50.ETHUSDT)')
-    .option('--throttle <ms>', 'Throttle updates (ms)', '1000')
-    .option('--testnet', 'Use testnet instead of mainnet')
-    .action((options) => {
-        console.log(chalk.green('\n🔴 Starting WebSocket stream...\n'));
-        console.log(chalk.cyan(`Category: ${options.category}`));
-        console.log(chalk.cyan(`Topics: ${options.topics.join(', ')}`));
-        console.log(chalk.cyan(`Throttle: ${options.throttle}ms`));
-        console.log(chalk.yellow('\nPress Ctrl+C to stop streaming\n'));
-
-        const wsHandler = new CryptoDogWebSocketHandler({
-            testnet: options.testnet || false,
-            throttleMs: parseInt(options.throttle)
-        });
-
-        wsHandler.subscribeToTopics(options.topics, options.category);
-
-        wsHandler.onUpdate((data) => {
-            console.log(chalk.green('━'.repeat(60)));
-            console.log(chalk.cyan(`[${new Date().toISOString()}]`));
-            console.log(JSON.stringify(data, null, 2));
-        });
-
-        wsHandler.onException((err) => {
-            console.error(chalk.red('WebSocket error:'), err.message);
-        });
+    .command('clear-signals')
+    .description('Delete all signals from database')
+    .option('-y, --yes', 'Skip confirmation')
+    .action(async (options) => {
+        if (!options.yes) {
+            console.log(chalk.yellow('\n⚠️  This will delete ALL signals. Use --yes to confirm.\n'));
+            return;
+        }
+        
+        const spinner = ora('Deleting all signals...').start();
+        
+        try {
+            await deleteAll();
+            spinner.succeed(chalk.green('✓ All signals deleted successfully!\n'));
+        } catch (error) {
+            spinner.fail('Failed to delete signals');
+            console.error(chalk.red(error.message));
+        }
     });
 
 program.parse();
