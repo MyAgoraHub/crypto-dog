@@ -7,28 +7,15 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 const INTERVAL = (1000 * 60 ); // 1 minute
 
-// Detect if running in Termux environment
-const isTermux = () => {
-    // Check multiple indicators
-    return (
-        process.env.PREFIX?.includes('com.termux') ||
-        process.env.TERMUX_VERSION !== undefined ||
-        process.env.ANDROID_ROOT !== undefined ||
-        process.env.SHELL?.includes('termux')
-    );
-};
-
-// Send Termux notification (tries regardless of detection)
+// Send notification (works in Termux if termux-api is installed)
 const sendTermuxNotification = async (title, content, priority = 'default') => {
     try {
         const command = `termux-notification --title "${title}" --content "${content}" --priority ${priority} --sound`;
         await execAsync(command);
         console.log('✓ Notification sent:', title);
     } catch (error) {
-        // Silently fail if termux-notification not available
-        if (isTermux()) {
-            console.log('Termux detected but notification failed. Install termux-api: pkg install termux-api');
-        }
+        // Silently fail - only log in debug mode
+        // This is normal when not running in Termux or termux-api not installed
     }
 };
 import {
