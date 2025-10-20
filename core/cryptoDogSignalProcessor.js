@@ -44,8 +44,6 @@ import {
 import { getSignalModel } from "../core/repository/signalModel.js";
 import { calculateNextInvocationBasedOnTimeFrame } from "../core/cryptoDogAgent.js";
 
-import ohlcv  from '../ohlcv.json' assert { type: 'json' };  
-import { createIndicatorData } from '../core/cryptoDogTools.js';
 
 const determineDataModel = (signalType, data, o,h,l,c,v) => {
     switch (signalType) {
