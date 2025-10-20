@@ -1,7 +1,32 @@
 import {getKlineData } from "./indicator/impl/indicatorManager.js"; 
 import {IndicatorList} from "./indicator/Indicators.js"
 import {getInterval} from "../core/clients/cryptoDogRequestHandler.js"; 
-const INTERVAL = (1000 * 60 ); // 5 minutes
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
+const INTERVAL = (1000 * 60 ); // 1 minute
+
+// Detect if running in Termux environment
+const isTermux = () => {
+    return process.env.PREFIX && process.env.PREFIX.includes('com.termux');
+};
+
+// Send Termux notification
+const sendTermuxNotification = async (title, content, priority = 'default') => {
+    if (!isTermux()) {
+        console.log('Not in Termux environment, skipping notification');
+        return;
+    }
+
+    try {
+        const command = `termux-notification --title "${title}" --content "${content}" --priority ${priority} --sound`;
+        await execAsync(command);
+        console.log('✓ Notification sent:', title);
+    } catch (error) {
+        console.error('Failed to send notification:', error.message);
+    }
+};
 import {
     initializeDB,
     getActiveSignals, 
@@ -75,12 +100,21 @@ const process = async () => {
         console.log(currentSignal)
         let result = await processSignal(currentSignal);
         if(result.signal === true) {
-            // Notification Logic here for termux
-
+           // Send Termux notification
+           const notificationTitle = `🚨 Signal Triggered: ${currentSignal.symbol}`;
+           const notificationContent = `${currentSignal.signalType} - ${currentSignal.timeframe} | Trigger: ${currentSignal.triggerCount + 1}/${currentSignal.maxTriggerTimes}`;
+           await sendTermuxNotification(notificationTitle, notificationContent, 'high');
+           
            // Update Signals   
            currentSignal.triggerCount = currentSignal.triggerCount+1;
            if( currentSignal.triggerCount >= currentSignal.maxTriggerTimes) {
             currentSignal.isActive = false;
+            // Send final notification
+            await sendTermuxNotification(
+                `✓ Signal Completed: ${currentSignal.symbol}`,
+                `${currentSignal.signalType} reached max triggers (${currentSignal.maxTriggerTimes})`,
+                'default'
+            );
            }
         }
         currentSignal.updatedOn = new Date().toISOString();
