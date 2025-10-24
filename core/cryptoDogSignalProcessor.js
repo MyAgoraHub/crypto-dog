@@ -33,7 +33,7 @@ import {
     getNextInvocation
 } from "../core/repository/dbManager.js";
 import { getSignalModel } from "../core/repository/signalModel.js";
-import { calculateNextInvocationBasedOnTimeFrame } from "../core/cryptoDogAgent.js";
+import { calculateNextInvocationBasedOnTimeFrame } from "./clients/cryptoDogAgent.js";
 
 
 const determineDataModel = (signalType, data, o,h,l,c,v) => {

@@ -5,9 +5,9 @@ import {
     getIntervals, 
     getInterval,
     getOrderBook
-} from './clients/cryptoDogRequestHandler.js';
+} from './cryptoDogRequestHandler.js';
 
-import {calculateNextFromToSequence} from "./cryptoDogTools.js";
+import {calculateNextFromToSequence} from "../cryptoDogTools.js";
 
 const candleBuffer = [];
 

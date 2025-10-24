@@ -1,4 +1,4 @@
-import { loadCandleData } from '../../cryptoDogAgent.js';
+import { loadCandleData } from '../../clients/cryptoDogAgent.js';
 import { createIndicatorData } from '../../cryptoDogTools.js';
 import {  FloorPivots, 
     Woodies,
@@ -163,14 +163,42 @@ const preloadDataVariants = async (category, symbol, interval, currentIterations
     });
 };
 
+const getRefreshInterval = (interval) => {
+    // Define refresh intervals for common timeframes in seconds
+    const intervals = {
+        '1': 60,    // 1 minute
+        '5': 300,   // 5 minutes
+        '15': 900,  // 15 minutes
+        '30': 1800, // 30 minutes
+        '60': 3600, // 1 hour
+        '120': 7200, // 2 hours
+        '240': 14400, // 4 hours
+        '360': 21600, // 6 hours
+        '720': 43200, // 12 hours
+        'D': 86400, // 1 day
+        'W': 604800, // 1 week
+        'M': 2419200  // 1 month
+    };
+    return intervals[interval] || 3600; // Default to 1 hour if interval not recognized
+}
+
 const fetchData = async (category, symbol, interval, iterations, candles) => {
     const cacheKey = `${category}_${symbol}_${interval}_${iterations}_${candles}`;
     
     // Check if data exists in cache
     if (dataCache.has(cacheKey)) {
         const cached = dataCache.get(cacheKey);
-        console.log(`✓ Using cached data for ${cacheKey} (age: ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
-        return cached.data;
+        const ageInSeconds = (Date.now() - cached.timestamp) / 1000;
+        
+        // Calculate refresh interval based on timeframe
+        const refreshIntervalSeconds = getRefreshInterval(interval);
+        
+        if (ageInSeconds < refreshIntervalSeconds) {
+            console.log(`✓ Using cached data for ${cacheKey} (age: ${Math.round(ageInSeconds)}s, refresh in: ${Math.round(refreshIntervalSeconds - ageInSeconds)}s)`);
+            return cached.data;
+        } else {
+            console.log(`⏰ Cached data expired for ${cacheKey} (age: ${Math.round(ageInSeconds)}s > ${refreshIntervalSeconds}s)`);
+        }
     }
     
     // Check if this is the first fetch for this symbol/interval
