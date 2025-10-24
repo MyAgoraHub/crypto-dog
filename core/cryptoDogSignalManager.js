@@ -12,7 +12,7 @@ import {
 } 
 from "../core/repository/dbManager.js";
 import { getSignalModel } from "../core/repository/signalModel.js";
-import { calculateNextInvocationBasedOnTimeFrame } from "../core/cryptoDogAgent.js";
+import { calculateNextInvocationBasedOnTimeFrame } from "./clients/cryptoDogAgent.js";
 import {signalAgent} from "./cryptoDogSignalAgent.js"
 import {IndicatorList} from "../core/indicator/Indicators.js"
 

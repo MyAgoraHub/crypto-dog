@@ -13,7 +13,7 @@ import {
 } 
 from "../core/repository/dbManager.js";
 import { getSignalModel } from "../core/repository/signalModel.js";
-import { calculateNextInvocationBasedOnTimeFrame } from "../core/cryptoDogAgent.js";
+import { calculateNextInvocationBasedOnTimeFrame } from "../core/clients/cryptoDogAgent.js";
 
 import {
     createRsiObSignal, 

@@ -16,7 +16,8 @@
     "sandbox:dbRuntimes": "node sandbox/dbRuntimes.js",
     "sandbox:indicatorExploration":"node sandbox/indicatorExploration.js",
     "start:processManager":"node core/cryptoDogSignalProcessor.js",
-    "cli": "node crypto-dog-cli.js"
+    "cli": "node crypto-dog-cli.js",
+    "cli-bt-eth-strategy": "node crypto-dog-cli.js backtest -s ETHUSDT -i 4h -t supertrend-long --iterations 15 --candles 200"
   },
   "author": "",
   "license": "ISC",
