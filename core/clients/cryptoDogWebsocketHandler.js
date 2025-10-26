@@ -7,7 +7,17 @@ export class CryptoDogWebSocketHandler {
       secret: config.secret || null,
       testnet: config.testnet || false,
       demoTrading: config.demoTrading || false,
-      // Add other config options as needed
+      // Disable WebSocket logging to prevent dashboard interference
+      disableHeartbeatLogs: true,
+      silent: true,
+      // Custom logger that suppresses output
+      logger: {
+        info: () => {},
+        warn: () => {},
+        error: () => {},
+        debug: () => {},
+        silly: () => {}
+      },
       ...config
     };
     this.ws = new WebsocketClient(this.config);

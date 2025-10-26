@@ -1,11 +1,13 @@
 import { CryptoDogWebSocketHandler } from "../core/clients/cryptoDogWebsocketHandler.js";
 
+const interval = '15'; // 15 minutes
+const symbol = 'BTCUSDT';
 const wsHandler = new CryptoDogWebSocketHandler({
   testnet: false,  // or false for live
   throttleMs: 5000
 });
 
-wsHandler.subscribeToTopics(['tickers.BTCUSDT'], 'spot');
+wsHandler.subscribeToTopics([`kline.${interval}.${symbol}`], 'spot');
 
 wsHandler.onUpdate((data) => {
   console.log('Received data:', JSON.stringify(data, null, 2));
