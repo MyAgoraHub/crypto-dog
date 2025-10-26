@@ -113,3 +113,4 @@ export const createCrossDownSignal = async (symbol, timeframe, value, args={}) =
      let evaluate = signalAgent.crossUnder;
     await createIndicatorSignal(symbol, timeframe, value, "EMAIndicator", evaluate , args, "CrossDownSignal" )
 }
+

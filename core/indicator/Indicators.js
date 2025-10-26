@@ -1718,7 +1718,13 @@ class IndicatorList{
             "EMAIndicator":EMAIndicator.getData,
             "SmaIndicator":SmaIndicator.getData,
             "FloorPivots":FloorPivots.getData,
-            "Woodies":Woodies.getData
+            "Woodies":Woodies.getData,
+            "KsiIndicator":KsiIndicator.getData,
+            "TrixIndicator":TrixIndicator.getData,
+            "ZScore":ZScore.getData,
+            "ZEMAIndicator":ZEMAIndicator.getData,
+            "DynamicGridSignals":DynamicGridSignals.getData,
+            "SupportAndResistance":SupportAndResistance.getData
         }
         return map[key]
     }

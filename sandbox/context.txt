@@ -1,0 +1,116 @@
+📊 Latest Indicator Values:
+RSI(14): 68.84
+MACD: { MACD: 663.2692308, signal: 563.6976496, histogram: 99.5715812 }
+SuperTrend: { trend: 'long', value: 112771.1484619 }
+ATR(14): 280.5436055
+Bollinger Upper: {
+  middle: 112878.75,
+  upper: 114143.5662,
+  lower: 111613.9338,
+  pb: 0.7693869671
+}
+Williams %R: -22.11310532
+MFI(14): 79.04
+OBV: 1077.0796930000001
+Stochastic %K: { k: 77.88689468, d: 76.25954773 } %D: { k: 82.1932498, d: 76.62076231 }
+ADX(14): { adx: 57.96260643, pdi: 31.98660935, mdi: 8.589096918 }
+CCI(20): 84.46821938848628
+Awesome Oscillator: 1217.35
+Ichimoku Tenkan: {
+  conversion: 113318.3,
+  base: 112798.4,
+  spanA: 113058.35,
+  spanB: 112608
+}
+PSAR: 112896.20458402166
+ROC(12): 1.017107763
+TRIX(15): 0.05517274076
+Force Index: 14059.63522
+Z-Score(20): {
+  o: 1.2975704550227738,
+  h: 1.0183308554187949,
+  l: 1.3669531741413876,
+  c: 1.0775479024985748,
+  v: -1.0598087037425317
+}
+Multi-Divergence: {
+  c: 113560.2,
+  hasDivergence: false,
+  divergence: [
+    {
+      indicator: 'RSI',
+      type: 'Pending Divergence',
+      index: 175,
+      open: 113636.5,
+      close: 113560.2
+    },
+    {
+      indicator: 'MACD',
+      type: 'Pending Divergence',
+      index: 175,
+      open: 113636.5,
+      close: 113560.2
+    },
+    {
+      indicator: 'Stochastic',
+      type: 'Pending Divergence',
+      index: 175,
+      open: 113636.5,
+      close: 113560.2
+    },
+    {
+      indicator: 'Williams %R',
+      type: 'Pending Divergence',
+      index: 175,
+      open: 113636.5,
+      close: 113560.2
+    }
+  ]
+}
+Dynamic Grid: {
+  o: 113636.5,
+  l: 113538.8,
+  h: 113693.5,
+  c: 113560.2,
+  v: 29.643094,
+  grid: [ 109685, 110538.4, 111391.8, 112245.2, 113098.6, 113952 ]
+}
+Support/Resistance: { level: 113560.2, type: 'discovery' }
+Volume Profile: {
+  rangeStart: 113714.94444444455,
+  rangeEnd: 113952.00000000012,
+  bullishVolume: 463.92652400000003,
+  bearishVolume: 283.543851,
+  totalVolume: 747.4703750000001
+}
+VWAP: 111499.85478161118
+Floor Pivots: {
+  floor: {
+    pivot: 113597.5,
+    r1: 113656.2,
+    r2: 113752.2,
+    r3: 113810.9,
+    s1: 113501.5,
+    s2: 113442.8,
+    s3: 113346.8
+  }
+}
+Woodies Pivots: {
+  woodies: {
+    pivot: 113588.17499999999,
+    r1: 113637.54999999997,
+    r2: 113742.87499999999,
+    s1: 113482.84999999998,
+    s2: 113433.47499999999
+  }
+}
+EMA: { fast: 112976.1559, medium: 112373.2671, slow: 111436.0369 }
+SMA: {
+  fastPeriod: 112878.75,
+  mediumPeriod: 112102.868,
+  slowPeriod: 111427.4765
+}
+ZEMA(20): 112976.1559
+Wilders Smoothing: 112776.1617
+WMA(20): 113194.1452
+ADL: 767

@@ -40,6 +40,7 @@ crypto-dog list-signals              # View all signals
 crypto-dog clear-signals             # Delete all signals
 crypto-dog start-monitor             # Start signal processor
 crypto-dog start-server              # Start API server
+crypto-dog live-feed                 # Start live feed dashboard
 ```
 
 ---
@@ -497,6 +498,33 @@ crypto-dog start-server
 - **Source Code**: Check `crypto-dog-cli.js` for implementation
 - **Signal Types**: See `core/cryptoDogSignalManager.js` for signal logic
 - **Indicators**: Check `core/indicator/` for indicator implementations
+
+---
+
+## 6. **Live Feed Dashboard** - Real-time Terminal UI
+```bash
+# Start live indicator dashboard (blessed-contrib)
+crypto-dog live-feed
+
+# Custom symbol and interval
+crypto-dog live-feed -s ETHUSDT -i 5m
+
+# Light theme
+crypto-dog live-feed -s BTCUSDT -i 1m -t light
+```
+
+**Features:**
+- 📊 **Real-time indicator table** with color-coded status
+- 🎨 **Dark/Light themes** for different environments
+- ⌨️ **Keyboard controls**: `q` to quit, `r` to refresh
+- 📈 **Live updates** every new candle
+- 🔔 **Status bar** with connection info and timestamps
+
+**Table Columns:**
+- 📊 **Indicator**: Technical indicator name
+- 💰 **Value**: Current calculated value
+- 📈 **Status**: Color-coded signal (🟢 Buy, 🔴 Sell, 🟡 Neutral)
+- ⚡ **Change**: Recent value change indicator
 
 ---
 
