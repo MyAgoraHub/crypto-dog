@@ -3,7 +3,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import Table from 'cli-table3';
 import { spawn } from 'child_process';
 import {
     getInstrumentsInfo,
@@ -702,70 +701,56 @@ program
     await startLiveFeed(options.symbol, options.interval, options.theme);
   });
 
-// Helper functions for backtest command
-function mapTypeToSignalType(type) {
-    const mapping = {
-        'rsi-ob': 'INDICATOR_RsiObSignal',
-        'rsi-os': 'INDICATOR_RsiOsSignal',
-        'crocodile-dive': 'INDICATOR_CrocodileDiveSignal',
-        'crocodile': 'INDICATOR_CrocodileSignal',
-        'cross-up': 'INDICATOR_CrossUpSignal',
-        'cross-down': 'INDICATOR_CrossDownSignal',
-        'multi-div': 'INDICATOR_DivergenceDetector',
-        'uptrend': 'INDICATOR_UptrendSignal',
-        'downtrend': 'INDICATOR_DownTrendSignal',
-        'woodies': 'INDICATOR_Woodies',
-        'supertrend-long': 'INDICATOR_SuperTrendSignal',
-        'supertrend-short': 'INDICATOR_SuperTrendSignal',
-        'price-gt': 'PRICE_ACTION_GT',
-        'price-lt': 'PRICE_ACTION_LT',
-        'price-gte': 'PRICE_ACTION_GTE',
-        'price-lte': 'PRICE_ACTION_LTE',
-        'price-eq': 'PRICE_ACTION_EQ'
-    };
-    return mapping[type.toLowerCase()] || type;
-}
+// Command: Signal Combinations
+program
+  .command('combinations')
+  .description('Display popular trading signal combinations')
+  .option('-s, --symbol <symbol>', 'Trading symbol (default: BTCUSDT)', 'BTCUSDT')
+  .option('-i, --interval <interval>', 'Time interval (default: 1h)', '1h')
+  .option('-l, --live', 'Run in live mode with real-time updates')
+  .action(async (options) => {
+    try {
+      if (options.live) {
+        // Live mode - use simple console display (no blessed-contrib)
+        const { startLiveCombinations } = await import('./core/cryptoDogCombinations.js');
+        await startLiveCombinations(options.symbol, options.interval);
+      } else {
+        // Static mode - display once and exit
+        console.log(chalk.green(`\n🎯 Analyzing signal combinations for ${options.symbol} ${options.interval}\n`));
 
-function getIndicatorForType(type) {
-    const mapping = {
-        'rsi-ob': 'RsiIndicator',
-        'rsi-os': 'RsiIndicator',
-        'crocodile-dive': 'Ema3Indicator',
-        'crocodile': 'Ema3Indicator',
-        'cross-up': 'EMAIndicator',
-        'cross-down': 'EMAIndicator',
-        'multi-div': 'MultiDivergenceDetector',
-        'uptrend': 'EMAIndicator',
-        'downtrend': 'EMAIndicator',
-        'woodies': 'Woodies',
-        'supertrend-long': 'SuperTrendIndicator',
-        'supertrend-short': 'SuperTrendIndicator'
-    };
-    return mapping[type.toLowerCase()] || null;
-}
+        const { CryptoDogCombinationsAgent } = await import('./core/cryptoDogCombinations.js');
+        const agent = new CryptoDogCombinationsAgent();
 
-function getEvaluateFunctionForType(type) {
-    const mapping = {
-        'rsi-ob': signalAgent.ob.toString(),
-        'rsi-os': signalAgent.os.toString(),
-        'crocodile-dive': signalAgent.crocodileDive.toString(),
-        'crocodile': signalAgent.crocodile.toString(),
-        'cross-up': signalAgent.crossOver.toString(),
-        'cross-down': signalAgent.crossUnder.toString(),
-        'multi-div': signalAgent.multiDiv.toString(),
-        'uptrend': signalAgent.uptrendTrend.toString(),
-        'downtrend': signalAgent.downTrend.toString(),
-        'woodies': signalAgent.woodies.toString(),
-        'supertrend-long': signalAgent.superTrend.toString(),
-        'supertrend-short': signalAgent.superTrend.toString(),
-        'price-gt': signalAgent.gt.toString(),
-        'price-lt': signalAgent.lt.toString(),
-        'price-gte': signalAgent.gte.toString(),
-        'price-lte': signalAgent.lte.toString(),
-        'price-eq': signalAgent.eq.toString()
-    };
-    
-    return mapping[type.toLowerCase()] || signalAgent.gt.toString();
-}
+        const { getKlineCandles, getInterval } = await import('./core/clients/cryptoDogRequestHandler.js');
+        const intervalValue = getInterval(options.interval).value;
+        const ohlcv = await getKlineCandles('spot', options.symbol, intervalValue, null, null, 201);
+
+        if (!ohlcv || !ohlcv.result || !ohlcv.result.list) {
+          throw new Error(`Failed to fetch data: ${ohlcv?.retMsg || 'Unknown error'}`);
+        }
+
+        agent.klineData = ohlcv.result.list.reverse();
+        const combinations = agent.processSignalCombinations();
+
+        // Display in log format (same as live mode)
+        console.log(chalk.cyan(`\n📊 TRADING SIGNAL COMBINATIONS - ${options.symbol} ${options.interval}`));
+        console.log(chalk.gray(`Analysis completed: ${new Date().toLocaleString()}\n`));
+
+        // Display each combination
+        combinations.forEach((combo, index) => {
+          console.log(chalk.yellow(`${index + 1}. ${combo.name} (${combo.strategy})`));
+          console.log(chalk.green(`   Signal: ${combo.signal}`));
+          console.log(chalk.gray(`   Details: ${combo.details}`));
+          if (combo.score) {
+            console.log(chalk.blue(`   Score: ${combo.score}`));
+          }
+          console.log('');
+        });
+      }
+    } catch (error) {
+      console.error(chalk.red('Error in combinations command:'), error.message);
+      console.error(error.stack);
+    }
+  });
 
 program.parse();

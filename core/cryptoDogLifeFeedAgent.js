@@ -161,62 +161,38 @@ export class CryptoDogLifeFeedAgent {
     }
 
     async startRealTimeKlineFeed(interval, symbol) {
-        let ohlcv = await getKlineCandles("spot", symbol, getInterval(interval).value, null, null, this.minLoadSize);
-        // may have to reverse here we adding in incorrect order
-        this.klineData = ohlcv.result.list.reverse();
+        const { getKlineCandles, getInterval } = await import('./clients/cryptoDogRequestHandler.js');
+        const intervalValue = getInterval(interval).value;
         
-        // Suppress all console output during WebSocket setup to prevent dashboard corruption
-        const originalConsoleLog = console.log;
-        const originalConsoleWarn = console.warn;
-        const originalConsoleError = console.error;
-        const originalConsoleInfo = console.info;
+        // Load initial historical data
+        const ohlcv = await getKlineCandles('spot', symbol, intervalValue, null, null, 201);
+        if (ohlcv && ohlcv.result && ohlcv.result.list) {
+            this.klineData = ohlcv.result.list.reverse();
+        }
         
-        console.log = () => {};
-        console.warn = () => {};
-        console.error = () => {};
-        console.info = () => {};
+        // Subscribe to real-time updates
+        const topic = `kline.${intervalValue}.${symbol}`;
+        this.wsHandler.subscribeToTopics([topic], 'spot');
         
-        // Also suppress stdout writes that might come from the library
-        const originalStdoutWrite = process.stdout.write;
-        process.stdout.write = () => {};
-        
-        this.wsHandler.subscribeToTopics([`kline.${ getInterval(interval).value}.${symbol}`], 'spot');
-        
-        // Restore console methods after connection is established
-        setTimeout(() => {
-            console.log = originalConsoleLog;
-            console.warn = originalConsoleWarn;
-            console.error = originalConsoleError;
-            console.info = originalConsoleInfo;
-            process.stdout.write = originalStdoutWrite;
-        }, 3000); // Keep suppressed for 3 seconds to ensure connection is stable
-        
-        // Suppress WebSocket connection logging to avoid messing up the dashboard
-        this.wsHandler.onOpen(() => {
-            // Connection established
-        });
-        
-        this.wsHandler.onUpdate((update) => {
-            try {
-                let {open, close, high, low, volume, timestamp, start, end} = update.data[0];
-
-                // Validate timestamp
-                if (!timestamp || isNaN(timestamp)) {
-                    console.error('Invalid timestamp received:', timestamp);
-                    return;
+        // Handle real-time updates
+        this.wsHandler.onUpdate((data) => {
+            if (data.topic === topic && data.data) {
+                const kline = data.data[0];
+                if (kline) {
+                    const open = parseFloat(kline.open);
+                    const high = parseFloat(kline.high);
+                    const low = parseFloat(kline.low);
+                    const close = parseFloat(kline.close);
+                    const volume = parseFloat(kline.volume);
+                    const timestamp = parseInt(kline.start);
+                    
+                    // Load new data point
+                    this.loadData(open, close, high, low, volume, timestamp, null, new Date());
+                    
+                    // Process data (this will be overridden in subclasses)
+                    this.processData();
                 }
-                // Convert timestamp to number if it's a string
-                timestamp = Number(timestamp);
-                 this.loadData(open, close, high, low, volume, timestamp, start, end);
-                 this.processData();
-            } catch (error) {
-                console.error('Error processing WebSocket data:', error);
-                console.error('Data received:', update);
             }
-        });
-
-        this.wsHandler.onException((err) => {
-            console.error('WebSocket error:', err);
         });
     }
 }
