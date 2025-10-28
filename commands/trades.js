@@ -32,13 +32,13 @@ export function registerTradesCommand(program) {
 
             if (isVerySmallScreen) {
                 gridRows = 10;
-                gridCols = 10;
+                gridCols = 25;  // Increased from 10 to 25 for better content display
                 headerRows = 1;
                 logRows = 7;
                 statusRows = 2;
             } else if (isSmallScreen) {
                 gridRows = 12;
-                gridCols = 10;
+                gridCols = 15;  // Increased from 10 to 15 for better content display
                 headerRows = 1;
                 logRows = 9;
                 statusRows = 2;

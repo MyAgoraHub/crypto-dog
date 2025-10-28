@@ -631,6 +631,66 @@ export class CryptoDogCombinationsAgent {
         return combinations;
     }
 
+    // Get current indicator values for display
+    getCurrentIndicatorValues() {
+        if (!this.isKlineDataLoaded() || this.klineData.length < 50) {
+            return null;
+        }
+
+        let {o,h,l,c,v, buffer } = createIndicatorData(this.klineData);
+        
+        // Get all indicators
+        let rsi = IndicatorList.getIndicator("RsiIndicator")(o,h,l,c,v, {period:14}, buffer);
+        let macd = IndicatorList.getIndicator("MacdIndicator")(o,h,l,c,v, {fastPeriod:12, slowPeriod:26, signalPeriod:9}, buffer);
+        let superTrend = IndicatorList.getIndicator("SuperTrendIndicator")(o,h,l,c,v, {period:10, multiplier:3}, buffer);
+        let atr = IndicatorList.getIndicator("AtrIndicator")(o,h,l,c,v, {period:14}, buffer);
+        let bollinger = IndicatorList.getIndicator("BollingerIndicator")(o,h,l,c,v, {period:20, stdDev:2}, buffer);
+        let williamsR = IndicatorList.getIndicator("WilliamsRIndicator")(o,h,l,c,v, {period:14}, buffer);
+        let mfi = IndicatorList.getIndicator("MfiIndicator")(o,h,l,c,v, {period:14}, buffer);
+        let obv = IndicatorList.getIndicator("ObvIndicator")(o,h,l,c,v, {}, buffer);
+        let stochastic = IndicatorList.getIndicator("StochasticIndicator")(o,h,l,c,v, {kPeriod:14, dPeriod:3}, buffer);
+        let adx = IndicatorList.getIndicator("AdxIndicator")(o,h,l,c,v, {period:14}, buffer);
+        let ichimoku = IndicatorList.getIndicator("IchimokuCloudIndicator")(o,h,l,c,v, {}, buffer);
+        let emaFast = IndicatorList.getIndicator("EMAIndicator")(o,h,l,c,v, {period:20}, buffer);
+        let emaSlow = IndicatorList.getIndicator("EMAIndicator")(o,h,l,c,v, {period:200}, buffer);
+        let volumeWeightedAvgPrice = IndicatorList.getIndicator("VolumeWeightedAvgPrice")(o,h,l,c,v, {}, buffer);
+        
+        // Get latest values
+        const latestClose = c.length > 0 ? c[c.length - 1] : null;
+        const latestRSI = rsi.length > 0 ? rsi[rsi.length - 1] : null;
+        const latestMACD = macd.length > 0 ? macd[macd.length - 1] : null;
+        const latestSuperTrend = superTrend.length > 0 ? superTrend[superTrend.length - 1] : null;
+        const latestATR = atr.length > 0 ? atr[atr.length - 1] : null;
+        const latestBollinger = bollinger.length > 0 ? bollinger[bollinger.length - 1] : null;
+        const latestWilliamsR = williamsR.length > 0 ? williamsR[williamsR.length - 1] : null;
+        const latestMFI = mfi.length > 0 ? mfi[mfi.length - 1] : null;
+        const latestOBV = obv.length > 0 ? obv[obv.length - 1] : null;
+        const latestStochastic = stochastic.length > 0 ? stochastic[stochastic.length - 1] : null;
+        const latestADX = adx.length > 0 ? adx[adx.length - 1] : null;
+        const latestIchimoku = ichimoku.length > 0 ? ichimoku[ichimoku.length - 1] : null;
+        const latestEMAFast = emaFast.length > 0 ? emaFast[emaFast.length - 1] : null;
+        const latestEMASlow = emaSlow.length > 0 ? emaSlow[emaSlow.length - 1] : null;
+        const latestVWAP = volumeWeightedAvgPrice.length > 0 ? volumeWeightedAvgPrice[volumeWeightedAvgPrice.length - 1] : null;
+        
+        return {
+            price: latestClose,
+            rsi: latestRSI,
+            macd: latestMACD,
+            superTrend: latestSuperTrend,
+            atr: latestATR,
+            bollinger: latestBollinger,
+            williamsR: latestWilliamsR,
+            mfi: latestMFI,
+            obv: latestOBV,
+            stochastic: latestStochastic,
+            adx: latestADX,
+            ichimoku: latestIchimoku,
+            emaFast: latestEMAFast,
+            emaSlow: latestEMASlow,
+            vwap: latestVWAP
+        };
+    }
+
     async startRealTimeKlineFeed(interval, symbol) {
         const { getKlineCandles, getInterval } = await import('./clients/cryptoDogRequestHandler.js');
         const intervalValue = getInterval(interval).value;

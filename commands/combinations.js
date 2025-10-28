@@ -39,13 +39,13 @@ async function showCombinationSelector(options) {
 
     if (isVerySmallScreen) {
         gridRows = 10;
-        gridCols = 10;
+        gridCols = 25;  // Increased from 10 to 25 for better content display
         headerRows = 1;
         listRows = 7;
         statusRows = 2;
     } else if (isSmallScreen) {
         gridRows = 12;
-        gridCols = 10;
+        gridCols = 15;  // Increased from 10 to 15 for better content display
         headerRows = 2;
         listRows = 8;
         statusRows = 2;
@@ -175,13 +175,13 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
 
     if (isVerySmallScreen) {
         gridRows = 10;
-        gridCols = 10;
+        gridCols = 25;  // Increased from 10 to 25 for better content display
         headerRows = 1;
         logRows = 7;
         statusRows = 2;
     } else if (isSmallScreen) {
         gridRows = 12;
-        gridCols = 10;
+        gridCols = 15;  // Increased from 10 to 15 for better content display
         headerRows = 2;
         logRows = 8;
         statusRows = 2;
@@ -238,19 +238,26 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
         try {
             const combinations = agent.processSignalCombinations();
             const currentCombo = combinations.find(c => c.name === selectedCombo.name);
+            const indicatorValues = agent.getCurrentIndicatorValues();
 
-            if (currentCombo) {
+            if (currentCombo && indicatorValues) {
                 const timestamp = new Date().toLocaleTimeString();
                 const signalColor = getSignalColor(currentCombo.signal);
+
+                // Create detailed indicator display based on combination type
+                let indicatorDetails = getIndicatorDetailsForCombination(currentCombo.name, indicatorValues);
 
                 // Format signal line based on screen size
                 let signalLine;
                 if (isVerySmallScreen) {
-                    signalLine = `${timestamp.split(':').slice(0,2).join(':')} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}`;
+                    signalLine = `${timestamp.split(':').slice(0,2).join(':')} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}\n${indicatorDetails}`;
                 } else if (isSmallScreen) {
-                    signalLine = `${timestamp} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${currentCombo.details.substring(0, 30)}...`;
+                    // For small screens, ensure all details are visible by using multiple lines if needed
+                    const compactDetails = indicatorDetails.length > 40 ? 
+                        indicatorDetails.replace(/ \| /g, '\n') : indicatorDetails;
+                    signalLine = `${timestamp} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}\n${compactDetails}`;
                 } else {
-                    signalLine = `${timestamp} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${currentCombo.details}`;
+                    signalLine = `${timestamp} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${indicatorDetails}`;
                 }
 
                 // Only log if signal changed or every 10th update
@@ -350,4 +357,95 @@ function getSignalColor(signal) {
     } else {
         return 'cyan';
     }
+}
+
+function getIndicatorDetailsForCombination(comboName, indicators) {
+    const formatValue = (val, decimals = 2) => val !== null && val !== undefined && typeof val === 'number' ? val.toFixed(decimals) : 'N/A';
+    
+    if (comboName.includes('MACD + RSI + EMA')) {
+        return `MACD: ${formatValue(indicators.macd?.MACD)}/${formatValue(indicators.macd?.signal)} | RSI: ${formatValue(indicators.rsi)} | EMA: ${formatValue(indicators.emaFast)}`;
+    }
+    
+    if (comboName.includes('Stochastic + RSI + Williams')) {
+        return `Stoch K: ${formatValue(indicators.stochastic?.k)} D: ${formatValue(indicators.stochastic?.d)} | RSI: ${formatValue(indicators.rsi)} | Williams: ${formatValue(indicators.williamsR)}`;
+    }
+    
+    if (comboName.includes('Bollinger Bands + RSI + Volume')) {
+        return `BB Upper: ${formatValue(indicators.bollinger?.upper)} Lower: ${formatValue(indicators.bollinger?.lower)} | RSI: ${formatValue(indicators.rsi)}`;
+    }
+    
+    if (comboName.includes('ADX + SuperTrend + ATR')) {
+        return `ADX: ${formatValue(indicators.adx)} | SuperTrend: ${formatValue(indicators.superTrend)} | ATR: ${formatValue(indicators.atr)}`;
+    }
+    
+    if (comboName.includes('Ichimoku + RSI + MACD')) {
+        return `Tenkan: ${formatValue(indicators.ichimoku?.conversionPeriod)} Kijun: ${formatValue(indicators.ichimoku?.base)} | RSI: ${formatValue(indicators.rsi)} | MACD: ${formatValue(indicators.macd?.MACD)}`;
+    }
+    
+    if (comboName.includes('VWAP + Bollinger Bands + MACD')) {
+        return `VWAP: ${formatValue(indicators.vwap)} | BB Mid: ${formatValue(indicators.bollinger?.middle)} | MACD: ${formatValue(indicators.macd?.MACD)}`;
+    }
+    
+    if (comboName.includes('Support/Resistance + ADX + Stochastic')) {
+        return `ADX: ${formatValue(indicators.adx)} | Stoch K: ${formatValue(indicators.stochastic?.k)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('Volume Profile + RSI + EMA')) {
+        return `RSI: ${formatValue(indicators.rsi)} | EMA: ${formatValue(indicators.emaFast)} | MFI: ${formatValue(indicators.mfi)}`;
+    }
+    
+    if (comboName.includes('Pivot Points + SuperTrend + ATR')) {
+        return `SuperTrend: ${formatValue(indicators.superTrend)} | ATR: ${formatValue(indicators.atr)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('Fibonacci + RSI + Volume')) {
+        return `RSI: ${formatValue(indicators.rsi)} | Price: ${formatValue(indicators.price)} | MFI: ${formatValue(indicators.mfi)}`;
+    }
+    
+    if (comboName.includes('Moving Average Crossover + RSI + Volume')) {
+        return `EMA Fast: ${formatValue(indicators.emaFast)} Slow: ${formatValue(indicators.emaSlow)} | RSI: ${formatValue(indicators.rsi)}`;
+    }
+    
+    if (comboName.includes('Parabolic SAR + RSI + MACD')) {
+        return `RSI: ${formatValue(indicators.rsi)} | MACD: ${formatValue(indicators.macd?.MACD)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('CCI + RSI + Bollinger Bands')) {
+        return `RSI: ${formatValue(indicators.rsi)} | BB Upper: ${formatValue(indicators.bollinger?.upper)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('Engulfing Patterns + Support/Resistance + Volume')) {
+        return `MFI: ${formatValue(indicators.mfi)} | OBV: ${formatValue(indicators.obv)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('Pin Bars + Trend Lines + RSI')) {
+        return `RSI: ${formatValue(indicators.rsi)} | EMA: ${formatValue(indicators.emaFast)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('Elder Impulse + MACD + Stochastic')) {
+        return `MACD: ${formatValue(indicators.macd?.MACD)} | Stoch K: ${formatValue(indicators.stochastic?.k)} | EMA: ${formatValue(indicators.emaFast)}`;
+    }
+    
+    if (comboName.includes('Keltner Channels + RSI + Volume')) {
+        return `RSI: ${formatValue(indicators.rsi)} | ATR: ${formatValue(indicators.atr)} | MFI: ${formatValue(indicators.mfi)}`;
+    }
+    
+    if (comboName.includes('Donchian Channels + ADX + ATR')) {
+        return `ADX: ${formatValue(indicators.adx)} | ATR: ${formatValue(indicators.atr)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('Inside Bars + Breakout + Volume')) {
+        return `ATR: ${formatValue(indicators.atr)} | MFI: ${formatValue(indicators.mfi)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('Heikin Ashi + RSI + EMA')) {
+        return `RSI: ${formatValue(indicators.rsi)} | EMA: ${formatValue(indicators.emaFast)} | Price: ${formatValue(indicators.price)}`;
+    }
+    
+    if (comboName.includes('Predictive Analytics')) {
+        return `Price: ${formatValue(indicators.price)} | RSI: ${formatValue(indicators.rsi)} | MACD: ${formatValue(indicators.macd?.MACD)} | Volume: ${formatValue(indicators.mfi)}`;
+    }
+    
+    // Default fallback
+    return `Price: ${formatValue(indicators.price)} | RSI: ${formatValue(indicators.rsi)} | MACD: ${formatValue(indicators.macd?.MACD)}`;
 }
