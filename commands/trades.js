@@ -154,10 +154,13 @@ export function registerTradesCommand(program) {
                         // Format trade line with colors - adjust for small screens
                         let tradeLine;
                         if (isVerySmallScreen) {
-                            // Very compact format for tiny screens - keep 4 decimals for quantity
-                            tradeLine = `${timestamp.split(':').slice(0,2).join(':')} ${priceIndicatorColored} $${price.toFixed(0)} | ${quantity.toFixed(4)} | ${sideColor}${side === 'Buy' ? 'B' : 'S'}${sideColorEnd}`;
+                            // Multi-line format for very small screens to show more data vertically
+                            const timePrice = `${timestamp.split(':').slice(0,2).join(':')} ${priceIndicatorColored} $${price.toFixed(4)}`;
+                            const quantitySymbol = `${quantity.toFixed(4)} ${options.symbol.replace('USDT', '')}`;
+                            const sideDisplay = `${sideColor}${side === 'Buy' ? 'BUY' : 'SELL'}${sideColorEnd}`;
+                            tradeLine = `${timePrice}\n${quantitySymbol}\n${sideDisplay}`;
                         } else if (isSmallScreen) {
-                            // Compact format for small screens - keep 4 decimals for quantity
+                            // Compact format for small screens - keep 4 decimals for price and quantity
                             tradeLine = `${timestamp} ${priceIndicatorColored} $${price.toFixed(4)} | ${quantity.toFixed(4)} | ${sideColor}${side}${sideColorEnd}`;
                         } else {
                             // Full format for normal screens
