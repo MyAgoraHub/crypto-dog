@@ -41,14 +41,14 @@ async function showCombinationSelector(options) {
         gridRows = 10;
         gridCols = Math.max(30, Math.floor(screenWidth / 2)); // Even more columns for very small screens
         headerRows = 1;
-        listRows = 7;
-        statusRows = 2;
+        listRows = 8; // Keep same
+        statusRows = 1; // Reduced to give more space to log
     } else if (isSmallScreen) {
         gridRows = 12;
         gridCols = Math.max(25, Math.floor(screenWidth / 3)); // More columns for small screens
         headerRows = 2;
-        listRows = 8;
-        statusRows = 2;
+        listRows = 9; // Increased from 8 to 9 for multi-line signals
+        statusRows = 1; // Reduced to give more space to log
     } else {
         // For normal/large screens, use many more columns
         gridCols = Math.max(30, Math.floor(screenWidth / 2));
@@ -183,14 +183,14 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
         gridRows = 10;
         gridCols = Math.max(30, Math.floor(screenWidth / 2)); // Even more columns for very small screens
         headerRows = 1;
-        logRows = 7;
-        statusRows = 2;
+        logRows = 8; // Increased from 7 to 8 for multi-line signals
+        statusRows = 1; // Reduced to give more space to log
     } else if (isSmallScreen) {
         gridRows = 12;
         gridCols = Math.max(25, Math.floor(screenWidth / 3)); // More columns for small screens
         headerRows = 2;
-        logRows = 8;
-        statusRows = 2;
+        logRows = 9; // Increased from 8 to 9 for multi-line signals
+        statusRows = 1; // Reduced to give more space to log
     } else {
         // For normal/large screens, use many more columns
         gridCols = Math.max(30, Math.floor(screenWidth / 2));
@@ -217,7 +217,7 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
         label: logLabel,
         border: isSmallScreen ? undefined : {type: "line", fg: 'green'},
         tags: true,
-        scrollback: isSmallScreen ? 50 : 100,
+        scrollback: isSmallScreen ? 200 : 100, // Increased scrollback for small screens
         width: '100%'
     });
 
@@ -264,18 +264,24 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
                 const maxLineLength = gridCols * 8; // Approximate characters per line (increased)
                 
                 if (isVerySmallScreen) {
-                    // For very small screens, keep it simple but show key info
-                    const shortDetails = indicatorDetails.length > 35 ? 
-                        indicatorDetails.substring(0, 32) + '...' : indicatorDetails;
-                    signalLine = `${timestamp.split(':').slice(0,2).join(':')} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${shortDetails}`;
+                    // For very small screens (like Android Termux), split details across multiple lines
+                    const shortSignal = `${timestamp.split(':').slice(0,2).join(':')} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}`;
+                    // Split indicator details into 2 lines if too long
+                    if (indicatorDetails.length > 30) {
+                        const midPoint = Math.floor(indicatorDetails.length / 2);
+                        const firstPart = indicatorDetails.substring(0, midPoint);
+                        const secondPart = indicatorDetails.substring(midPoint);
+                        signalLine = `${shortSignal}\n${firstPart}\n${secondPart}`;
+                    } else {
+                        signalLine = `${shortSignal}\n${indicatorDetails}`;
+                    }
                 } else if (isSmallScreen) {
-                    // For small screens, try to fit on one line, truncate if needed
+                    // For small screens, try to fit on one line, but use 2 lines if needed
                     const fullLine = `${timestamp} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${indicatorDetails}`;
                     if (fullLine.length > maxLineLength) {
-                        // Truncate smartly
-                        const availableForDetails = maxLineLength - timestamp.length - currentCombo.signal.length - 10;
-                        const truncatedDetails = indicatorDetails.substring(0, availableForDetails) + '...';
-                        signalLine = `${timestamp} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${truncatedDetails}`;
+                        // Split across 2 lines instead of truncating
+                        const signalPart = `${timestamp} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}`;
+                        signalLine = `${signalPart}\n${indicatorDetails}`;
                     } else {
                         signalLine = fullLine;
                     }
