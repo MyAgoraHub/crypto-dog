@@ -30,25 +30,28 @@ async function showCombinationSelector(options) {
     const isSmallScreen = screenWidth < 80 || screenHeight < 20;
     const isVerySmallScreen = screenWidth < 60 || screenHeight < 15;
 
-    // Adjust grid based on screen size
+    // Adjust grid based on screen size - use more columns to utilize full width
     let gridRows = 12;
-    let gridCols = 12;
+    let gridCols = Math.floor(screenWidth / 3); // Use more columns - 1/3 of screen width
     let headerRows = 2;
     let listRows = 8;
     let statusRows = 2;
 
     if (isVerySmallScreen) {
         gridRows = 10;
-        gridCols = 25;  // Increased from 10 to 25 for better content display
+        gridCols = Math.max(30, Math.floor(screenWidth / 2)); // Even more columns for very small screens
         headerRows = 1;
         listRows = 7;
         statusRows = 2;
     } else if (isSmallScreen) {
         gridRows = 12;
-        gridCols = 15;  // Increased from 10 to 15 for better content display
+        gridCols = Math.max(25, Math.floor(screenWidth / 3)); // More columns for small screens
         headerRows = 2;
         listRows = 8;
         statusRows = 2;
+    } else {
+        // For normal/large screens, use many more columns
+        gridCols = Math.max(30, Math.floor(screenWidth / 2));
     }
 
     // Create grid layout for selection screen
@@ -60,7 +63,8 @@ async function showCombinationSelector(options) {
         fg: 'cyan',
         selectedFg: 'cyan',
         label: headerLabel,
-        border: isSmallScreen ? undefined : {type: "line", fg: 'cyan'}
+        border: isSmallScreen ? undefined : {type: "line", fg: 'cyan'},
+        width: '100%'
     });
 
     // Combinations list
@@ -74,14 +78,16 @@ async function showCombinationSelector(options) {
         scrollable: true,
         invertSelected: true,
         mouse: true,
-        keys: true
+        keys: true,
+        width: '100%'
     });
 
     // Status bar
     const statusBar = grid.set(headerRows + listRows, 0, statusRows, gridCols, contrib.log, {
         fg: "green",
         selectedFg: "green",
-        label: isSmallScreen ? 'Status' : 'Status'
+        label: isSmallScreen ? 'Status' : 'Status',
+        width: '100%'
     });
 
     // Initialize header - adjust content for small screens
@@ -166,25 +172,28 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
     const isSmallScreen = screenWidth < 80 || screenHeight < 20;
     const isVerySmallScreen = screenWidth < 60 || screenHeight < 15;
 
-    // Adjust grid based on screen size
+    // Adjust grid based on screen size - use more columns to utilize full width
     let gridRows = 12;
-    let gridCols = 12;
+    let gridCols = Math.floor(screenWidth / 3); // Use more columns - 1/3 of screen width
     let headerRows = 2;
     let logRows = 8;
     let statusRows = 2;
 
     if (isVerySmallScreen) {
         gridRows = 10;
-        gridCols = 25;  // Increased from 10 to 25 for better content display
+        gridCols = Math.max(30, Math.floor(screenWidth / 2)); // Even more columns for very small screens
         headerRows = 1;
         logRows = 7;
         statusRows = 2;
     } else if (isSmallScreen) {
         gridRows = 12;
-        gridCols = 15;  // Increased from 10 to 15 for better content display
+        gridCols = Math.max(25, Math.floor(screenWidth / 3)); // More columns for small screens
         headerRows = 2;
         logRows = 8;
         statusRows = 2;
+    } else {
+        // For normal/large screens, use many more columns
+        gridCols = Math.max(30, Math.floor(screenWidth / 2));
     }
 
     // Create grid layout for monitoring
@@ -196,7 +205,8 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
         fg: 'cyan',
         selectedFg: 'cyan',
         label: headerLabel,
-        border: isSmallScreen ? undefined : {type: "line", fg: 'cyan'}
+        border: isSmallScreen ? undefined : {type: "line", fg: 'cyan'},
+        width: '100%'
     });
 
     // Signal log - main display area
@@ -207,14 +217,16 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
         label: logLabel,
         border: isSmallScreen ? undefined : {type: "line", fg: 'green'},
         tags: true,
-        scrollback: isSmallScreen ? 50 : 100
+        scrollback: isSmallScreen ? 50 : 100,
+        width: '100%'
     });
 
     // Status bar
     const statusBar = monitorGrid.set(headerRows + logRows, 0, statusRows, gridCols, contrib.log, {
         fg: "green",
         selectedFg: "green",
-        label: 'Status'
+        label: 'Status',
+        width: '100%'
     });
 
     // Initialize header - adjust content for small screens
@@ -247,16 +259,28 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
                 // Create detailed indicator display based on combination type
                 let indicatorDetails = getIndicatorDetailsForCombination(currentCombo.name, indicatorValues);
 
-                // Format signal line based on screen size
+                // Format signal line based on screen size - optimize for better space usage
                 let signalLine;
+                const maxLineLength = gridCols * 8; // Approximate characters per line (increased)
+                
                 if (isVerySmallScreen) {
-                    signalLine = `${timestamp.split(':').slice(0,2).join(':')} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}\n${indicatorDetails}`;
+                    // For very small screens, keep it simple but show key info
+                    const shortDetails = indicatorDetails.length > 35 ? 
+                        indicatorDetails.substring(0, 32) + '...' : indicatorDetails;
+                    signalLine = `${timestamp.split(':').slice(0,2).join(':')} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${shortDetails}`;
                 } else if (isSmallScreen) {
-                    // For small screens, ensure all details are visible by using multiple lines if needed
-                    const compactDetails = indicatorDetails.length > 40 ? 
-                        indicatorDetails.replace(/ \| /g, '\n') : indicatorDetails;
-                    signalLine = `${timestamp} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}\n${compactDetails}`;
+                    // For small screens, try to fit on one line, truncate if needed
+                    const fullLine = `${timestamp} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${indicatorDetails}`;
+                    if (fullLine.length > maxLineLength) {
+                        // Truncate smartly
+                        const availableForDetails = maxLineLength - timestamp.length - currentCombo.signal.length - 10;
+                        const truncatedDetails = indicatorDetails.substring(0, availableForDetails) + '...';
+                        signalLine = `${timestamp} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${truncatedDetails}`;
+                    } else {
+                        signalLine = fullLine;
+                    }
                 } else {
+                    // For normal/large screens, show full details
                     signalLine = `${timestamp} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${indicatorDetails}`;
                 }
 
