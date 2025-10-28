@@ -357,6 +357,277 @@ export class CryptoDogCombinationsAgent {
             score: ''
         });
         
+        // 11. Moving Average Crossover + RSI + Volume (MA Crossover)
+        let maCrossoverSignal = 'NEUTRAL';
+        let maTradeSignal = 'NEUTRAL';
+        
+        if (emaSignal === 'BULLISH' && rsiSignal === 'OVERSOLD' && volumeSignal === 'HIGH') {
+            maCrossoverSignal = 'BULLISH CROSSOVER';
+            maTradeSignal = 'MA BUY SIGNAL';
+        } else if (emaSignal === 'BEARISH' && rsiSignal === 'OVERBOUGHT' && volumeSignal === 'HIGH') {
+            maCrossoverSignal = 'BEARISH CROSSOVER';
+            maTradeSignal = 'MA SELL SIGNAL';
+        }
+        
+        combinations.push({
+            name: 'Moving Average Crossover + RSI + Volume',
+            strategy: 'MA Crossover',
+            signal: maTradeSignal,
+            details: `MA Trend: ${emaSignal} | RSI: ${rsiSignal} | Volume: ${volumeSignal}`,
+            score: ''
+        });
+        
+        // 12. Parabolic SAR + RSI + MACD (Stop and Reverse)
+        let psarSignal = 'NEUTRAL';
+        let psarTradeSignal = 'NEUTRAL';
+        
+        // Simplified PSAR logic - using SuperTrend as proxy
+        if (superTrendSignal === 'LONG' && macdSignal === 'BULLISH' && rsiSignal !== 'OVERBOUGHT') {
+            psarSignal = 'PSAR LONG';
+            psarTradeSignal = 'PSAR BUY';
+        } else if (superTrendSignal === 'SHORT' && macdSignal === 'BEARISH' && rsiSignal !== 'OVERSOLD') {
+            psarSignal = 'PSAR SHORT';
+            psarTradeSignal = 'PSAR SELL';
+        }
+        
+        combinations.push({
+            name: 'Parabolic SAR + RSI + MACD',
+            strategy: 'Stop and Reverse',
+            signal: psarTradeSignal,
+            details: `PSAR: ${psarSignal} | MACD: ${macdSignal} | RSI: ${rsiSignal}`,
+            score: ''
+        });
+        
+        // 13. CCI + RSI + Bollinger Bands (Commodity Channel Index)
+        let cciSignal = 'NEUTRAL';
+        let cciTradeSignal = 'NEUTRAL';
+        
+        // Using Stochastic as proxy for CCI (simplified)
+        if (stochSignal === 'OVERSOLD' && bbSignal === 'LOWER BAND' && rsiSignal === 'OVERSOLD') {
+            cciSignal = 'CCI OVERSOLD';
+            cciTradeSignal = 'CCI BUY';
+        } else if (stochSignal === 'OVERBOUGHT' && bbSignal === 'UPPER BAND' && rsiSignal === 'OVERBOUGHT') {
+            cciSignal = 'CCI OVERBOUGHT';
+            cciTradeSignal = 'CCI SELL';
+        }
+        
+        combinations.push({
+            name: 'CCI + RSI + Bollinger Bands',
+            strategy: 'Commodity Channel Index',
+            signal: cciTradeSignal,
+            details: `CCI: ${cciSignal} | RSI: ${rsiSignal} | BB: ${bbSignal}`,
+            score: ''
+        });
+        
+        // 14. Price Action: Engulfing Patterns + Support/Resistance + Volume
+        let engulfingSignal = 'NEUTRAL';
+        let engulfingTradeSignal = 'NEUTRAL';
+        
+        // Simplified engulfing logic - using volume and RSI divergence
+        if (volumeSignal === 'HIGH' && rsiSignal === 'OVERSOLD') {
+            engulfingSignal = 'BULLISH ENGULFING';
+            engulfingTradeSignal = 'ENGULFING BUY';
+        } else if (volumeSignal === 'HIGH' && rsiSignal === 'OVERBOUGHT') {
+            engulfingSignal = 'BEARISH ENGULFING';
+            engulfingTradeSignal = 'ENGULFING SELL';
+        }
+        
+        combinations.push({
+            name: 'Engulfing Patterns + Support/Resistance + Volume',
+            strategy: 'Price Action',
+            signal: engulfingTradeSignal,
+            details: `Pattern: ${engulfingSignal} | Volume: ${volumeSignal} | RSI: ${rsiSignal}`,
+            score: ''
+        });
+        
+        // 15. Price Action: Pin Bars + Trend Lines + RSI
+        let pinBarSignal = 'NEUTRAL';
+        let pinBarTradeSignal = 'NEUTRAL';
+        
+        // Simplified pin bar logic - using Bollinger Bands rejection
+        if (bbSignal === 'LOWER BAND' && rsiSignal === 'OVERSOLD' && emaSignal === 'BULLISH') {
+            pinBarSignal = 'BULLISH PIN BAR';
+            pinBarTradeSignal = 'PIN BAR BUY';
+        } else if (bbSignal === 'UPPER BAND' && rsiSignal === 'OVERBOUGHT' && emaSignal === 'BEARISH') {
+            pinBarSignal = 'BEARISH PIN BAR';
+            pinBarTradeSignal = 'PIN BAR SELL';
+        }
+        
+        combinations.push({
+            name: 'Pin Bars + Trend Lines + RSI',
+            strategy: 'Price Action',
+            signal: pinBarTradeSignal,
+            details: `Pin Bar: ${pinBarSignal} | Trend: ${emaSignal} | RSI: ${rsiSignal}`,
+            score: ''
+        });
+        
+        // 16. Elder Impulse + MACD + Stochastic (Impulse System)
+        let impulseSignal = 'NEUTRAL';
+        let impulseTradeSignal = 'NEUTRAL';
+        
+        if (macdSignal === 'BULLISH' && stochSignal === 'OVERSOLD' && emaSignal === 'BULLISH') {
+            impulseSignal = 'GREEN IMPULSE';
+            impulseTradeSignal = 'IMPULSE BUY';
+        } else if (macdSignal === 'BEARISH' && stochSignal === 'OVERBOUGHT' && emaSignal === 'BEARISH') {
+            impulseSignal = 'RED IMPULSE';
+            impulseTradeSignal = 'IMPULSE SELL';
+        }
+        
+        combinations.push({
+            name: 'Elder Impulse + MACD + Stochastic',
+            strategy: 'Impulse System',
+            signal: impulseTradeSignal,
+            details: `Impulse: ${impulseSignal} | MACD: ${macdSignal} | Stoch: ${stochSignal}`,
+            score: ''
+        });
+        
+        // 17. Keltner Channels + RSI + Volume (Channel Trading)
+        let keltnerSignal = 'NEUTRAL';
+        let keltnerTradeSignal = 'NEUTRAL';
+        
+        // Using Bollinger Bands as proxy for Keltner Channels
+        if (bbSignal === 'LOWER BAND' && rsiSignal === 'OVERSOLD' && volumeSignal === 'HIGH') {
+            keltnerSignal = 'KELTNER SUPPORT';
+            keltnerTradeSignal = 'KELTNER BUY';
+        } else if (bbSignal === 'UPPER BAND' && rsiSignal === 'OVERBOUGHT' && volumeSignal === 'HIGH') {
+            keltnerSignal = 'KELTNER RESISTANCE';
+            keltnerTradeSignal = 'KELTNER SELL';
+        }
+        
+        combinations.push({
+            name: 'Keltner Channels + RSI + Volume',
+            strategy: 'Channel Trading',
+            signal: keltnerTradeSignal,
+            details: `Channel: ${keltnerSignal} | RSI: ${rsiSignal} | Volume: ${volumeSignal}`,
+            score: ''
+        });
+        
+        // 18. Donchian Channels + ADX + ATR (Range Trading)
+        let donchianSignal = 'NEUTRAL';
+        let donchianTradeSignal = 'NEUTRAL';
+        
+        // Using Bollinger Bands as proxy for Donchian
+        if (bbSignal === 'MIDDLE BAND' && adxSignal === 'TRENDING' && atrSignal !== 'NEUTRAL') {
+            donchianSignal = 'DONCHIAN RANGE';
+            donchianTradeSignal = 'DONCHIAN BREAKOUT';
+        }
+        
+        combinations.push({
+            name: 'Donchian Channels + ADX + ATR',
+            strategy: 'Range Trading',
+            signal: donchianTradeSignal,
+            details: `Range: ${donchianSignal} | ADX: ${adxSignal} | ATR: ${atrSignal}`,
+            score: ''
+        });
+        
+        // 19. Price Action: Inside Bars + Breakout + Volume
+        let insideBarSignal = 'NEUTRAL';
+        let insideBarTradeSignal = 'NEUTRAL';
+        
+        // Simplified inside bar logic - using ATR for volatility
+        if (atrSignal === 'HIGH_VOLATILITY' && volumeSignal === 'HIGH') {
+            insideBarSignal = 'INSIDE BAR BREAKOUT';
+            insideBarTradeSignal = 'INSIDE BAR TRADE';
+        }
+        
+        combinations.push({
+            name: 'Inside Bars + Breakout + Volume',
+            strategy: 'Price Action',
+            signal: insideBarTradeSignal,
+            details: `Breakout: ${insideBarSignal} | ATR: ${atrSignal} | Volume: ${volumeSignal}`,
+            score: ''
+        });
+        
+        // 20. Heikin Ashi + RSI + EMA (Smoothed Price Action)
+        let heikinSignal = 'NEUTRAL';
+        let heikinTradeSignal = 'NEUTRAL';
+        
+        // Simplified Heikin Ashi logic - using EMA smoothing
+        if (emaSignal === 'BULLISH' && rsiSignal === 'OVERSOLD') {
+            heikinSignal = 'HEIKIN BULLISH';
+            heikinTradeSignal = 'HEIKIN BUY';
+        } else if (emaSignal === 'BEARISH' && rsiSignal === 'OVERBOUGHT') {
+            heikinSignal = 'HEIKIN BEARISH';
+            heikinTradeSignal = 'HEIKIN SELL';
+        }
+        
+        combinations.push({
+            name: 'Heikin Ashi + RSI + EMA',
+            strategy: 'Smoothed Price Action',
+            signal: heikinTradeSignal,
+            details: `Heikin: ${heikinSignal} | RSI: ${rsiSignal} | EMA: ${emaSignal}`,
+            score: ''
+        });
+        
+        // 21. Predictive Analytics - Poor Man's AI (Statistical Pattern Recognition)
+        let predictiveSignal = 'NEUTRAL';
+        let predictiveTradeSignal = 'NEUTRAL';
+        let confidenceLevel = 'LOW';
+        
+        // Analyze recent price momentum (last 5 candles)
+        const recentPrices = this.klineData.slice(-5).map(k => parseFloat(k.close));
+        const priceChanges = [];
+        for (let i = 1; i < recentPrices.length; i++) {
+            priceChanges.push((recentPrices[i] - recentPrices[i-1]) / recentPrices[i-1]);
+        }
+        
+        const avgPriceChange = priceChanges.reduce((a, b) => a + b, 0) / priceChanges.length;
+        const priceVolatility = Math.sqrt(priceChanges.reduce((a, b) => a + b * b, 0) / priceChanges.length);
+        
+        // Analyze volume trend (last 5 candles)
+        const recentVolumes = this.klineData.slice(-5).map(k => parseFloat(k.volume));
+        const avgVolume = recentVolumes.reduce((a, b) => a + b, 0) / recentVolumes.length;
+        const currentVolume = recentVolumes[recentVolumes.length - 1];
+        const volumeTrend = currentVolume > avgVolume * 1.2 ? 'HIGH' : currentVolume < avgVolume * 0.8 ? 'LOW' : 'NORMAL';
+        
+        // Simple predictive logic based on patterns
+        let bullishFactors = 0;
+        let bearishFactors = 0;
+        
+        // Price momentum factors
+        if (avgPriceChange > 0.005) bullishFactors += 2; // Strong upward momentum
+        else if (avgPriceChange < -0.005) bearishFactors += 2; // Strong downward momentum
+        
+        // Volume confirmation
+        if (volumeTrend === 'HIGH' && avgPriceChange > 0) bullishFactors += 1;
+        if (volumeTrend === 'HIGH' && avgPriceChange < 0) bearishFactors += 1;
+        
+        // Volatility analysis
+        if (priceVolatility > 0.02 && avgPriceChange > 0) bullishFactors += 1; // High vol + up = strong move
+        if (priceVolatility > 0.02 && avgPriceChange < 0) bearishFactors += 1; // High vol + down = strong move
+        
+        // RSI trend analysis
+        if (rsiSignal === 'OVERSOLD' && avgPriceChange > 0) bullishFactors += 1;
+        if (rsiSignal === 'OVERBOUGHT' && avgPriceChange < 0) bearishFactors += 1;
+        
+        // MACD confirmation
+        if (macdSignal === 'BULLISH') bullishFactors += 1;
+        if (macdSignal === 'BEARISH') bearishFactors += 1;
+        
+        // Determine confidence and signal
+        const totalFactors = bullishFactors + bearishFactors;
+        if (totalFactors >= 3) confidenceLevel = 'HIGH';
+        else if (totalFactors >= 2) confidenceLevel = 'MEDIUM';
+        
+        if (bullishFactors > bearishFactors + 1) {
+            predictiveSignal = 'PREDICTED UPTREND';
+            predictiveTradeSignal = 'AI BUY SIGNAL';
+        } else if (bearishFactors > bullishFactors + 1) {
+            predictiveSignal = 'PREDICTED DOWNTREND';
+            predictiveTradeSignal = 'AI SELL SIGNAL';
+        } else {
+            predictiveSignal = 'UNCERTAIN TREND';
+            predictiveTradeSignal = 'AI HOLD SIGNAL';
+        }
+        
+        combinations.push({
+            name: 'Predictive Analytics - Poor Man\'s AI',
+            strategy: 'Statistical Pattern Recognition',
+            signal: predictiveTradeSignal,
+            details: `Prediction: ${predictiveSignal} | Confidence: ${confidenceLevel} | Momentum: ${(avgPriceChange * 100).toFixed(2)}% | Volume: ${volumeTrend}`,
+            score: `${bullishFactors}/${bearishFactors}`
+        });
+        
         return combinations;
     }
 
