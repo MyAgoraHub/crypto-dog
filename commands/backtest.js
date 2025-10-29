@@ -5,31 +5,31 @@ import { backtestSignal } from '../core/cryptoDogBacktest.js';
 
 function mapTypeToSignalType(type) {
     const signalTypes = {
-        'rsi-ob': 'rsi-ob',
-        'rsi-os': 'rsi-os',
-        'crocodile-dive': 'crocodile-dive',
-        'crocodile': 'crocodile',
-        'cross-up': 'cross-up',
-        'cross-down': 'cross-down',
-        'multi-div': 'multi-div',
-        'uptrend': 'uptrend',
-        'downtrend': 'downtrend',
-        'woodies': 'woodies',
-        'supertrend-long': 'supertrend',
-        'supertrend-short': 'supertrend',
-        'price-gt': 'price-action',
-        'price-lt': 'price-action',
-        'price-gte': 'price-action',
-        'price-lte': 'price-action',
-        'price-eq': 'price-action'
+        'rsi-ob': 'INDICATOR_RsiObSignal',
+        'rsi-os': 'INDICATOR_RsiOsSignal',
+        'crocodile-dive': 'INDICATOR_CrocodileDiveSignal',
+        'crocodile': 'INDICATOR_CrocodileSignal',
+        'cross-up': 'INDICATOR_CrossUpSignal',
+        'cross-down': 'INDICATOR_CrossDownSignal',
+        'multi-div': 'INDICATOR_DivergenceDetector',
+        'uptrend': 'INDICATOR_UptrendSignal',
+        'downtrend': 'INDICATOR_DownTrendSignal',
+        'woodies': 'INDICATOR_Woodies',
+        'supertrend-long': 'INDICATOR_SuperTrendSignal',
+        'supertrend-short': 'INDICATOR_SuperTrendSignal',
+        'price-gt': 'PRICE_ACTION_GT',
+        'price-lt': 'PRICE_ACTION_LT',
+        'price-gte': 'PRICE_ACTION_GTE',
+        'price-lte': 'PRICE_ACTION_LTE',
+        'price-eq': 'PRICE_ACTION_EQ'
     };
     return signalTypes[type] || type;
 }
 
 function getIndicatorForType(type) {
     const indicators = {
-        'rsi-ob': 'rsi',
-        'rsi-os': 'rsi',
+        'rsi-ob': 'RsiIndicator',
+        'rsi-os': 'RsiIndicator',
         'crocodile-dive': 'ema',
         'crocodile': 'ema',
         'cross-up': 'ema',
@@ -38,8 +38,8 @@ function getIndicatorForType(type) {
         'uptrend': 'trend',
         'downtrend': 'trend',
         'woodies': 'pivot',
-        'supertrend-long': 'supertrend',
-        'supertrend-short': 'supertrend',
+        'supertrend-long': 'SuperTrendIndicator',
+        'supertrend-short': 'SuperTrendIndicator',
         'price-gt': 'price',
         'price-lt': 'price',
         'price-gte': 'price',
@@ -50,9 +50,29 @@ function getIndicatorForType(type) {
 }
 
 function getEvaluateFunctionForType(type) {
-    // This would need to be implemented based on the actual evaluation functions
-    // For now, returning a placeholder
-    return async () => ({});
+    // Return the string representation of the evaluation function
+    // These match the functions in cryptoDogSignalAgent.js
+    const evaluateFunctions = {
+        'rsi-ob': `(data, model) => { return { signal: data.value > model.value, data:data }; }`,
+        'rsi-os': `(data, model) => { return { signal: data.value < model.value, data:data }; }`,
+        'crocodile-dive': `(data, model) => { return { signal: data.ema1 < data.ema2 && data.ema2 < data.ema3, data:data }; }`,
+        'crocodile': `(data, model) => { return { signal: data.ema1 > data.ema2 && data.ema2 > data.ema3, data:data }; }`,
+        'cross-up': `(data, model) => { return { signal: data.all.every(element => element < data.current), data:data }; }`,
+        'cross-down': `(data, model) => { return { signal: data.all.every(element => element > data.current), data:data }; }`,
+        'multi-div': `(data, model) => { return { signal: data.hasDivergence === true, divergence: data.divergence || [], data:data }; }`,
+        'uptrend': `(data, model) => { return { signal: data.data > 0, data:data }; }`,
+        'downtrend': `(data, model) => { return { signal: data.data < 0, data:data }; }`,
+        'woodies': `(data, model) => { return { signal: true, data:data }; }`, // Woodies always signals when conditions met
+        'supertrend-long': `(data, model) => { return { signal: data.trend === 'long' || data.trend === 'uptrend', trend: data.trend, data:data }; }`,
+        'supertrend-short': `(data, model) => { return { signal: data.trend === 'short' || data.trend === 'downtrend', trend: data.trend, data:data }; }`,
+        'price-gt': `(data, model) => { return { signal: data.value > model.value, data:data }; }`,
+        'price-lt': `(data, model) => { return { signal: data.value < model.value, data:data }; }`,
+        'price-gte': `(data, model) => { return { signal: data.value >= model.value, data:data }; }`,
+        'price-lte': `(data, model) => { return { signal: data.value <= model.value, data:data }; }`,
+        'price-eq': `(data, model) => { return { signal: data.value === model.value, data:data }; }`
+    };
+    
+    return evaluateFunctions[type] || `(data, model) => { return { signal: false, data:data }; }`;
 }
 
 export function registerBacktestCommand(program) {

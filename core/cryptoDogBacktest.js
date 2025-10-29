@@ -26,6 +26,8 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
         const getData = IndicatorList.getIndicator(signal.indicator);
         indicatorData = getData(o, h, l, c, v, signal.indicatorArgs || {}, buffer);
         console.log(`📈 Calculated ${Array.isArray(indicatorData) ? indicatorData.length : 'object'} indicator values`);
+        console.log(`📈 First 5 indicator values:`, Array.isArray(indicatorData) ? indicatorData.slice(0, 5) : 'Not an array');
+        console.log(`📈 Signal type: ${signal.signalType}, Indicator: ${signal.indicator}`);
     }
     
     // Prepare evaluation function
@@ -39,11 +41,33 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
             testModel = indicatorData[testIndex];
         } else if (signal.signalType.includes('Rsi')) {
             testModel = { value: indicatorData[testIndex] };
+        } else if (signal.signalType.includes('Crocodile')) {
+            testModel = {
+                ema1: indicatorData.ema1?.[testIndex],
+                ema2: indicatorData.ema2?.[testIndex],
+                ema3: indicatorData.ema3?.[testIndex]
+            };
+        } else if (signal.signalType.includes('Cross')) {
+            if (testIndex < 3) {
+                console.log(`  Not enough data for cross signal test`);
+            } else {
+                testModel = {
+                    all: [indicatorData[testIndex-1], indicatorData[testIndex-2], indicatorData[testIndex-3]],
+                    current: indicatorData[testIndex]
+                };
+            }
+        } else if (signal.signalType.includes('trend')) {
+            testModel = { data: indicatorData[testIndex], c: c[testIndex] };
+        } else if (signal.signalType.includes('Woodies')) {
+            testModel = { c: c[testIndex], data: indicatorData[testIndex] };
+        } else {
+            testModel = indicatorData[testIndex];
         }
         if (testModel) {
             console.log(`\n🔍 Testing evaluation at index ${testIndex}:`);
-            console.log(`  DataModel:`, testModel);
+            console.log(`  DataModel:`, JSON.stringify(testModel, null, 2));
             console.log(`  Signal value:`, signal.value);
+            console.log(`  Signal type:`, signal.signalType);
             try {
                 const testResult = evaluateFunc(testModel, signal);
                 console.log(`  Eval result:`, testResult);
