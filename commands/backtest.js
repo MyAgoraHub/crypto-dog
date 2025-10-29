@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
 import { backtestSignal } from '../core/cryptoDogBacktest.js';
+import { signalAgent } from '../core/cryptoDogSignalAgent.js';
 
 function mapTypeToSignalType(type) {
     const signalTypes = {
@@ -21,7 +22,72 @@ function mapTypeToSignalType(type) {
         'price-lt': 'PRICE_ACTION_LT',
         'price-gte': 'PRICE_ACTION_GTE',
         'price-lte': 'PRICE_ACTION_LTE',
-        'price-eq': 'PRICE_ACTION_EQ'
+        'price-eq': 'PRICE_ACTION_EQ',
+        // MACD Signals
+        'macd-bullish': 'INDICATOR_MacdBullishSignal',
+        'macd-bearish': 'INDICATOR_MacdBearishSignal',
+        // Bollinger Band Signals
+        'bollinger-upper-touch': 'INDICATOR_BollingerUpperTouchSignal',
+        'bollinger-lower-touch': 'INDICATOR_BollingerLowerTouchSignal',
+        // Stochastic Signals
+        'stochastic-overbought': 'INDICATOR_StochasticOverboughtSignal',
+        'stochastic-oversold': 'INDICATOR_StochasticOversoldSignal',
+        // Williams %R Signals
+        'williams-overbought': 'INDICATOR_WilliamsOverboughtSignal',
+        'williams-oversold': 'INDICATOR_WilliamsOversoldSignal',
+        // Moving Average Signals
+        'golden-cross': 'INDICATOR_GoldenCrossSignal',
+        'death-cross': 'INDICATOR_DeathCrossSignal',
+        // Volume Signals
+        'volume-spike': 'INDICATOR_VolumeSpikeSignal',
+        // Ichimoku Signals
+        'ichimoku-bullish': 'INDICATOR_IchimokuBullishSignal',
+        'ichimoku-bearish': 'INDICATOR_IchimokuBearishSignal',
+        // ADX Signals
+        'adx-strong-trend': 'INDICATOR_AdxStrongTrendSignal',
+        // MFI Signals
+        'mfi-overbought': 'INDICATOR_MfiOverboughtSignal',
+        'mfi-oversold': 'INDICATOR_MfiOversoldSignal',
+        // ATR Signals
+        'atr-high-volatility': 'INDICATOR_AtrHighVolatilitySignal',
+        // Parabolic SAR Signals
+        'parabolic-sar-bullish': 'INDICATOR_ParabolicSarBullishSignal',
+        'parabolic-sar-bearish': 'INDICATOR_ParabolicSarBearishSignal',
+        // CCI Signals
+        'cci-overbought': 'INDICATOR_CciOverboughtSignal',
+        'cci-oversold': 'INDICATOR_CciOversoldSignal',
+        // MACD Histogram Signals
+        'macd-histogram-positive': 'INDICATOR_MacdHistogramPositiveSignal',
+        'macd-histogram-negative': 'INDICATOR_MacdHistogramNegativeSignal',
+        // Bollinger Advanced Signals
+        'bollinger-squeeze': 'INDICATOR_BollingerSqueezeSignal',
+        'bollinger-expansion': 'INDICATOR_BollingerExpansionSignal',
+        // Stochastic Cross Signals
+        'stochastic-bullish-cross': 'INDICATOR_StochasticBullishCrossSignal',
+        'stochastic-bearish-cross': 'INDICATOR_StochasticBearishCrossSignal',
+        // Moving Average Advanced Signals
+        'ma-support': 'INDICATOR_MaSupportSignal',
+        'ma-resistance': 'INDICATOR_MaResistanceSignal',
+        // Volume Advanced Signals
+        'obv-bullish': 'INDICATOR_ObvBullishSignal',
+        'obv-bearish': 'INDICATOR_ObvBearishSignal',
+        // Ichimoku Advanced Signals
+        'ichimoku-tk-cross-bullish': 'INDICATOR_IchimokuTkCrossBullishSignal',
+        'ichimoku-tk-cross-bearish': 'INDICATOR_IchimokuTkCrossBearishSignal',
+        // Advanced Signals
+        'fibonacci-retracement': 'INDICATOR_FibonacciRetracementSignal',
+        'support-breakout': 'INDICATOR_SupportBreakoutSignal',
+        'resistance-breakout': 'INDICATOR_ResistanceBreakoutSignal',
+        'adx-weak-trend': 'INDICATOR_AdxWeakTrendSignal',
+        'tema-bullish': 'INDICATOR_TemaBullishSignal',
+        'tema-bearish': 'INDICATOR_TemaBearishSignal',
+        'keltner-upper-breakout': 'INDICATOR_KeltnerUpperBreakoutSignal',
+        'keltner-lower-breakout': 'INDICATOR_KeltnerLowerBreakoutSignal',
+        'donchian-upper-breakout': 'INDICATOR_DonchianUpperBreakoutSignal',
+        'donchian-lower-breakout': 'INDICATOR_DonchianLowerBreakoutSignal',
+        'elder-impulse-bull': 'INDICATOR_ElderImpulseBullSignal',
+        'elder-impulse-bear': 'INDICATOR_ElderImpulseBearSignal',
+        'elder-impulse-blue': 'INDICATOR_ElderImpulseBlueSignal'
     };
     return signalTypes[type] || type;
 }
@@ -44,35 +110,165 @@ function getIndicatorForType(type) {
         'price-lt': 'price',
         'price-gte': 'price',
         'price-lte': 'price',
-        'price-eq': 'price'
+        'price-eq': 'price',
+        // MACD Signals
+        'macd-bullish': 'MacdIndicator',
+        'macd-bearish': 'MacdIndicator',
+        // Bollinger Band Signals
+        'bollinger-upper-touch': 'BollingerIndicator',
+        'bollinger-lower-touch': 'BollingerIndicator',
+        // Stochastic Signals
+        'stochastic-overbought': 'StochasticIndicator',
+        'stochastic-oversold': 'StochasticIndicator',
+        // Williams %R Signals
+        'williams-overbought': 'WilliamsRIndicator',
+        'williams-oversold': 'WilliamsRIndicator',
+        // Moving Average Signals
+        'golden-cross': 'EMAIndicator',
+        'death-cross': 'EMAIndicator',
+        // Volume Signals
+        'volume-spike': 'ObvIndicator',
+        // Ichimoku Signals
+        'ichimoku-bullish': 'IchimokuCloudIndicator',
+        'ichimoku-bearish': 'IchimokuCloudIndicator',
+        // ADX Signals
+        'adx-strong-trend': 'AdxIndicator',
+        // MFI Signals
+        'mfi-overbought': 'MfiIndicator',
+        'mfi-oversold': 'MfiIndicator',
+        // ATR Signals
+        'atr-high-volatility': 'AtrIndicator',
+        // Parabolic SAR Signals
+        'parabolic-sar-bullish': 'PsarIndicator',
+        'parabolic-sar-bearish': 'PsarIndicator',
+        // CCI Signals
+        'cci-overbought': 'CciIndicator',
+        'cci-oversold': 'CciIndicator',
+        // MACD Histogram Signals
+        'macd-histogram-positive': 'MacdIndicator',
+        'macd-histogram-negative': 'MacdIndicator',
+        // Bollinger Advanced Signals
+        'bollinger-squeeze': 'BollingerIndicator',
+        'bollinger-expansion': 'BollingerIndicator',
+        // Stochastic Cross Signals
+        'stochastic-bullish-cross': 'StochasticIndicator',
+        'stochastic-bearish-cross': 'StochasticIndicator',
+        // Moving Average Advanced Signals
+        'ma-support': 'EMAIndicator',
+        'ma-resistance': 'EMAIndicator',
+        // Volume Advanced Signals
+        'obv-bullish': 'ObvIndicator',
+        'obv-bearish': 'ObvIndicator',
+        // Ichimoku Advanced Signals
+        'ichimoku-tk-cross-bullish': 'IchimokuCloudIndicator',
+        'ichimoku-tk-cross-bearish': 'IchimokuCloudIndicator',
+        // Advanced Signals
+        'fibonacci-retracement': 'price', // Uses price data
+        'support-breakout': 'SupportAndResistance', // Custom indicator
+        'resistance-breakout': 'SupportAndResistance', // Custom indicator
+        'adx-weak-trend': 'AdxIndicator',
+        'tema-bullish': 'TrixIndicator', // TEMA is Triple EMA, using TRIX as approximation
+        'tema-bearish': 'TrixIndicator', // TEMA is Triple EMA, using TRIX as approximation
+        'keltner-upper-breakout': 'AtrIndicator', // Keltner uses ATR
+        'keltner-lower-breakout': 'AtrIndicator', // Keltner uses ATR
+        'donchian-upper-breakout': 'price', // Donchian uses price highs/lows
+        'donchian-lower-breakout': 'price', // Donchian uses price highs/lows
+        'elder-impulse-bull': 'MacdIndicator', // Elder Impulse uses MACD + EMAs
+        'elder-impulse-bear': 'MacdIndicator', // Elder Impulse uses MACD + EMAs
+        'elder-impulse-blue': 'MacdIndicator' // Elder Impulse uses MACD + EMAs
     };
     return indicators[type] || 'unknown';
 }
 
 function getEvaluateFunctionForType(type) {
-    // Return the string representation of the evaluation function
+    // Return the string representation of the evaluation function from signalAgent
     // These match the functions in cryptoDogSignalAgent.js
     const evaluateFunctions = {
-        'rsi-ob': `(data, model) => { return { signal: data.value > model.value, data:data }; }`,
-        'rsi-os': `(data, model) => { return { signal: data.value < model.value, data:data }; }`,
-        'crocodile-dive': `(data, model) => { return { signal: data.ema1 < data.ema2 && data.ema2 < data.ema3, data:data }; }`,
-        'crocodile': `(data, model) => { return { signal: data.ema1 > data.ema2 && data.ema2 > data.ema3, data:data }; }`,
-        'cross-up': `(data, model) => { return { signal: data.all.every(element => element < data.current), data:data }; }`,
-        'cross-down': `(data, model) => { return { signal: data.all.every(element => element > data.current), data:data }; }`,
-        'multi-div': `(data, model) => { return { signal: data.hasDivergence === true, divergence: data.divergence || [], data:data }; }`,
-        'uptrend': `(data, model) => { return { signal: data.data > 0, data:data }; }`,
-        'downtrend': `(data, model) => { return { signal: data.data < 0, data:data }; }`,
-        'woodies': `(data, model) => { return { signal: true, data:data }; }`, // Woodies always signals when conditions met
-        'supertrend-long': `(data, model) => { return { signal: data.trend === 'long' || data.trend === 'uptrend', trend: data.trend, data:data }; }`,
-        'supertrend-short': `(data, model) => { return { signal: data.trend === 'short' || data.trend === 'downtrend', trend: data.trend, data:data }; }`,
-        'price-gt': `(data, model) => { return { signal: data.value > model.value, data:data }; }`,
-        'price-lt': `(data, model) => { return { signal: data.value < model.value, data:data }; }`,
-        'price-gte': `(data, model) => { return { signal: data.value >= model.value, data:data }; }`,
-        'price-lte': `(data, model) => { return { signal: data.value <= model.value, data:data }; }`,
-        'price-eq': `(data, model) => { return { signal: data.value === model.value, data:data }; }`
+        'rsi-ob': `signalAgent.ob`,
+        'rsi-os': `signalAgent.os`,
+        'crocodile-dive': `signalAgent.crocodileDive`,
+        'crocodile': `signalAgent.crocodile`,
+        'cross-up': `signalAgent.crossOver`,
+        'cross-down': `signalAgent.crossUnder`,
+        'multi-div': `signalAgent.multiDiv`,
+        'uptrend': `signalAgent.uptrendTrend`,
+        'downtrend': `signalAgent.downTrend`,
+        'woodies': `signalAgent.woodies`,
+        'supertrend-long': `signalAgent.superTrend`,
+        'supertrend-short': `signalAgent.superTrend`,
+        'price-gt': `signalAgent.gt`,
+        'price-lt': `signalAgent.lt`,
+        'price-gte': `signalAgent.gte`,
+        'price-lte': `signalAgent.lte`,
+        'price-eq': `signalAgent.eq`,
+        // MACD Signals
+        'macd-bullish': `signalAgent.macdBullish`,
+        'macd-bearish': `signalAgent.macdBearish`,
+        // Bollinger Band Signals
+        'bollinger-upper-touch': `signalAgent.bollingerUpperTouch`,
+        'bollinger-lower-touch': `signalAgent.bollingerLowerTouch`,
+        // Stochastic Signals
+        'stochastic-overbought': `signalAgent.stochasticOverbought`,
+        'stochastic-oversold': `signalAgent.stochasticOversold`,
+        // Williams %R Signals
+        'williams-overbought': `signalAgent.williamsOverbought`,
+        'williams-oversold': `signalAgent.williamsOversold`,
+        // Moving Average Signals
+        'golden-cross': `signalAgent.goldenCross`,
+        'death-cross': `signalAgent.deathCross`,
+        // Volume Signals
+        'volume-spike': `signalAgent.volumeSpike`,
+        // Ichimoku Signals
+        'ichimoku-bullish': `signalAgent.ichimokuBullish`,
+        'ichimoku-bearish': `signalAgent.ichimokuBearish`,
+        // ADX Signals
+        'adx-strong-trend': `signalAgent.adxStrongTrend`,
+        // MFI Signals
+        'mfi-overbought': `signalAgent.mfiOverbought`,
+        'mfi-oversold': `signalAgent.mfiOversold`,
+        // ATR Signals
+        'atr-high-volatility': `signalAgent.atrHighVolatility`,
+        // Parabolic SAR Signals
+        'parabolic-sar-bullish': `signalAgent.parabolicSarBullish`,
+        'parabolic-sar-bearish': `signalAgent.parabolicSarBearish`,
+        // CCI Signals
+        'cci-overbought': `signalAgent.cciOverbought`,
+        'cci-oversold': `signalAgent.cciOversold`,
+        // MACD Histogram Signals
+        'macd-histogram-positive': `signalAgent.macdHistogramPositive`,
+        'macd-histogram-negative': `signalAgent.macdHistogramNegative`,
+        // Bollinger Advanced Signals
+        'bollinger-squeeze': `signalAgent.bollingerSqueeze`,
+        'bollinger-expansion': `signalAgent.bollingerExpansion`,
+        // Stochastic Cross Signals
+        'stochastic-bullish-cross': `signalAgent.stochasticBullishCross`,
+        'stochastic-bearish-cross': `signalAgent.stochasticBearishCross`,
+        // Moving Average Advanced Signals
+        'ma-support': `signalAgent.maSupport`,
+        'ma-resistance': `signalAgent.maResistance`,
+        // Volume Advanced Signals
+        'obv-bullish': `signalAgent.obvBullish`,
+        'obv-bearish': `signalAgent.obvBearish`,
+        // Ichimoku Advanced Signals
+        'ichimoku-tk-cross-bullish': `signalAgent.ichimokuTkCrossBullish`,
+        'ichimoku-tk-cross-bearish': `signalAgent.ichimokuTkCrossBearish`,
+        // Advanced Signals
+        'fibonacci-retracement': `signalAgent.fibonacciRetracement`,
+        'support-breakout': `signalAgent.supportBreakout`,
+        'resistance-breakout': `signalAgent.resistanceBreakout`,
+        'adx-weak-trend': `signalAgent.adxWeakTrend`,
+        'tema-bullish': `signalAgent.temaBullish`,
+        'tema-bearish': `signalAgent.temaBearish`,
+        'keltner-upper-breakout': `signalAgent.keltnerUpperBreakout`,
+        'keltner-lower-breakout': `signalAgent.keltnerLowerBreakout`,
+        'donchian-upper-breakout': `signalAgent.donchianUpperBreakout`,
+        'donchian-lower-breakout': `signalAgent.donchianLowerBreakout`,
+        'elder-impulse-bull': `signalAgent.elderImpulseBull`,
+        'elder-impulse-bear': `signalAgent.elderImpulseBear`,
+        'elder-impulse-blue': `signalAgent.elderImpulseBlue`
     };
     
-    return evaluateFunctions[type] || `(data, model) => { return { signal: false, data:data }; }`;
+    return evaluateFunctions[type] || `signalAgent.gt`; // fallback
 }
 
 export function registerBacktestCommand(program) {
@@ -177,7 +373,7 @@ ${chalk.cyan('Notes:')}
                 // Create temporary signal for backtesting
                 const signalType = mapTypeToSignalType(options.type);
                 const indicator = getIndicatorForType(options.type);
-                const evaluate = getEvaluateFunctionForType(options.type);
+                const evaluateFuncName = getEvaluateFunctionForType(options.type);
 
                 const signal = {
                     symbol,
@@ -185,7 +381,7 @@ ${chalk.cyan('Notes:')}
                     signalType,
                     indicator,
                     value,
-                    evaluate,
+                    evaluate: evaluateFuncName, // Store function name instead of string
                     indicatorArgs: options.type === 'cross-up' || options.type === 'cross-down' ? { period: 200 } : {}
                 };
 

@@ -37,6 +37,69 @@ export function registerSignalCommands(program) {
             console.log('  supertrend-long - SuperTrend Long');
             console.log('  supertrend-short- SuperTrend Short');
 
+            console.log(chalk.cyan('\nMACD Signals:'));
+            console.log('  macd-bullish           - MACD Bullish Crossover');
+            console.log('  macd-bearish           - MACD Bearish Crossover');
+            console.log('  macd-histogram-positive- MACD Histogram Turns Positive');
+            console.log('  macd-histogram-negative- MACD Histogram Turns Negative');
+
+            console.log(chalk.cyan('\nBollinger Band Signals:'));
+            console.log('  bollinger-upper-touch  - Price Touches Upper Bollinger Band');
+            console.log('  bollinger-lower-touch  - Price Touches Lower Bollinger Band');
+            console.log('  bollinger-squeeze      - Bollinger Bands Squeezing (Low Volatility)');
+            console.log('  bollinger-expansion    - Bollinger Bands Expanding (High Volatility)');
+
+            console.log(chalk.cyan('\nStochastic Signals:'));
+            console.log('  stochastic-overbought   - Stochastic Overbought (>80)');
+            console.log('  stochastic-oversold     - Stochastic Oversold (<20)');
+            console.log('  stochastic-bullish-cross- %K Crosses Above %D');
+            console.log('  stochastic-bearish-cross- %K Crosses Below %D');
+
+            console.log(chalk.cyan('\nWilliams %R Signals:'));
+            console.log('  williams-overbought     - Williams %R Overbought (>-20)');
+            console.log('  williams-oversold       - Williams %R Oversold (<-80)');
+
+            console.log(chalk.cyan('\nMoving Average Signals:'));
+            console.log('  golden-cross           - Fast MA Crosses Above Slow MA (Bullish)');
+            console.log('  death-cross            - Fast MA Crosses Below Slow MA (Bearish)');
+            console.log('  ma-support             - Price Finds Support at Moving Average');
+            console.log('  ma-resistance          - Price Hits Resistance at Moving Average');
+
+            console.log(chalk.cyan('\nVolume Signals:'));
+            console.log('  volume-spike           - Volume Spike (2x Average)');
+            console.log('  obv-bullish            - OBV Bullish (Rising OBV + Rising Price)');
+            console.log('  obv-bearish            - OBV Bearish (Falling OBV + Falling Price)');
+
+            console.log(chalk.cyan('\nIchimoku Signals:'));
+            console.log('  ichimoku-bullish       - Ichimoku Bullish Setup');
+            console.log('  ichimoku-bearish       - Ichimoku Bearish Setup');
+            console.log('  ichimoku-tk-cross-bullish- Tenkan Crosses Above Kijun');
+            console.log('  ichimoku-tk-cross-bearish- Tenkan Crosses Below Kijun');
+
+            console.log(chalk.cyan('\nAdvanced Signals:'));
+            console.log('  fibonacci-retracement  - Price at Fibonacci Retracement Level');
+            console.log('  support-breakout       - Price Breaks Above Support');
+            console.log('  resistance-breakout    - Price Breaks Above Resistance');
+            console.log('  adx-strong-trend       - ADX Strong Trend (>25)');
+            console.log('  adx-weak-trend         - ADX Weak Trend (<20)');
+            console.log('  mfi-overbought         - MFI Overbought (>80)');
+            console.log('  mfi-oversold           - MFI Oversold (<20)');
+            console.log('  atr-high-volatility    - ATR High Volatility');
+            console.log('  atr-low-volatility     - ATR Low Volatility');
+            console.log('  parabolic-sar-bullish  - Parabolic SAR Bullish (Below Price)');
+            console.log('  parabolic-sar-bearish  - Parabolic SAR Bearish (Above Price)');
+            console.log('  cci-overbought         - CCI Overbought (>100)');
+            console.log('  cci-oversold           - CCI Oversold (<-100)');
+            console.log('  tema-bullish           - TEMA Bullish Setup');
+            console.log('  tema-bearish           - TEMA Bearish Setup');
+            console.log('  keltner-upper-breakout - Price Breaks Above Keltner Upper');
+            console.log('  keltner-lower-breakout - Price Breaks Below Keltner Lower');
+            console.log('  donchian-upper-breakout- Price Breaks Above Donchian Upper');
+            console.log('  donchian-lower-breakout- Price Breaks Below Donchian Lower');
+            console.log('  elder-impulse-bull     - Elder Impulse Bull (Green)');
+            console.log('  elder-impulse-bear     - Elder Impulse Bear (Red)');
+            console.log('  elder-impulse-blue     - Elder Impulse Neutral (Blue)');
+
             console.log(chalk.cyan('\nPrice Action Signals:'));
             console.log('  price-gt        - Price Greater Than (requires --value)');
             console.log('  price-lt        - Price Less Than (requires --value)');

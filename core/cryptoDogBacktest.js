@@ -2,6 +2,7 @@ import { loadCandleData } from './clients/cryptoDogAgent.js';
 import { createIndicatorData } from './cryptoDogTools.js';
 import { IndicatorList } from './indicator/Indicators.js';
 import { getInterval } from './clients/cryptoDogRequestHandler.js';
+import { signalAgent } from './cryptoDogSignalAgent.js';
 
 /**
  * Backtest a signal against historical data
@@ -31,7 +32,15 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
     }
     
     // Prepare evaluation function
-    const evaluateFunc = new Function('return ' + signal.evaluate)();
+    let evaluateFunc;
+    if (typeof signal.evaluate === 'string' && signal.evaluate.includes('signalAgent.')) {
+        // Handle signalAgent function references
+        const funcName = signal.evaluate.replace('signalAgent.', '');
+        evaluateFunc = signalAgent[funcName];
+    } else {
+        // Fallback for string functions
+        evaluateFunc = new Function('return ' + signal.evaluate)();
+    }
     
     // Debug: test evaluation on first valid datapoint
     if (signal.signalType.includes('INDICATOR') && indicatorData.length > 100) {
@@ -41,11 +50,21 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
             testModel = indicatorData[testIndex];
         } else if (signal.signalType.includes('Rsi')) {
             testModel = { value: indicatorData[testIndex] };
-        } else if (signal.signalType.includes('Crocodile')) {
+        } else if (signal.signalType.includes('Williams')) {
+            testModel = { value: indicatorData[testIndex] };
+        } else if (signal.signalType.includes('Mfi')) {
+            testModel = { value: indicatorData[testIndex] };
+        } else if (signal.signalType.includes('Cci')) {
+            testModel = { value: indicatorData[testIndex] };
+        } else if (signal.signalType.includes('Parabolic')) {
+            testModel = { sar: indicatorData[testIndex], price: c[testIndex] };
+        } else if (signal.signalType.includes('Stochastic') && signal.signalType.includes('Cross')) {
+            // Stochastic cross signals need current and previous K/D values
             testModel = {
-                ema1: indicatorData.ema1?.[testIndex],
-                ema2: indicatorData.ema2?.[testIndex],
-                ema3: indicatorData.ema3?.[testIndex]
+                k: indicatorData[testIndex]?.k,
+                d: indicatorData[testIndex]?.d,
+                previousK: indicatorData[testIndex-1]?.k,
+                previousD: indicatorData[testIndex-1]?.d
             };
         } else if (signal.signalType.includes('Cross')) {
             if (testIndex < 3) {
@@ -60,6 +79,22 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
             testModel = { data: indicatorData[testIndex], c: c[testIndex] };
         } else if (signal.signalType.includes('Woodies')) {
             testModel = { c: c[testIndex], data: indicatorData[testIndex] };
+        } else if (signal.signalType.includes('Macd')) {
+            // MACD signals need current and previous values for crossover detection
+            testModel = {
+                macd: indicatorData[testIndex]?.MACD,
+                signal: indicatorData[testIndex]?.signal,
+                histogram: indicatorData[testIndex]?.histogram,
+                previousMacd: indicatorData[testIndex-1]?.MACD,
+                previousSignal: indicatorData[testIndex-1]?.signal,
+                previousHistogram: indicatorData[testIndex-1]?.histogram
+            };
+        } else if (signal.signalType.includes('Bollinger')) {
+            // Bollinger signals need price and band data
+            testModel = {
+                ...indicatorData[testIndex],
+                price: c[testIndex]
+            };
         } else {
             testModel = indicatorData[testIndex];
         }
@@ -95,11 +130,27 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                 dataModel = indicatorData[i];
             } else if (signal.signalType.includes('Rsi')) {
                 dataModel = { value: indicatorData[i] };
+            } else if (signal.signalType.includes('Williams')) {
+                dataModel = { value: indicatorData[i] };
+            } else if (signal.signalType.includes('Mfi')) {
+                dataModel = { value: indicatorData[i] };
+            } else if (signal.signalType.includes('Cci')) {
+                dataModel = { value: indicatorData[i] };
+            } else if (signal.signalType.includes('Parabolic')) {
+                dataModel = { sar: indicatorData[i], price: c[i] };
             } else if (signal.signalType.includes('Crocodile')) {
                 dataModel = {
                     ema1: indicatorData.ema1?.[i],
                     ema2: indicatorData.ema2?.[i],
                     ema3: indicatorData.ema3?.[i]
+                };
+            } else if (signal.signalType.includes('Stochastic') && signal.signalType.includes('Cross')) {
+                // Stochastic cross signals need current and previous K/D values
+                dataModel = {
+                    k: indicatorData[i]?.k,
+                    d: indicatorData[i]?.d,
+                    previousK: indicatorData[i-1]?.k,
+                    previousD: indicatorData[i-1]?.d
                 };
             } else if (signal.signalType.includes('Cross')) {
                 if (i < 3) continue;
@@ -111,6 +162,24 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                 dataModel = { data: indicatorData[i], c: c[i] };
             } else if (signal.signalType.includes('Woodies')) {
                 dataModel = { c: c[i], data: indicatorData[i] };
+            } else if (signal.signalType.includes('Macd')) {
+                // MACD signals need current and previous values for crossover detection
+                // Skip if signal line is not yet calculated (needs enough data for EMA)
+                if (!indicatorData[i]?.signal || !indicatorData[i-1]?.signal) continue;
+                dataModel = {
+                    macd: indicatorData[i]?.MACD,
+                    signal: indicatorData[i]?.signal,
+                    histogram: indicatorData[i]?.histogram,
+                    previousMacd: indicatorData[i-1]?.MACD,
+                    previousSignal: indicatorData[i-1]?.signal,
+                    previousHistogram: indicatorData[i-1]?.histogram
+                };
+            } else if (signal.signalType.includes('Bollinger')) {
+                // Bollinger signals need price and band data
+                dataModel = {
+                    ...indicatorData[i],
+                    price: c[i]
+                };
             } else {
                 dataModel = indicatorData[i];
             }
