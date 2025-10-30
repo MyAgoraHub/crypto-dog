@@ -24,7 +24,6 @@ export const loadCandleData = async (category, symbol, interval, iterations, lim
         await new Promise(resolve => setTimeout(resolve, 500));
         
         let nextCandleSequence = calculateNextFromToSequence(klineData.result.list, interval);
-        console.log(`Fetching with end: ${nextCandleSequence.to} (${new Date(nextCandleSequence.to).toISOString()})`);
         
         // Bybit API: Use 'end' parameter to fetch candles ending before that timestamp
         const newKlineData = await getPreviousCandles(category, symbol, interval, null, nextCandleSequence.to, limit);
@@ -33,7 +32,6 @@ export const loadCandleData = async (category, symbol, interval, iterations, lim
         if (newKlineData && newKlineData.result && newKlineData.result.list.length > 0) {
             const firstCandle = newKlineData.result.list[0];
             const lastCandle = newKlineData.result.list[newKlineData.result.list.length - 1];
-            console.log(`API returned: ${new Date(parseInt(lastCandle[0])).toISOString()} to ${new Date(parseInt(firstCandle[0])).toISOString()}`);
             
             klineData = newKlineData; // Update klineData for next iteration
             candleBuffer.push(...newKlineData.result.list);
@@ -48,7 +46,6 @@ export const loadCandleData = async (category, symbol, interval, iterations, lim
         }
         iterations--;
     }
-    console.log(`Total candles loaded: ${candleBuffer.length}`);
     return candleBuffer;
 }
 

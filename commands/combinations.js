@@ -24,57 +24,32 @@ async function showCombinationSelector(options) {
         title: `CryptoDog Signal Combinations - ${options.symbol}`
     });
 
-    // Detect screen size for responsive layout
-    const screenWidth = screen.width || 80;
-    const screenHeight = screen.height || 24;
-    const isSmallScreen = screenWidth < 80 || screenHeight < 20;
-    const isVerySmallScreen = screenWidth < 60 || screenHeight < 15;
-
-    // Adjust grid based on screen size - use more columns to utilize full width
-    let gridRows = 12;
-    let gridCols = Math.floor(screenWidth / 3); // Use more columns - 1/3 of screen width
-    let headerRows = 2;
-    let listRows = 8;
-    let statusRows = 2;
-
-    if (isVerySmallScreen) {
-        gridRows = 10;
-        gridCols = Math.max(30, Math.floor(screenWidth / 2)); // Even more columns for very small screens
-        headerRows = 1;
-        listRows = 8; // Keep same
-        statusRows = 1; // Reduced to give more space to log
-    } else if (isSmallScreen) {
-        gridRows = 12;
-        gridCols = Math.max(25, Math.floor(screenWidth / 3)); // More columns for small screens
-        headerRows = 2;
-        listRows = 9; // Increased from 8 to 9 for multi-line signals
-        statusRows = 1; // Reduced to give more space to log
-    } else {
-        // For normal/large screens, use many more columns
-        gridCols = Math.max(30, Math.floor(screenWidth / 2));
-    }
+    // Standard grid layout
+    const gridRows = 12;
+    const gridCols = 12;
+    const headerRows = 2;
+    const listRows = 8;
+    const statusRows = 2;
 
     // Create grid layout for selection screen
     const grid = new contrib.grid({rows: gridRows, cols: gridCols, screen: screen});
 
-    // Header - adjust content for small screens
-    const headerLabel = isSmallScreen ? 'Combinations' : 'Signal Combinations Menu';
+    // Header
     const headerLog = grid.set(0, 0, headerRows, gridCols, contrib.log, {
         fg: 'cyan',
         selectedFg: 'cyan',
-        label: headerLabel,
-        border: isSmallScreen ? undefined : {type: "line", fg: 'cyan'},
+        label: 'Signal Combinations Menu',
+        border: {type: "line", fg: 'cyan'},
         width: '100%'
     });
 
     // Combinations list
-    const listLabel = isSmallScreen ? 'Select Combination' : 'Select a Combination to Monitor';
     const combinationsList = grid.set(headerRows, 0, listRows, gridCols, blessed.list, {
         fg: 'white',
         selectedFg: 'black',
         selectedBg: 'cyan',
-        label: listLabel,
-        border: isSmallScreen ? undefined : {type: "line", fg: 'green'},
+        label: 'Select a Combination to Monitor',
+        border: {type: "line", fg: 'green'},
         scrollable: true,
         invertSelected: true,
         mouse: true,
@@ -86,22 +61,14 @@ async function showCombinationSelector(options) {
     const statusBar = grid.set(headerRows + listRows, 0, statusRows, gridCols, contrib.log, {
         fg: "green",
         selectedFg: "green",
-        label: isSmallScreen ? 'Status' : 'Status',
+        label: 'Status',
         width: '100%'
     });
 
-    // Initialize header - adjust content for small screens
-    if (isVerySmallScreen) {
-        headerLog.log(`📊 Combinations`);
-        headerLog.log(`${options.symbol} ${options.interval}`);
-    } else if (isSmallScreen) {
-        headerLog.log(`📊 Trading Combinations`);
-        headerLog.log(`${options.symbol} | ${options.interval}`);
-    } else {
-        headerLog.log(`📊 Available Trading Signal Combinations`);
-        headerLog.log(`Symbol: ${options.symbol} | Interval: ${options.interval}`);
-        headerLog.log(`─`.repeat(Math.min(40, screenWidth - 10)));
-    }
+    // Initialize header
+    headerLog.log(`📊 Available Trading Signal Combinations`);
+    headerLog.log(`Symbol: ${options.symbol} | Interval: ${options.interval}`);
+    headerLog.log(`─`.repeat(40));
 
     // Get available combinations
     const { CryptoDogCombinationsAgent } = await import('../core/cryptoDogCombinations.js');
@@ -122,23 +89,14 @@ async function showCombinationSelector(options) {
     agent.klineData = ohlcv.result.list.reverse();
     const combinations = agent.processSignalCombinations();
 
-    // Populate the list - adjust formatting for small screens
+    // Populate the list
     const comboNames = combinations.map((combo, index) => {
-        if (isVerySmallScreen) {
-            return `${index + 1}. ${combo.name.split(' + ')[0]}...`;
-        } else if (isSmallScreen) {
-            return `${index + 1}. ${combo.name}`;
-        } else {
-            return `${index + 1}. ${combo.name} (${combo.strategy})`;
-        }
+        return `${index + 1}. ${combo.name} (${combo.strategy})`;
     });
     combinationsList.setItems(comboNames);
 
-    // Adjust status message for small screens
-    const statusMsg = isSmallScreen
-        ? '↑↓ Enter Esc'
-        : '↑↓ to navigate | Enter to select | Esc to exit';
-    statusBar.setContent(statusMsg);
+    // Set status message
+    statusBar.setContent('↑↓ to navigate | Enter to select | Esc to exit');
     screen.render();
 
     // Handle selection
@@ -166,58 +124,33 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
         title: `CryptoDog - ${selectedCombo.name}`
     });
 
-    // Detect screen size for responsive layout
-    const screenWidth = screen.width || 80;
-    const screenHeight = screen.height || 24;
-    const isSmallScreen = screenWidth < 80 || screenHeight < 20;
-    const isVerySmallScreen = screenWidth < 60 || screenHeight < 15;
-
-    // Adjust grid based on screen size - use more columns to utilize full width
-    let gridRows = 12;
-    let gridCols = Math.floor(screenWidth / 3); // Use more columns - 1/3 of screen width
-    let headerRows = 2;
-    let logRows = 8;
-    let statusRows = 2;
-
-    if (isVerySmallScreen) {
-        gridRows = 10;
-        gridCols = Math.max(30, Math.floor(screenWidth / 2)); // Even more columns for very small screens
-        headerRows = 1;
-        logRows = 8; // Increased from 7 to 8 for multi-line signals
-        statusRows = 1; // Reduced to give more space to log
-    } else if (isSmallScreen) {
-        gridRows = 12;
-        gridCols = Math.max(25, Math.floor(screenWidth / 3)); // More columns for small screens
-        headerRows = 2;
-        logRows = 9; // Increased from 8 to 9 for multi-line signals
-        statusRows = 1; // Reduced to give more space to log
-    } else {
-        // For normal/large screens, use many more columns
-        gridCols = Math.max(30, Math.floor(screenWidth / 2));
-    }
+    // Standard grid layout
+    const gridRows = 12;
+    const gridCols = 12;
+    const headerRows = 2;
+    const logRows = 8;
+    const statusRows = 2;
 
     // Create grid layout for monitoring
     const monitorGrid = new contrib.grid({rows: gridRows, cols: gridCols, screen: screen});
 
-    // Header with selected combination info - adjust for small screens
-    const headerLabel = isSmallScreen ? selectedCombo.name.substring(0, 15) : `Live Monitor: ${selectedCombo.name}`;
+    // Header with selected combination info
     const headerLog = monitorGrid.set(0, 0, headerRows, gridCols, contrib.log, {
         fg: 'cyan',
         selectedFg: 'cyan',
-        label: headerLabel,
-        border: isSmallScreen ? undefined : {type: "line", fg: 'cyan'},
+        label: `Live Monitor: ${selectedCombo.name}`,
+        border: {type: "line", fg: 'cyan'},
         width: '100%'
     });
 
     // Signal log - main display area
-    const logLabel = isSmallScreen ? 'Signals' : 'Signal Feed';
     const signalLog = monitorGrid.set(headerRows, 0, logRows, gridCols, contrib.log, {
         fg: 'white',
         selectedFg: 'white',
-        label: logLabel,
-        border: isSmallScreen ? undefined : {type: "line", fg: 'green'},
+        label: 'Signal Feed',
+        border: {type: "line", fg: 'green'},
         tags: true,
-        scrollback: isSmallScreen ? 200 : 100, // Increased scrollback for small screens
+        scrollback: 100,
         width: '100%'
     });
 
@@ -229,18 +162,10 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
         width: '100%'
     });
 
-    // Initialize header - adjust content for small screens
-    if (isVerySmallScreen) {
-        headerLog.log(`🎯 ${selectedCombo.name.substring(0, 12)}`);
-        headerLog.log(`${symbol} ${interval}`);
-    } else if (isSmallScreen) {
-        headerLog.log(`🎯 ${selectedCombo.name}`);
-        headerLog.log(`${selectedCombo.strategy} | ${symbol} ${interval}`);
-    } else {
-        headerLog.log(`🎯 Monitoring: ${selectedCombo.name}`);
-        headerLog.log(`Strategy: ${selectedCombo.strategy} | Symbol: ${symbol} | Interval: ${interval}`);
-        headerLog.log(`─`.repeat(Math.min(40, screenWidth - 10)));
-    }
+    // Initialize header
+    headerLog.log(`🎯 Monitoring: ${selectedCombo.name}`);
+    headerLog.log(`Strategy: ${selectedCombo.strategy} | Symbol: ${symbol} | Interval: ${interval}`);
+    headerLog.log(`─`.repeat(40));
 
     let signalCount = 0;
     let lastSignal = '';
@@ -259,36 +184,8 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
                 // Create detailed indicator display based on combination type
                 let indicatorDetails = getIndicatorDetailsForCombination(currentCombo.name, indicatorValues);
 
-                // Format signal line based on screen size - optimize for better space usage
-                let signalLine;
-                const maxLineLength = gridCols * 8; // Approximate characters per line (increased)
-                
-                if (isVerySmallScreen) {
-                    // For very small screens (like Android Termux), split details across multiple lines
-                    const shortSignal = `${timestamp.split(':').slice(0,2).join(':')} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}`;
-                    // Split indicator details into 2 lines if too long
-                    if (indicatorDetails.length > 30) {
-                        const midPoint = Math.floor(indicatorDetails.length / 2);
-                        const firstPart = indicatorDetails.substring(0, midPoint);
-                        const secondPart = indicatorDetails.substring(midPoint);
-                        signalLine = `${shortSignal}\n${firstPart}\n${secondPart}`;
-                    } else {
-                        signalLine = `${shortSignal}\n${indicatorDetails}`;
-                    }
-                } else if (isSmallScreen) {
-                    // For small screens, try to fit on one line, but use 2 lines if needed
-                    const fullLine = `${timestamp} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${indicatorDetails}`;
-                    if (fullLine.length > maxLineLength) {
-                        // Split across 2 lines instead of truncating
-                        const signalPart = `${timestamp} {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg}`;
-                        signalLine = `${signalPart}\n${indicatorDetails}`;
-                    } else {
-                        signalLine = fullLine;
-                    }
-                } else {
-                    // For normal/large screens, show full details
-                    signalLine = `${timestamp} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${indicatorDetails}`;
-                }
+                // Format signal line
+                const signalLine = `${timestamp} | {${signalColor}-fg}${currentCombo.signal}{/${signalColor}-fg} | ${indicatorDetails}`;
 
                 // Only log if signal changed or every 10th update
                 if (currentCombo.signal !== lastSignal || signalCount % 10 === 0) {
@@ -298,31 +195,21 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
 
                 signalCount++;
 
-                // Update status every 5 signals - adjust message for small screens
+                // Update status every 5 signals
                 if (signalCount % 5 === 0) {
-                    let statusMsg;
-                    if (isVerySmallScreen) {
-                        statusMsg = `✅ ${signalCount} | ${currentCombo.signal}`;
-                    } else if (isSmallScreen) {
-                        statusMsg = `✅ Active | ${signalCount} signals | ${currentCombo.signal}`;
-                    } else {
-                        statusMsg = `✅ Active | Signals: ${signalCount} | Current: ${currentCombo.signal}\nLast Update: ${timestamp}`;
-                    }
+                    const statusMsg = `✅ Active | Signals: ${signalCount} | Current: ${currentCombo.signal}\nLast Update: ${timestamp}`;
                     statusBar.setContent(statusMsg);
                     screen.render();
                 }
             }
         } catch (error) {
-            const errorMsg = isSmallScreen ? `❌ Error` : `{red-fg}Error updating signals: ${error.message}{/red-fg}`;
+            const errorMsg = `{red-fg}Error updating signals: ${error.message}{/red-fg}`;
             signalLog.log(errorMsg);
         }
     }
 
     // Start real-time feed
-    const initialStatus = isSmallScreen
-        ? `🔄 Starting...`
-        : `🔄 Starting real-time feed...`;
-    statusBar.setContent(initialStatus);
+    statusBar.setContent(`🔄 Starting real-time feed...`);
     screen.render();
 
     try {
@@ -336,17 +223,11 @@ async function startLiveCombinationMonitor(selectedCombo, symbol, interval, agen
         // Initial update
         updateSignals();
 
-        const activeStatus = isSmallScreen
-            ? `🟢 Active | 'b'=menu Esc=exit`
-            : `🟢 Live monitoring active | Press 'b' for menu | Esc to exit`;
-        statusBar.setContent(activeStatus);
+        statusBar.setContent(`🟢 Live monitoring active | Press 'b' for menu | Esc to exit`);
         screen.render();
 
     } catch (error) {
-        const errorStatus = isSmallScreen
-            ? `❌ Error`
-            : `❌ Error starting feed: ${error.message}`;
-        statusBar.setContent(errorStatus);
+        statusBar.setContent(`❌ Error starting feed: ${error.message}`);
         screen.render();
         setTimeout(() => screen.destroy(), 3000);
         return;
