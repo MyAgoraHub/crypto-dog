@@ -28,10 +28,6 @@ export const calculateNextFromToSequence = (list, interval) => {
     const newFromDate = new Date(newFrom);
     const newToDate = new Date(newTo);
 
-    console.log(`Current Data: ${new Date(oldestTime).toISOString()} (oldest) to ${new Date(newestTime).toISOString()} (newest)`);
-    console.log(`Next Fetch: ${newFromDate.toISOString()} (from) to ${newToDate.toISOString()} (to)`);
-    console.log(`Time span: ${timeSpan}ms, Interval: ${intervalMs}ms`);
-    
     return { from: newFrom, to: newTo, fromDate: newFromDate, toDate: newToDate };
 };
 
