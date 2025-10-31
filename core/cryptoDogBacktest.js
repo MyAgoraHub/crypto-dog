@@ -43,8 +43,8 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
     }
     
     // Debug: test evaluation on first valid datapoint
-    if (signal.signalType.includes('INDICATOR') && indicatorData.length > 100) {
-        const testIndex = 100;
+    if (signal.signalType.includes('INDICATOR') && c.length > 50) {
+        const testIndex = 50;
         let testModel;
         if (signal.signalType.includes('SuperTrend')) {
             testModel = indicatorData[testIndex];
@@ -75,6 +75,12 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                     current: indicatorData[testIndex]
                 };
             }
+        } else if (signal.signalType.includes('Crocodile')) {
+            testModel = {
+                ema1: indicatorData.ema1?.[testIndex],
+                ema2: indicatorData.ema2?.[testIndex],
+                ema3: indicatorData.ema3?.[testIndex]
+            };
         } else if (signal.signalType.includes('trend')) {
             testModel = { data: indicatorData[testIndex], c: c[testIndex] };
         } else if (signal.signalType.includes('Woodies')) {
@@ -179,6 +185,12 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                 dataModel = {
                     ...indicatorData[i],
                     price: c[i]
+                };
+            } else if (signal.signalType.includes('Crocodile')) {
+                dataModel = {
+                    ema1: indicatorData.ema1?.[i],
+                    ema2: indicatorData.ema2?.[i],
+                    ema3: indicatorData.ema3?.[i]
                 };
             } else {
                 dataModel = indicatorData[i];
@@ -353,16 +365,16 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
 };
 
 const determinePositionDirection = (signalType, result, signal) => {
-    if (signalType.includes('SuperTrend')) {
+    if (signal.signalType.includes('SuperTrend')) {
         if (result?.trend) return result.trend === 'long' || result.trend === 'uptrend';
         if (signal?.value) return signal.value === 'long';
     }
     
-    if (signalType.includes('Woodies')) {
+    if (signal.signalType.includes('Woodies')) {
         if (result?.type) return result.type.includes('support');
     }
     
-    if (signalType.includes('Divergence')) {
+    if (signal.signalType.includes('Divergence')) {
         if (result?.divergence && Array.isArray(result.divergence)) {
             return result.divergence.some(d => typeof d === 'string' && d.toLowerCase().includes('bullish'));
         }

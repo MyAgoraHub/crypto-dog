@@ -1,6 +1,8 @@
 import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
+import blessed from 'blessed';
+import contrib from 'blessed-contrib';
 import { backtestSignal } from '../core/cryptoDogBacktest.js';
 import { signalAgent } from '../core/cryptoDogSignalAgent.js';
 
@@ -96,14 +98,14 @@ function getIndicatorForType(type) {
     const indicators = {
         'rsi-ob': 'RsiIndicator',
         'rsi-os': 'RsiIndicator',
-        'crocodile-dive': 'ema',
-        'crocodile': 'ema',
-        'cross-up': 'ema',
-        'cross-down': 'ema',
-        'multi-div': 'divergence',
-        'uptrend': 'trend',
-        'downtrend': 'trend',
-        'woodies': 'pivot',
+        'crocodile-dive': 'Ema3Indicator',
+        'crocodile': 'Ema3Indicator',
+        'cross-up': 'EMAIndicator',
+        'cross-down': 'EMAIndicator',
+        'multi-div': 'MultiDivergenceDetector',
+        'uptrend': 'SuperTrendIndicator',
+        'downtrend': 'SuperTrendIndicator',
+        'woodies': 'Woodies',
         'supertrend-long': 'SuperTrendIndicator',
         'supertrend-short': 'SuperTrendIndicator',
         'price-gt': 'price',
@@ -271,194 +273,296 @@ function getEvaluateFunctionForType(type) {
     return evaluateFunctions[type] || `signalAgent.gt`; // fallback
 }
 
+async function showSignalSelector(options) {
+    console.log(chalk.cyan(`\n🎯 Starting Interactive Backtest Signal Selector`));
+    console.log(chalk.gray(`Symbol: ${options.symbol} | Interval: ${options.interval}`));
+    console.log(chalk.gray(`Press Ctrl+C to exit\n`));
+
+    // Create blessed screen for signal selection
+    const screen = blessed.screen({
+        smartCSR: true,
+        title: `CryptoDog Backtest Signal Selector - ${options.symbol}`
+    });
+
+    // Standard grid layout
+    const gridRows = 12;
+    const gridCols = 12;
+    const headerRows = 2;
+    const listRows = 8;
+    const statusRows = 2;
+
+    // Create grid layout for selection screen
+    const grid = new contrib.grid({rows: gridRows, cols: gridCols, screen: screen});
+
+    // Header
+    const headerLog = grid.set(0, 0, headerRows, gridCols, contrib.log, {
+        fg: 'cyan',
+        selectedFg: 'cyan',
+        label: 'Signal Backtest Menu',
+        border: {type: "line", fg: 'cyan'},
+        width: '100%'
+    });
+
+    // Signals list
+    const signalsList = grid.set(headerRows, 0, listRows, gridCols, blessed.list, {
+        fg: 'white',
+        selectedFg: 'black',
+        selectedBg: 'cyan',
+        label: 'Select a Signal to Backtest',
+        border: {type: "line", fg: 'green'},
+        scrollable: true,
+        invertSelected: true,
+        mouse: true,
+        keys: true,
+        width: '100%'
+    });
+
+    // Status bar
+    const statusBar = grid.set(headerRows + listRows, 0, statusRows, gridCols, contrib.log, {
+        fg: "green",
+        selectedFg: "green",
+        label: 'Status',
+        width: '100%'
+    });
+
+    // Initialize header
+    headerLog.log(`📊 Available Trading Signals for Backtesting`);
+    headerLog.log(`Symbol: ${options.symbol} | Interval: ${options.interval}`);
+    headerLog.log(`─`.repeat(40));
+
+    // Get all available signal types
+    const signalTypes = [
+        // RSI Signals
+        { key: 'rsi-os', name: 'RSI Oversold (Long)', desc: 'Enter LONG when RSI < value' },
+        { key: 'rsi-ob', name: 'RSI Overbought (Short)', desc: 'Enter SHORT when RSI > value' },
+        
+        // SuperTrend Signals
+        { key: 'supertrend-long', name: 'SuperTrend Long', desc: 'Enter LONG on uptrend' },
+        { key: 'supertrend-short', name: 'SuperTrend Short', desc: 'Enter SHORT on downtrend' },
+        
+        // Price Action Signals
+        { key: 'price-gt', name: 'Price Above Level', desc: 'Enter LONG when price > value' },
+        { key: 'price-lt', name: 'Price Below Level', desc: 'Enter SHORT when price < value' },
+        { key: 'price-gte', name: 'Price At/Above Level', desc: 'Enter LONG when price >= value' },
+        { key: 'price-lte', name: 'Price At/Below Level', desc: 'Enter SHORT when price <= value' },
+        
+        // Pattern Signals
+        { key: 'crocodile', name: 'Crocodile (EMA Pattern)', desc: 'EMA1 > EMA2 > EMA3 (Bullish)' },
+        { key: 'crocodile-dive', name: 'Crocodile Dive', desc: 'EMA1 < EMA2 < EMA3 (Bearish)' },
+        { key: 'cross-up', name: 'EMA Cross Up', desc: 'Fast EMA crosses above Slow EMA' },
+        { key: 'cross-down', name: 'EMA Cross Down', desc: 'Fast EMA crosses below Slow EMA' },
+        
+        // Divergence Signals
+        { key: 'multi-div', name: 'Multi-Divergence', desc: 'Detects divergences across indicators' },
+        
+        // Trend Signals
+        { key: 'uptrend', name: 'Uptrend Signal', desc: 'SuperTrend uptrend detection' },
+        { key: 'downtrend', name: 'Downtrend Signal', desc: 'SuperTrend downtrend detection' },
+        
+        // Pivot Points
+        { key: 'woodies', name: 'Woodies Pivots', desc: 'Support/resistance pivot levels' },
+        
+        // MACD Signals
+        { key: 'macd-bullish', name: 'MACD Bullish Cross', desc: 'MACD crosses above signal' },
+        { key: 'macd-bearish', name: 'MACD Bearish Cross', desc: 'MACD crosses below signal' },
+        { key: 'macd-histogram-positive', name: 'MACD Histogram Positive', desc: 'Histogram turns positive' },
+        { key: 'macd-histogram-negative', name: 'MACD Histogram Negative', desc: 'Histogram turns negative' },
+        
+        // Bollinger Band Signals
+        { key: 'bollinger-upper-touch', name: 'Bollinger Upper Touch', desc: 'Price touches upper band' },
+        { key: 'bollinger-lower-touch', name: 'Bollinger Lower Touch', desc: 'Price touches lower band' },
+        { key: 'bollinger-squeeze', name: 'Bollinger Squeeze', desc: 'Bands are squeezing' },
+        { key: 'bollinger-expansion', name: 'Bollinger Expansion', desc: 'Bands are expanding' },
+        
+        // Stochastic Signals
+        { key: 'stochastic-overbought', name: 'Stochastic Overbought', desc: 'Stochastic > 80' },
+        { key: 'stochastic-oversold', name: 'Stochastic Oversold', desc: 'Stochastic < 20' },
+        { key: 'stochastic-bullish-cross', name: 'Stochastic Bullish Cross', desc: '%K crosses above %D' },
+        { key: 'stochastic-bearish-cross', name: 'Stochastic Bearish Cross', desc: '%K crosses below %D' },
+        
+        // Williams %R Signals
+        { key: 'williams-overbought', name: 'Williams %R Overbought', desc: 'Williams %R > -20' },
+        { key: 'williams-oversold', name: 'Williams %R Oversold', desc: 'Williams %R < -80' },
+        
+        // Moving Average Signals
+        { key: 'golden-cross', name: 'Golden Cross', desc: 'Fast MA crosses above slow MA' },
+        { key: 'death-cross', name: 'Death Cross', desc: 'Fast MA crosses below slow MA' },
+        { key: 'ma-support', name: 'MA Support', desc: 'Price finds support at MA' },
+        { key: 'ma-resistance', name: 'MA Resistance', desc: 'Price hits resistance at MA' },
+        
+        // Volume Signals
+        { key: 'volume-spike', name: 'Volume Spike', desc: 'Volume significantly above average' },
+        { key: 'obv-bullish', name: 'OBV Bullish', desc: 'On Balance Volume trending up' },
+        { key: 'obv-bearish', name: 'OBV Bearish', desc: 'On Balance Volume trending down' },
+        
+        // Ichimoku Signals
+        { key: 'ichimoku-bullish', name: 'Ichimoku Bullish', desc: 'Price above cloud, Tenkan > Kijun' },
+        { key: 'ichimoku-bearish', name: 'Ichimoku Bearish', desc: 'Price below cloud, Tenkan < Kijun' },
+        { key: 'ichimoku-tk-cross-bullish', name: 'Ichimoku TK Bullish Cross', desc: 'Tenkan crosses above Kijun' },
+        { key: 'ichimoku-tk-cross-bearish', name: 'Ichimoku TK Bearish Cross', desc: 'Tenkan crosses below Kijun' },
+        
+        // ADX Signals
+        { key: 'adx-strong-trend', name: 'ADX Strong Trend', desc: 'ADX > 25 (strong trend)' },
+        { key: 'adx-weak-trend', name: 'ADX Weak Trend', desc: 'ADX < 20 (weak trend)' },
+        
+        // MFI Signals
+        { key: 'mfi-overbought', name: 'MFI Overbought', desc: 'Money Flow Index > 80' },
+        { key: 'mfi-oversold', name: 'MFI Oversold', desc: 'Money Flow Index < 20' },
+        
+        // ATR Signals
+        { key: 'atr-high-volatility', name: 'ATR High Volatility', desc: 'ATR above moving average' },
+        
+        // Parabolic SAR Signals
+        { key: 'parabolic-sar-bullish', name: 'Parabolic SAR Bullish', desc: 'PSAR below price' },
+        { key: 'parabolic-sar-bearish', name: 'Parabolic SAR Bearish', desc: 'PSAR above price' },
+        
+        // CCI Signals
+        { key: 'cci-overbought', name: 'CCI Overbought', desc: 'CCI > 100' },
+        { key: 'cci-oversold', name: 'CCI Oversold', desc: 'CCI < -100' },
+        
+        // Advanced Signals
+        { key: 'fibonacci-retracement', name: 'Fibonacci Retracement', desc: 'Price at Fibonacci levels' },
+        { key: 'support-breakout', name: 'Support Breakout', desc: 'Price breaks above support' },
+        { key: 'resistance-breakout', name: 'Resistance Breakout', desc: 'Price breaks above resistance' },
+        { key: 'tema-bullish', name: 'TEMA Bullish', desc: 'Triple EMA bullish signal' },
+        { key: 'tema-bearish', name: 'TEMA Bearish', desc: 'Triple EMA bearish signal' },
+        { key: 'keltner-upper-breakout', name: 'Keltner Upper Breakout', desc: 'Price breaks above upper channel' },
+        { key: 'keltner-lower-breakout', name: 'Keltner Lower Breakout', desc: 'Price breaks below lower channel' },
+        { key: 'donchian-upper-breakout', name: 'Donchian Upper Breakout', desc: 'Price breaks above channel high' },
+        { key: 'donchian-lower-breakout', name: 'Donchian Lower Breakout', desc: 'Price breaks below channel low' },
+        { key: 'elder-impulse-bull', name: 'Elder Impulse Bull', desc: 'Green bar (bullish impulse)' },
+        { key: 'elder-impulse-bear', name: 'Elder Impulse Bear', desc: 'Red bar (bearish impulse)' },
+        { key: 'elder-impulse-blue', name: 'Elder Impulse Blue', desc: 'Blue bar (neutral impulse)' }
+    ];
+
+    // Populate the list
+    const signalNames = signalTypes.map((signal, index) => {
+        return `${index + 1}. ${signal.name} - ${signal.desc}`;
+    });
+    signalsList.setItems(signalNames);
+
+    // Set status message
+    statusBar.setContent('↑↓ to navigate | Enter to select | Esc to exit');
+    screen.render();
+
+    // Handle selection
+    signalsList.on('select', async function(item, index) {
+        const selectedSignal = signalTypes[index];
+        screen.destroy();
+        await runBacktestForSignal(selectedSignal, options);
+    });
+
+    // Key bindings
+    screen.key(['escape', 'q', 'C-c'], function(ch, key) {
+        screen.destroy();
+        process.exit(0);
+    });
+
+    // Focus on the list
+    signalsList.focus();
+    screen.render();
+}
+
+async function runBacktestForSignal(selectedSignal, options) {
+    const spinner = ora('Preparing backtest...').start();
+
+    try {
+        spinner.text = 'Fetching historical data...';
+
+        const symbol = options.symbol.toUpperCase();
+        const interval = options.interval;
+        const risk = parseFloat(options.risk);
+        const reward = parseFloat(options.reward);
+        const capital = parseFloat(options.capital);
+        const iterations = parseInt(options.iterations);
+        const candles = parseInt(options.candles);
+
+        // Determine signal value based on type
+        let value;
+        if (selectedSignal.key === 'supertrend-long') {
+            value = 'long';
+        } else if (selectedSignal.key === 'supertrend-short') {
+            value = 'short';
+        } else if (selectedSignal.key === 'rsi-os') {
+            value = 30; // RSI oversold threshold
+        } else if (selectedSignal.key === 'rsi-ob') {
+            value = 70; // RSI overbought threshold
+        } else {
+            value = 0;
+        }
+
+        // Create signal for backtesting
+        const signalType = mapTypeToSignalType(selectedSignal.key);
+        const indicator = getIndicatorForType(selectedSignal.key);
+        const evaluateFuncName = getEvaluateFunctionForType(selectedSignal.key);
+
+        const signal = {
+            symbol,
+            timeframe: interval,
+            signalType,
+            indicator,
+            value,
+            evaluate: evaluateFuncName, // Store function name instead of string
+            indicatorArgs: selectedSignal.key === 'cross-up' || selectedSignal.key === 'cross-down' ? { period: 200 } : {}
+        };
+
+        spinner.text = 'Running backtest simulation...';
+        const results = await backtestSignal(signal, iterations, candles, risk, reward, capital);
+
+        spinner.succeed('Backtest completed!');
+
+        // Display results
+        console.log(chalk.green('\n📊 BACKTEST RESULTS\n'));
+        console.log(chalk.cyan('Signal Configuration:'));
+        console.log(`  Symbol: ${results.signal.symbol}`);
+        console.log(`  Timeframe: ${results.signal.timeframe}`);
+        console.log(`  Type: ${results.signal.type}`);
+        if (value !== 0) console.log(`  Value: ${value}`);
+
+        console.log(chalk.cyan('\nTest Period:'));
+        console.log(`  Start: ${results.period.start}`);
+        console.log(`  End: ${results.period.end}`);
+        console.log(`  Candles Analyzed: ${results.period.candles}`);
+        console.log(`  Data Points: ${iterations} iterations × ${candles} candles`);
+
+        console.log(chalk.cyan('\nPerformance:'));
+        const profitColor = parseFloat(results.performance.returnPercent) >= 0 ? chalk.green : chalk.red;
+        console.log(`  Initial Capital: $${results.performance.initialCapital}`);
+        console.log(`  Final Capital: ${profitColor('$' + results.performance.finalCapital)}`);
+        console.log(`  Net Profit: ${profitColor(results.performance.netProfit >= 0 ? '+' : '')}${profitColor('$' + results.performance.netProfit)}`);
+        console.log(`  Return: ${profitColor(results.performance.returnPercent + '%')}`);
+        console.log(`  Max Drawdown: ${chalk.red(results.performance.maxDrawdown + '%')}`);
+
+        console.log(chalk.cyan('\nTrade Statistics:'));
+        const winRateColor = parseFloat(results.trades.winRate) >= 50 ? chalk.green : chalk.red;
+        console.log(`  Total Trades: ${results.trades.total}`);
+        console.log(`  Wins: ${chalk.green(results.trades.wins)}`);
+        console.log(`  Losses: ${chalk.red(results.trades.losses)}`);
+        console.log(`  Win Rate: ${winRateColor(results.trades.winRate + '%')}`);
+        console.log(`  Avg Win: ${chalk.green('$' + results.trades.avgWin)}`);
+        console.log(`  Avg Loss: ${chalk.red('$' + results.trades.avgLoss)}`);
+        console.log(`  Profit Factor: ${results.trades.profitFactor}`);
+
+        console.log('');
+    } catch (error) {
+        spinner.fail('Backtest failed');
+        console.error(chalk.red(error.message));
+        console.error(error.stack);
+    }
+}
+
 export function registerBacktestCommand(program) {
     program
         .command('backtest')
-        .description('Backtest a signal strategy against historical data')
-        .requiredOption('-s, --symbol <symbol>', 'Trading symbol (e.g., BTCUSDT)')
-        .requiredOption('-i, --interval <interval>', 'Time interval (e.g., 1m, 5m, 15m, 1h, 4h)')
-        .requiredOption('-t, --type <type>', 'Signal type (use "crypto-dog signal-types" to list)')
-        .option('-v, --value <value>', 'Signal value (for RSI, price action, etc.)')
+        .description('Interactive backtest signal strategy selector')
+        .option('-s, --symbol <symbol>', 'Trading symbol (default: BTCUSDT)', 'BTCUSDT')
+        .option('-i, --interval <interval>', 'Time interval (default: 1h)', '1h')
         .option('--iterations <number>', 'Number of historical data pulls', '10')
         .option('--candles <number>', 'Candles per pull', '200')
         .option('--risk <percent>', 'Risk per trade (%)', '2')
         .option('--reward <percent>', 'Reward per trade (%)', '5')
         .option('--capital <amount>', 'Initial capital', '10000')
-        .option('--show-trades', 'Show all trade details')
-        .addHelpText('after', `
-${chalk.cyan('Examples:')}
-
-  ${chalk.gray('# RSI Strategies')}
-  ${chalk.yellow('crypto-dog backtest -s BTCUSDT -i 1h -t rsi-os -v 30')}
-  ${chalk.gray('  → Long when RSI < 30 (oversold)')}
-
-  ${chalk.yellow('crypto-dog backtest -s ETHUSDT -i 4h -t rsi-ob -v 70')}
-  ${chalk.gray('  → Short when RSI > 70 (overbought)')}
-
-  ${chalk.gray('# SuperTrend Strategies')}
-  ${chalk.yellow('crypto-dog backtest -s BTCUSDT -i 15m -t supertrend-long')}
-  ${chalk.gray('  → Long positions when SuperTrend shows uptrend')}
-
-  ${chalk.yellow('crypto-dog backtest -s ADAUSDT -i 1h -t supertrend-short')}
-  ${chalk.gray('  → Short positions when SuperTrend shows downtrend')}
-
-  ${chalk.gray('# Price Action Strategies')}
-  ${chalk.yellow('crypto-dog backtest -s BTCUSDT -i 5m -t price-gt -v 50000')}
-  ${chalk.gray('  → Long when price breaks above $50,000')}
-
-  ${chalk.yellow('crypto-dog backtest -s ETHUSDT -i 15m -t price-lt -v 3000')}
-  ${chalk.gray('  → Short when price falls below $3,000')}
-
-  ${chalk.gray('# Pattern Recognition')}
-  ${chalk.yellow('crypto-dog backtest -s SOLUSDT -i 4h -t crocodile')}
-  ${chalk.gray('  → Long on bullish EMA pattern (EMA1 > EMA2 > EMA3)')}
-
-  ${chalk.yellow('crypto-dog backtest -s BNBUSDT -i 1h -t crocodile-dive')}
-  ${chalk.gray('  → Short on bearish EMA pattern (EMA1 < EMA2 < EMA3)')}
-
-  ${chalk.yellow('crypto-dog backtest -s BTCUSDT -i 15m -t cross-up')}
-  ${chalk.gray('  → Long on EMA crossover (bullish cross)')}
-
-  ${chalk.gray('# Divergence Detection')}
-  ${chalk.yellow('crypto-dog backtest -s BTCUSDT -i 4h -t multi-div')}
-  ${chalk.gray('  → Detects bullish/bearish divergences across RSI, MACD, Stochastic')}
-
-  ${chalk.yellow('crypto-dog backtest -s ETHUSDT -i 1h -t woodies')}
-  ${chalk.gray('  → Pivot point support/resistance levels')}
-
-  ${chalk.gray('# Advanced Setups')}
-  ${chalk.yellow('crypto-dog backtest -s BTCUSDT -i 1h -t rsi-os -v 25 --risk 1.5 --reward 6 --capital 50000')}
-  ${chalk.gray('  → RSI strategy with 1:4 risk/reward ratio and $50k capital')}
-
-  ${chalk.yellow('crypto-dog backtest -s ETHUSDT -i 4h -t supertrend-long --iterations 20 --show-trades')}
-  ${chalk.gray('  → SuperTrend with more historical data + full trade log')}
-
-  ${chalk.gray('# Quick Tests (fewer iterations for faster results)')}
-  ${chalk.yellow('crypto-dog backtest -s ADAUSDT -i 15m -t rsi-os -v 30 --iterations 3')}
-  ${chalk.gray('  → Quick backtest with 600 candles')}
-
-${chalk.cyan('Notes:')}
-  • ${chalk.gray('supertrend-long')} = Enters LONG when SuperTrend indicator trend = 'long'
-  • ${chalk.gray('supertrend-short')} = Enters SHORT when SuperTrend indicator trend = 'short'
-  • Default risk/reward is 2%/5% (2.5:1 ratio)
-  • Use --iterations to control data amount (more = longer test period)
-  • Use --show-trades to see every individual trade
-    `)
         .action(async (options) => {
-            const spinner = ora('Preparing backtest...').start();
-
-            try {
-                spinner.text = 'Fetching historical data...';
-
-                const symbol = options.symbol.toUpperCase();
-                const interval = options.interval;
-                const risk = parseFloat(options.risk);
-                const reward = parseFloat(options.reward);
-                const capital = parseFloat(options.capital);
-                const iterations = parseInt(options.iterations);
-                const candles = parseInt(options.candles);
-
-                // Determine signal value based on type
-                let value;
-                if (options.type === 'supertrend-long') {
-                    value = 'long';
-                } else if (options.type === 'supertrend-short') {
-                    value = 'short';
-                } else if (options.value) {
-                    value = parseFloat(options.value);
-                } else {
-                    value = 0;
-                }
-
-                // Create temporary signal for backtesting
-                const signalType = mapTypeToSignalType(options.type);
-                const indicator = getIndicatorForType(options.type);
-                const evaluateFuncName = getEvaluateFunctionForType(options.type);
-
-                const signal = {
-                    symbol,
-                    timeframe: interval,
-                    signalType,
-                    indicator,
-                    value,
-                    evaluate: evaluateFuncName, // Store function name instead of string
-                    indicatorArgs: options.type === 'cross-up' || options.type === 'cross-down' ? { period: 200 } : {}
-                };
-
-                spinner.text = 'Running backtest simulation...';
-                const results = await backtestSignal(signal, iterations, candles, risk, reward, capital);
-
-                spinner.succeed('Backtest completed!');
-
-                // Display results
-                console.log(chalk.green('\n📊 BACKTEST RESULTS\n'));
-                console.log(chalk.cyan('Signal Configuration:'));
-                console.log(`  Symbol: ${results.signal.symbol}`);
-                console.log(`  Timeframe: ${results.signal.timeframe}`);
-                console.log(`  Type: ${results.signal.type}`);
-                if (options.value) console.log(`  Value: ${value}`);
-
-                console.log(chalk.cyan('\nTest Period:'));
-                console.log(`  Start: ${results.period.start}`);
-                console.log(`  End: ${results.period.end}`);
-                console.log(`  Candles Analyzed: ${results.period.candles}`);
-                console.log(`  Data Points: ${iterations} iterations × ${candles} candles`);
-
-                console.log(chalk.cyan('\nPerformance:'));
-                const profitColor = parseFloat(results.performance.returnPercent) >= 0 ? chalk.green : chalk.red;
-                console.log(`  Initial Capital: $${results.performance.initialCapital}`);
-                console.log(`  Final Capital: ${profitColor('$' + results.performance.finalCapital)}`);
-                console.log(`  Net Profit: ${profitColor(results.performance.netProfit >= 0 ? '+' : '')}${profitColor('$' + results.performance.netProfit)}`);
-                console.log(`  Return: ${profitColor(results.performance.returnPercent + '%')}`);
-                console.log(`  Max Drawdown: ${chalk.red(results.performance.maxDrawdown + '%')}`);
-
-                console.log(chalk.cyan('\nTrade Statistics:'));
-                const winRateColor = parseFloat(results.trades.winRate) >= 50 ? chalk.green : chalk.red;
-                console.log(`  Total Trades: ${results.trades.total}`);
-                console.log(`  Wins: ${chalk.green(results.trades.wins)}`);
-                console.log(`  Losses: ${chalk.red(results.trades.losses)}`);
-                console.log(`  Win Rate: ${winRateColor(results.trades.winRate + '%')}`);
-                console.log(`  Avg Win: ${chalk.green('$' + results.trades.avgWin)}`);
-                console.log(`  Avg Loss: ${chalk.red('$' + results.trades.avgLoss)}`);
-                console.log(`  Profit Factor: ${results.trades.profitFactor}`);
-
-                if (options.showTrades && results.tradeHistory.length > 0) {
-                    console.log(chalk.cyan('\n📈 Trade History:\n'));
-
-                    const table = new Table({
-                        head: [
-                            chalk.cyan('Entry'),
-                            chalk.cyan('Position'),
-                            chalk.cyan('Entry Price'),
-                            chalk.cyan('Exit Price'),
-                            chalk.cyan('Exit Reason'),
-                            chalk.cyan('P/L %'),
-                            chalk.cyan('P/L $')
-                        ],
-                        colWidths: [20, 10, 12, 12, 15, 10, 12]
-                    });
-
-                    results.tradeHistory.forEach(trade => {
-                        const plColor = parseFloat(trade.profitLoss) >= 0 ? chalk.green : chalk.red;
-                        table.push([
-                            trade.entry.timestamp.slice(0, 19).replace('T', ' '),
-                            trade.entry.position,
-                            trade.entry.price.toFixed(2),
-                            trade.exit.price.toFixed(2),
-                            trade.exit.reason,
-                            plColor(trade.profitLossPercent + '%'),
-                            plColor((parseFloat(trade.profitLoss) >= 0 ? '+' : '') + '$' + trade.profitLoss)
-                        ]);
-                    });
-
-                    console.log(table.toString());
-                }
-
-                console.log('');
-            } catch (error) {
-                spinner.fail('Backtest failed');
-                console.error(chalk.red(error.message));
-                console.error(error.stack);
-            }
+            await showSignalSelector(options);
         });
 }
