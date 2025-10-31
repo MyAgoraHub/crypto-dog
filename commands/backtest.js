@@ -126,8 +126,8 @@ function getIndicatorForType(type) {
         'williams-overbought': 'WilliamsRIndicator',
         'williams-oversold': 'WilliamsRIndicator',
         // Moving Average Signals
-        'golden-cross': 'EMAIndicator',
-        'death-cross': 'EMAIndicator',
+        'golden-cross': 'Ema3Indicator',
+        'death-cross': 'Ema3Indicator',
         // Volume Signals
         'volume-spike': 'ObvIndicator',
         // Ichimoku Signals
@@ -514,9 +514,9 @@ async function runBacktestForSignal(selectedSignal, options) {
         // Display results
         console.log(chalk.green('\n📊 BACKTEST RESULTS\n'));
         console.log(chalk.cyan('Signal Configuration:'));
-        console.log(`  Symbol: ${results.signal.symbol}`);
-        console.log(`  Timeframe: ${results.signal.timeframe}`);
-        console.log(`  Type: ${results.signal.type}`);
+        console.log(`  Symbol: ${signal.symbol}`);
+        console.log(`  Timeframe: ${signal.timeframe}`);
+        console.log(`  Type: ${signal.signalType}`);
         if (value !== 0) console.log(`  Value: ${value}`);
 
         console.log(chalk.cyan('\nTest Period:'));

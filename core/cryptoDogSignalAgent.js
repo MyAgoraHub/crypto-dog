@@ -65,12 +65,12 @@ export const signalAgent = {
         return { signal: (data.ema2 < data.ema3) && (data.ema1 < data.ema2), data:data}
     },
     uptrendTrend: (data, model) => {
-        // ema1 fast Moving 
-        // ema2 long lag
-        return { signal: data.c > data, data:data}
+        // Check if SuperTrend indicates uptrend (long position)
+        return { signal: data.data?.trend === 'long', data: data }
     },
     downTrend: (data, model) => {
-        return { signal: data.c < data, data:data}
+        // Check if SuperTrend indicates downtrend (short position)
+        return { signal: data.data?.trend === 'short', data: data }
     },
 
     woodies: (data, model) => {
@@ -120,7 +120,7 @@ export const signalAgent = {
     bollingerExpansion: (data, model) => {
         // Bollinger Bands are expanding (high volatility)
         const bandwidth = (data.upper - data.lower) / data.middle;
-        return { signal: bandwidth > 0.15, data:data }; // More than 15% bandwidth
+        return { signal: bandwidth > 0.08, data:data }; // More than 8% bandwidth
     },
 
     // Stochastic Signals

@@ -7,12 +7,14 @@ All reported INDICATOR signal issues have been resolved:
 - ✅ **INDICATOR_CrocodileSignal**: Fixed mapping from 'ema' → 'Ema3Indicator'
 - ✅ **INDICATOR_CrossUpSignal**: Fixed mapping from 'ema' → 'EMAIndicator'  
 - ✅ **INDICATOR_CrossDownSignal**: Fixed mapping from 'ema' → 'EMAIndicator'
-- ✅ **INDICATOR_UptrendSignal**: Fixed mapping from 'trend' → 'SuperTrendIndicator' + logic fix
-- ✅ **INDICATOR_DownTrendSignal**: Fixed mapping from 'trend' → 'SuperTrendIndicator' + logic fix
+- ✅ **INDICATOR_UptrendSignal**: Fixed mapping from 'trend' → 'SuperTrendIndicator' + corrected logic to check trend === 'long'
+- ✅ **INDICATOR_DownTrendSignal**: Fixed mapping from 'trend' → 'SuperTrendIndicator' + corrected logic to check trend === 'short'
 - ✅ **INDICATOR_Woodies**: Fixed mapping from 'pivot' → 'Woodies'
 - ✅ **INDICATOR_DivergenceDetector**: Fixed mapping from 'divergence' → 'MultiDivergenceDetector'
 - ✅ **INDICATOR_RsiOsSignal**: Fixed missing threshold value (30 for oversold)
 - ✅ **INDICATOR_RsiObSignal**: Fixed missing threshold value (70 for overbought)
+- ✅ **INDICATOR_GoldenCrossSignal**: Fixed mapping from 'EMAIndicator' → 'Ema3Indicator' + added data model for fast/slow EMA crossover
+- ✅ **INDICATOR_DeathCrossSignal**: Fixed mapping from 'EMAIndicator' → 'Ema3Indicator' + added data model for fast/slow EMA crossover
 
 **Root Cause**: All signals were mapped to invalid indicator keys that don't exist in `IndicatorList.getIndicator()`, and RSI signals lacked proper threshold values.
 
@@ -189,6 +191,50 @@ downTrend: (data, model) => {
 - Data model passes `{ data: superTrendData[i], c: c[i] }` to signal functions
 
 **Testing**: Run backtest with uptrend/downtrend signals - should detect trend changes.
+
+### 9. INDICATOR_GoldenCrossSignal/INDICATOR_DeathCrossSignal Not Yielding Results
+**Symptoms**: Golden cross and death cross signals show 0 signals found
+
+**Root Cause**: 
+- Signals were mapped to use invalid indicator key `'EMAIndicator'`
+- `'EMAIndicator'` returns single EMA array, but signals expect fast/slow EMA crossover data
+- Signal functions expect `{fast, slow, previousFast, previousSlow}` but got single EMA value
+- No data model building case for GoldenCross/DeathCross signals
+
+**Solution**:
+1. Change indicator mapping from `'EMAIndicator'` to `'Ema3Indicator'`:
+```javascript
+'golden-cross': 'Ema3Indicator',
+'death-cross': 'Ema3Indicator',
+```
+
+2. Add data model building case in `/core/cryptoDogBacktest.js`:
+```javascript
+} else if (signal.signalType.includes('GoldenCross') || signal.signalType.includes('DeathCross')) {
+    // Golden/Death cross signals need fast/slow EMA crossover data
+    if (i < 1 || !indicatorData.ema2?.[i] || !indicatorData.ema3?.[i] || !indicatorData.ema2?.[i-1] || !indicatorData.ema3?.[i-1]) continue;
+    dataModel = {
+        fast: indicatorData.ema2[i], // 50-period EMA
+        slow: indicatorData.ema3[i], // 200-period EMA
+        previousFast: indicatorData.ema2[i-1],
+        previousSlow: indicatorData.ema3[i-1]
+    };
+}
+```
+
+3. Update position direction logic:
+```javascript
+const bullish = ['RsiOs', 'Crocodile', 'CrossUp', 'Uptrend', 'PRICE_ACTION_GT', 'PRICE_ACTION_GTE', 'GoldenCross'];
+const bearish = ['RsiOb', 'CrocodileDive', 'CrossDown', 'DownTrend', 'PRICE_ACTION_LT', 'PRICE_ACTION_LTE', 'DeathCross'];
+```
+
+**Why This Works**:
+- `Ema3Indicator` returns `{ema1: [...], ema2: [...], ema3: [...]}` (20, 50, 200 period EMAs)
+- Golden cross uses 50-period crossing above 200-period (bullish)
+- Death cross uses 50-period crossing below 200-period (bearish)
+- Data model correctly provides fast/slow EMA values for crossover detection
+
+**Testing**: Run backtest with golden-cross or death-cross signals - should detect EMA crossovers.
 
 ## File Structure & Key Locations
 

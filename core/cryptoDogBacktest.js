@@ -192,6 +192,31 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                     ema2: indicatorData.ema2?.[i],
                     ema3: indicatorData.ema3?.[i]
                 };
+            } else if (signal.signalType.includes('Ichimoku')) {
+                // Ichimoku signals need price and Ichimoku components
+                // Ichimoku data may be shorter than candle data due to calculation requirements
+                const ichimokuIndex = i - (c.length - indicatorData.length);
+                if (ichimokuIndex >= 1 && ichimokuIndex < indicatorData.length) { // Need at least 2 data points for previous values
+                    const ichimoku = indicatorData[ichimokuIndex];
+                    const previousIchimoku = indicatorData[ichimokuIndex - 1];
+                    dataModel = {
+                        price: c[i],
+                        spanA: ichimoku.spanA,
+                        spanB: ichimoku.conversion,
+                        tenkan: ichimoku.base,
+                        kijun: ichimoku.conversion,
+                        previousTenkan: previousIchimoku.conversion,
+                        previousKijun: previousIchimoku.base
+                    };
+                } else {
+                    dataModel = null; // Skip if Ichimoku data not available
+                }
+            } else if (signal.signalType.includes('Cross')) {
+                if (i < 3) continue;
+                dataModel = {
+                    all: [indicatorData[i-1], indicatorData[i-2], indicatorData[i-3]],
+                    current: indicatorData[i]
+                };
             } else {
                 dataModel = indicatorData[i];
             }
