@@ -23,12 +23,20 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
     console.log(`⏱️  Duration: ${periodDays.toFixed(1)} days`);    
     // Calculate indicators
     let indicatorData = [];
-    if (signal.signalType.includes('INDICATOR')) {
+    if (signal.signalType.includes('INDICATOR') && !signal.signalType.includes('VolumeSpike') && !signal.signalType.includes('FibonacciRetracement')) {
         const getData = IndicatorList.getIndicator(signal.indicator);
         indicatorData = getData(o, h, l, c, v, signal.indicatorArgs || {}, buffer);
         console.log(`📈 Calculated ${Array.isArray(indicatorData) ? indicatorData.length : 'object'} indicator values`);
         console.log(`📈 First 5 indicator values:`, Array.isArray(indicatorData) ? indicatorData.slice(0, 5) : 'Not an array');
         console.log(`📈 Signal type: ${signal.signalType}, Indicator: ${signal.indicator}`);
+    } else if (signal.signalType.includes('VolumeSpike')) {
+        // Volume Spike doesn't need indicator calculation, just use volume data
+        indicatorData = v; // Use volume data directly
+        console.log(`📈 Volume Spike signal - using volume data directly`);
+    } else if (signal.signalType.includes('FibonacciRetracement')) {
+        // Fibonacci Retracement doesn't need indicator calculation, just use price data
+        indicatorData = null; // No indicator data needed
+        console.log(`📈 Fibonacci Retracement signal - no indicator calculation needed`);
     }
     
     // Prepare evaluation function
@@ -43,8 +51,8 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
     }
     
     // Debug: test evaluation on first valid datapoint
-    if (signal.signalType.includes('INDICATOR') && c.length > 50) {
-        const testIndex = 50;
+    if (signal.signalType.includes('INDICATOR') && c.length > 20) {
+        const testIndex = Math.min(20, Math.floor(c.length / 4));
         let testModel;
         if (signal.signalType.includes('SuperTrend')) {
             testModel = indicatorData[testIndex];
@@ -101,6 +109,42 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                 ...indicatorData[testIndex],
                 price: c[testIndex]
             };
+        } else if (signal.signalType.includes('VolumeSpike')) {
+            // Volume spike signals need volume data
+            testModel = {
+                volumes: indicatorData.slice(Math.max(0, testIndex-20), testIndex+1), // Last 20 volumes including current
+                currentVolume: indicatorData[testIndex]
+            };
+        } else if (signal.signalType.includes('FibonacciRetracement')) {
+            // Fibonacci Retracement signals need recent high/low and current price
+            const lookback = 20; // Same lookback as in test
+            const startIdx = Math.max(0, testIndex - lookback);
+            const recentHigh = Math.max(...h.slice(startIdx, testIndex + 1));
+            const recentLow = Math.min(...l.slice(startIdx, testIndex + 1));
+            testModel = {
+                high: recentHigh,
+                low: recentLow,
+                price: c[testIndex]
+            };
+        } else if (signal.signalType.includes('Ichimoku')) {
+            // Ichimoku signals need price and Ichimoku components
+            // Ichimoku data may be shorter than candle data due to calculation requirements
+            const ichimokuIndex = testIndex - (c.length - indicatorData.length);
+            if (ichimokuIndex >= 1 && ichimokuIndex < indicatorData.length) { // Need at least 2 data points for previous values
+                const ichimoku = indicatorData[ichimokuIndex];
+                const previousIchimoku = indicatorData[ichimokuIndex - 1];
+                testModel = {
+                    price: c[testIndex],
+                    spanA: ichimoku.spanA,
+                    spanB: ichimoku.conversion,
+                    tenkan: ichimoku.base,
+                    kijun: ichimoku.conversion,
+                    previousTenkan: previousIchimoku.conversion,
+                    previousKijun: previousIchimoku.base
+                };
+            } else {
+                testModel = null; // Skip if Ichimoku data not available
+            }
         } else {
             testModel = indicatorData[testIndex];
         }
@@ -127,7 +171,9 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
     let signalTriggers = 0;
     
     // Simulate through all candles
-    for (let i = 50; i < c.length - 50; i++) {
+    const startIndex = Math.min(10, Math.floor(c.length / 4));
+    const endIndex = Math.max(startIndex + 1, c.length - 10);
+    for (let i = startIndex; i < endIndex; i++) {
         let dataModel = null;
         
         // Build data model for this candle
@@ -186,11 +232,36 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                     ...indicatorData[i],
                     price: c[i]
                 };
+            } else if (signal.signalType.includes('Obv')) {
+                // OBV signals need current and previous OBV values plus price data
+                dataModel = {
+                    obv: indicatorData[i],
+                    previousObv: indicatorData[i-1],
+                    price: c[i],
+                    previousPrice: c[i-1]
+                };
+            } else if (signal.signalType.includes('FibonacciRetracement')) {
+                // Fibonacci Retracement signals need recent high/low and current price
+                const lookback = 20; // Same lookback as in test
+                const startIdx = Math.max(0, i - lookback);
+                const recentHigh = Math.max(...h.slice(startIdx, i + 1));
+                const recentLow = Math.min(...l.slice(startIdx, i + 1));
+                dataModel = {
+                    high: recentHigh,
+                    low: recentLow,
+                    price: c[i]
+                };
             } else if (signal.signalType.includes('Crocodile')) {
                 dataModel = {
                     ema1: indicatorData.ema1?.[i],
                     ema2: indicatorData.ema2?.[i],
                     ema3: indicatorData.ema3?.[i]
+                };
+            } else if (signal.signalType.includes('VolumeSpike')) {
+                // Volume spike signals need volume data
+                dataModel = {
+                    volumes: indicatorData.slice(Math.max(0, i-20), i+1), // Last 20 volumes including current
+                    currentVolume: indicatorData[i]
                 };
             } else if (signal.signalType.includes('Ichimoku')) {
                 // Ichimoku signals need price and Ichimoku components
