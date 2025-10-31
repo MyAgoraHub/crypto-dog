@@ -1091,6 +1091,51 @@ class ZEMAIndicator{
     }
 }
 
+class TemaIndicator{
+
+    static className = "TemaIndicator"
+    /**
+     * @param o {Array<number>}  The Opening Candles
+     * @param h {Array<number>}  The Higher High Candles
+     * @param l {Array<number>}  The Lower Low Candles
+     * @param c {Array<number>}  The Closing Candles
+     * @param v {Array<number>}  The Volumes
+     * @param args.period {number} (the moving average period default 20)
+     * @param candles {Array<Array<number>>} o,h,l,c,v array Buffer
+     * @returns [Number]
+     * */
+    static getData(o,h,l,c,v, args, candles){
+        const period = args.period || 20;
+        
+        // Calculate EMA1
+        const ema1 = new EMA({period: period, values: c});
+        const ema1Data = ema1.getResult();
+        
+        // Calculate EMA2 (EMA of EMA1)
+        const ema2 = new EMA({period: period, values: ema1Data});
+        const ema2Data = ema2.getResult();
+        
+        // Calculate EMA3 (EMA of EMA2)
+        const ema3 = new EMA({period: period, values: ema2Data});
+        const ema3Data = ema3.getResult();
+        
+        // Calculate TEMA: 3*EMA1 - 3*EMA2 + EMA3
+        const tema = [];
+        const lengthDifference = ema1Data.length - ema3Data.length;
+        
+        for(let i = 0; i < ema3Data.length; i++) {
+            const ema1Value = ema1Data[i + lengthDifference];
+            const ema2Value = ema2Data[i + (ema1Data.length - ema2Data.length)];
+            const ema3Value = ema3Data[i];
+            
+            const temaValue = 3 * ema1Value - 3 * ema2Value + ema3Value;
+            tema.push(temaValue);
+        }
+        
+        return tema;
+    }
+}
+
 /**
  *  Class Ema10And20
  *  @type Indicator
@@ -1681,7 +1726,8 @@ class IndicatorList{
             "EMAIndicator",
             "SmaIndicator",
             "FloorPivots",
-            "Woodies"
+            "Woodies",
+            "TemaIndicator"
         ];
     }
 
@@ -1719,12 +1765,7 @@ class IndicatorList{
             "SmaIndicator":SmaIndicator.getData,
             "FloorPivots":FloorPivots.getData,
             "Woodies":Woodies.getData,
-            "KsiIndicator":KsiIndicator.getData,
-            "TrixIndicator":TrixIndicator.getData,
-            "ZScore":ZScore.getData,
-            "ZEMAIndicator":ZEMAIndicator.getData,
-            "DynamicGridSignals":DynamicGridSignals.getData,
-            "SupportAndResistance":SupportAndResistance.getData
+            "TemaIndicator":TemaIndicator.getData,
         }
         return map[key]
     }
@@ -2064,7 +2105,6 @@ class PatternRecognitionIndicator{
      * @param h {Array<number>}  The Higher High Candles
      * @param l {Array<number>}  The Lower Low Candles
      * @param c {Array<number>}  The Closing Candles
-
      * @returns {Boolean} returns true if a pattern is detected
      * @constructor
      */

@@ -126,6 +126,13 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                 low: recentLow,
                 price: c[testIndex]
             };
+        } else if (signal.signalType.includes('Tema')) {
+            // TEMA signals need current and previous TEMA values plus price
+            testModel = {
+                tema: indicatorData[testIndex],
+                previousTema: indicatorData[testIndex-1],
+                price: c[testIndex]
+            };
         } else if (signal.signalType.includes('Ichimoku')) {
             // Ichimoku signals need price and Ichimoku components
             // Ichimoku data may be shorter than candle data due to calculation requirements
@@ -249,6 +256,13 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                 dataModel = {
                     high: recentHigh,
                     low: recentLow,
+                    price: c[i]
+                };
+            } else if (signal.signalType.includes('Tema')) {
+                // TEMA signals need current and previous TEMA values plus price
+                dataModel = {
+                    tema: indicatorData[i],
+                    previousTema: indicatorData[i-1],
                     price: c[i]
                 };
             } else if (signal.signalType.includes('Crocodile')) {

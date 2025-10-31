@@ -169,8 +169,8 @@ function getIndicatorForType(type) {
         'support-breakout': 'SupportAndResistance', // Custom indicator
         'resistance-breakout': 'SupportAndResistance', // Custom indicator
         'adx-weak-trend': 'AdxIndicator',
-        'tema-bullish': 'TrixIndicator', // TEMA is Triple EMA, using TRIX as approximation
-        'tema-bearish': 'TrixIndicator', // TEMA is Triple EMA, using TRIX as approximation
+        'tema-bullish': 'TemaIndicator', // TEMA is Triple EMA
+        'tema-bearish': 'TemaIndicator', // TEMA is Triple EMA
         'keltner-upper-breakout': 'AtrIndicator', // Keltner uses ATR
         'keltner-lower-breakout': 'AtrIndicator', // Keltner uses ATR
         'donchian-upper-breakout': 'price', // Donchian uses price highs/lows
