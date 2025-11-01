@@ -109,6 +109,13 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                 ...indicatorData[testIndex],
                 price: c[testIndex]
             };
+        } else if (signal.signalType.includes('Keltner')) {
+            // Keltner signals need price and channel data
+            testModel = {
+                ...indicatorData[testIndex],
+                price: c[testIndex],
+                previousPrice: c[testIndex-1]
+            };
         } else if (signal.signalType.includes('VolumeSpike')) {
             // Volume spike signals need volume data
             testModel = {
@@ -238,6 +245,13 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
                 dataModel = {
                     ...indicatorData[i],
                     price: c[i]
+                };
+            } else if (signal.signalType.includes('Keltner')) {
+                // Keltner signals need price and channel data
+                dataModel = {
+                    ...indicatorData[i],
+                    price: c[i],
+                    previousPrice: c[i-1]
                 };
             } else if (signal.signalType.includes('Obv')) {
                 // OBV signals need current and previous OBV values plus price data

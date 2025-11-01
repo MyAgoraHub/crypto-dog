@@ -169,10 +169,10 @@ function getIndicatorForType(type) {
         'support-breakout': 'SupportAndResistance', // Custom indicator
         'resistance-breakout': 'SupportAndResistance', // Custom indicator
         'adx-weak-trend': 'AdxIndicator',
-        'tema-bullish': 'TemaIndicator', // TEMA is Triple EMA
-        'tema-bearish': 'TemaIndicator', // TEMA is Triple EMA
-        'keltner-upper-breakout': 'AtrIndicator', // Keltner uses ATR
-        'keltner-lower-breakout': 'AtrIndicator', // Keltner uses ATR
+        'tema-bullish': 'TrixIndicator', // TEMA is Triple EMA, using TRIX as approximation
+        'tema-bearish': 'TrixIndicator', // TEMA is Triple EMA, using TRIX as approximation
+        'keltner-upper-breakout': 'KeltnerIndicator', // Keltner uses EMA + ATR
+        'keltner-lower-breakout': 'KeltnerIndicator', // Keltner uses EMA + ATR
         'donchian-upper-breakout': 'price', // Donchian uses price highs/lows
         'donchian-lower-breakout': 'price', // Donchian uses price highs/lows
         'elder-impulse-bull': 'MacdIndicator', // Elder Impulse uses MACD + EMAs
@@ -514,9 +514,9 @@ async function runBacktestForSignal(selectedSignal, options) {
         // Display results
         console.log(chalk.green('\n📊 BACKTEST RESULTS\n'));
         console.log(chalk.cyan('Signal Configuration:'));
-        console.log(`  Symbol: ${signal.symbol}`);
-        console.log(`  Timeframe: ${signal.timeframe}`);
-        console.log(`  Type: ${signal.signalType}`);
+        console.log(`  Symbol: ${results.signal.symbol}`);
+        console.log(`  Timeframe: ${results.signal.timeframe}`);
+        console.log(`  Type: ${results.signal.type}`);
         if (value !== 0) console.log(`  Value: ${value}`);
 
         console.log(chalk.cyan('\nTest Period:'));

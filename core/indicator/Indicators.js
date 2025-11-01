@@ -806,6 +806,73 @@ class BollingerIndicator{
 }
 
 /**
+ *  Class KeltnerIndicator
+ *  @type Indicator
+ * */
+class KeltnerIndicator{
+
+    static className = "KeltnerIndicator"
+    /**
+     * @typedef {Object} keltner
+     * @property {number} middle - the center EMA line
+     * @property {number} upper - The upper channel band
+     * @property {number} lower - The lower channel band
+     */
+
+    /**
+     * @param o {Array<number>}  The Opening Candles
+     * @param h {Array<number>}  The Higher High Candles
+     * @param l {Array<number>}  The Lower Low Candles
+     * @param c {Array<number>}  The Closing Candles
+     * @param v {Array<number>}  The Volume Data
+     * @param args.period {number} the EMA period (default 20)
+     * @param args.multiplier {number} the ATR multiplier (default 2)
+     * @param args.atrPeriod {number} the ATR period (default 21)
+     * @param candles {Array<Array<number>>} o,h,l,c,v array Buffer
+     * @returns {Array<keltner>}
+     *
+     */
+    static getData(o,h,l,c,v, args, candles){
+        const period = args.period || 20;
+        const multiplier = args.multiplier || 2;
+        const atrPeriod = args.atrPeriod || 21;
+
+        // Calculate EMA for middle line
+        const ema = new EMA({period: period, values: c});
+        const emaData = ema.getResult();
+
+        // Calculate ATR
+        const atrInput = {
+            high: h,
+            low: l,
+            close: c,
+            period: atrPeriod
+        };
+        const atr = new ATR(atrInput);
+        const atrData = atr.getResult();
+
+        // Calculate Keltner Channel
+        const result = [];
+        const maxLength = Math.min(emaData.length, atrData.length);
+
+        for (let i = 0; i < maxLength; i++) {
+            const middle = emaData[i];
+            const atrValue = atrData[i];
+            const upper = middle + (atrValue * multiplier);
+            const lower = middle - (atrValue * multiplier);
+
+            result.push({
+                middle: middle,
+                upper: upper,
+                lower: lower
+            });
+        }
+
+        return result;
+    }
+}
+
+/**
  *  Class MacdIndicator
  *  @type Indicator
  * */
@@ -1088,51 +1155,6 @@ class ZEMAIndicator{
             zema.push(zmaEntry);
         }
         return zema;
-    }
-}
-
-class TemaIndicator{
-
-    static className = "TemaIndicator"
-    /**
-     * @param o {Array<number>}  The Opening Candles
-     * @param h {Array<number>}  The Higher High Candles
-     * @param l {Array<number>}  The Lower Low Candles
-     * @param c {Array<number>}  The Closing Candles
-     * @param v {Array<number>}  The Volumes
-     * @param args.period {number} (the moving average period default 20)
-     * @param candles {Array<Array<number>>} o,h,l,c,v array Buffer
-     * @returns [Number]
-     * */
-    static getData(o,h,l,c,v, args, candles){
-        const period = args.period || 20;
-        
-        // Calculate EMA1
-        const ema1 = new EMA({period: period, values: c});
-        const ema1Data = ema1.getResult();
-        
-        // Calculate EMA2 (EMA of EMA1)
-        const ema2 = new EMA({period: period, values: ema1Data});
-        const ema2Data = ema2.getResult();
-        
-        // Calculate EMA3 (EMA of EMA2)
-        const ema3 = new EMA({period: period, values: ema2Data});
-        const ema3Data = ema3.getResult();
-        
-        // Calculate TEMA: 3*EMA1 - 3*EMA2 + EMA3
-        const tema = [];
-        const lengthDifference = ema1Data.length - ema3Data.length;
-        
-        for(let i = 0; i < ema3Data.length; i++) {
-            const ema1Value = ema1Data[i + lengthDifference];
-            const ema2Value = ema2Data[i + (ema1Data.length - ema2Data.length)];
-            const ema3Value = ema3Data[i];
-            
-            const temaValue = 3 * ema1Value - 3 * ema2Value + ema3Value;
-            tema.push(temaValue);
-        }
-        
-        return tema;
     }
 }
 
@@ -1698,6 +1720,7 @@ class IndicatorList{
             "RsiIndicator",
             "AtrIndicator",
             "BollingerIndicator",
+            "KeltnerIndicator",
             "MacdIndicator",
             "PatternRecognitionIndicator",
             "WilliamsRIndicator",
@@ -1726,8 +1749,7 @@ class IndicatorList{
             "EMAIndicator",
             "SmaIndicator",
             "FloorPivots",
-            "Woodies",
-            "TemaIndicator"
+            "Woodies"
         ];
     }
 
@@ -1738,6 +1760,7 @@ class IndicatorList{
             "RsiIndicator":RsiIndicator.getData,
             "AtrIndicator":AtrIndicator.getData,
             "BollingerIndicator":BollingerIndicator.getData,
+            "KeltnerIndicator":KeltnerIndicator.getData,
             "MacdIndicator":MacdIndicator.getData,
             "WilliamsRIndicator":WilliamsRIndicator.getData,
             "KsiIndicator":KsiIndicator.getData,
@@ -1765,7 +1788,12 @@ class IndicatorList{
             "SmaIndicator":SmaIndicator.getData,
             "FloorPivots":FloorPivots.getData,
             "Woodies":Woodies.getData,
-            "TemaIndicator":TemaIndicator.getData,
+            "KsiIndicator":KsiIndicator.getData,
+            "TrixIndicator":TrixIndicator.getData,
+            "ZScore":ZScore.getData,
+            "ZEMAIndicator":ZEMAIndicator.getData,
+            "DynamicGridSignals":DynamicGridSignals.getData,
+            "SupportAndResistance":SupportAndResistance.getData
         }
         return map[key]
     }
@@ -2116,8 +2144,6 @@ class PatternRecognitionIndicator{
      *
      * @param o {Array<number>}  The Opening Candles
      * @param h {Array<number>}  The Higher High Candles
-     * @param l {Array<number>}  The Lower Low Candles
-     * @param c {Array<number>}  The Closing Candles
      * @returns {Boolean} returns true if a pattern is detected
      * @constructor
      */
@@ -2359,5 +2385,6 @@ export {
     ZScore,
     MultiDivergenceDetector,
     DynamicGridSignals,
-    SupportAndResistance
+    SupportAndResistance,
+    KeltnerIndicator
 };
