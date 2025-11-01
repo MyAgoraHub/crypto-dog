@@ -7,7 +7,7 @@ const wsHandler = new CryptoDogWebSocketHandler({
   throttleMs: 5000
 });
 
-wsHandler.subscribeToTopics([`kline.${interval}.${symbol}`], 'spot');
+wsHandler.subscribeToTopics([`orderbook.50.${symbol}`], 'spot');
 
 wsHandler.onUpdate((data) => {
   console.log('Received data:', JSON.stringify(data, null, 2));

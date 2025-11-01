@@ -40,6 +40,7 @@ const determineDataModel = (signalType, data, o,h,l,c,v) => {
     switch (signalType) {
         case "INDICATOR_RsiObSignal" : 
         case "INDICATOR_RsiOsSignal": 
+        case "INDICATOR_RSI_OBSignal": // Handle the database format
             return {value:data.pop()}
         case "INDICATOR_CrocodileDiveSignal": return {ema1:data.ema1.pop(), ema2:data.ema2.pop(), ema3:data.ema3.pop()};
         case "INDICATOR_CrocodileSignal": return {ema1:data.ema1.pop(), ema2:data.ema2.pop(), ema3:data.ema3.pop()};
@@ -58,15 +59,32 @@ const determineDataModel = (signalType, data, o,h,l,c,v) => {
             let prevMacd = data[data.length-2];
             return {macd:lastMacd.MACD, signal:lastMacd.signal, histogram:lastMacd.histogram, previousMacd:prevMacd?.MACD, previousSignal:prevMacd?.signal};
 
+        // MACD Histogram Signals
+        case "INDICATOR_MacdHistogramPositiveSignal":
+        case "INDICATOR_MacdHistogramNegativeSignal":
+            let lastMacdHist = data[data.length-1];
+            let prevMacdHist = data[data.length-2];
+            return {histogram:lastMacdHist.histogram, previousHistogram:prevMacdHist?.histogram};
+
         // Bollinger Band Signals
         case "INDICATOR_BollingerUpperTouchSignal":
         case "INDICATOR_BollingerLowerTouchSignal":
+            return {upper:data.upper.pop(), middle:data.middle.pop(), lower:data.lower.pop(), price:c.pop()};
+
+        // Bollinger Advanced Signals
+        case "INDICATOR_BollingerSqueezeSignal":
+        case "INDICATOR_BollingerExpansionSignal":
             return {upper:data.upper.pop(), middle:data.middle.pop(), lower:data.lower.pop(), price:c.pop()};
 
         // Stochastic Signals
         case "INDICATOR_StochasticOverboughtSignal":
         case "INDICATOR_StochasticOversoldSignal":
             return {k:data.k.pop(), d:data.d.pop()};
+
+        // Stochastic Cross Signals
+        case "INDICATOR_StochasticBullishCrossSignal":
+        case "INDICATOR_StochasticBearishCrossSignal":
+            return {k:data.k.pop(), d:data.d.pop(), previousK:data.k[data.k.length-2], previousD:data.d[data.d.length-2]};
 
         // Williams %R Signals
         case "INDICATOR_WilliamsOverboughtSignal":
@@ -78,17 +96,36 @@ const determineDataModel = (signalType, data, o,h,l,c,v) => {
         case "INDICATOR_DeathCrossSignal":
             return {fast:data.fast?.pop() || data.pop(), slow:data.slow?.pop() || data[data.length-2]};
 
+        // Moving Average Advanced Signals
+        case "INDICATOR_MaSupportSignal":
+        case "INDICATOR_MaResistanceSignal":
+            return {ma:data.pop(), price:c.pop()};
+
         // Volume Signals
         case "INDICATOR_VolumeSpikeSignal":
             return {volume:v.pop(), obv:data.pop()};
+
+        // Volume Advanced Signals
+        case "INDICATOR_ObvBullishSignal":
+        case "INDICATOR_ObvBearishSignal":
+            return {obv:data.pop(), previousObv:data[data.length-2], price:c.pop(), previousPrice:c[c.length-2]};
 
         // Ichimoku Signals
         case "INDICATOR_IchimokuBullishSignal":
         case "INDICATOR_IchimokuBearishSignal":
             return {tenkanSen:data.tenkanSen.pop(), kijunSen:data.kijunSen.pop(), senkouSpanA:data.senkouSpanA.pop(), senkouSpanB:data.senkouSpanB.pop(), chikouSpan:data.chikouSpan.pop(), price:c.pop()};
 
+        // Ichimoku Advanced Signals
+        case "INDICATOR_IchimokuTkCrossBullishSignal":
+        case "INDICATOR_IchimokuTkCrossBearishSignal":
+            return {tenkanSen:data.tenkanSen.pop(), kijunSen:data.kijunSen.pop(), previousTenkan:data.tenkanSen[data.tenkanSen.length-2], previousKijun:data.kijunSen[data.kijunSen.length-2]};
+
         // ADX Signals
         case "INDICATOR_AdxStrongTrendSignal":
+            return {adx:data.adx.pop(), plusDi:data.plusDi.pop(), minusDi:data.minusDi.pop()};
+
+        // ADX Weak Trend Signals
+        case "INDICATOR_AdxWeakTrendSignal":
             return {adx:data.adx.pop(), plusDi:data.plusDi.pop(), minusDi:data.minusDi.pop()};
 
         // MFI Signals
@@ -119,6 +156,27 @@ const determineDataModel = (signalType, data, o,h,l,c,v) => {
         case "INDICATOR_FibonacciRetracementSignal":
             return {price:c.pop(), levels:data};
 
+        // Support/Resistance Breakout Signals
+        case "INDICATOR_SupportBreakoutSignal":
+        case "INDICATOR_ResistanceBreakoutSignal":
+            return {price:c.pop(), level:data.pop()};
+
+        // TEMA Signals
+        case "INDICATOR_TemaBullishSignal":
+        case "INDICATOR_TemaBearishSignal":
+            return {tema:data.pop(), previousTema:data[data.length-2], price:c.pop()};
+
+        // Donchian Channel Signals
+        case "INDICATOR_DonchianUpperBreakoutSignal":
+        case "INDICATOR_DonchianLowerBreakoutSignal":
+            return {upper:data.upper?.pop() || Math.max(...h.slice(-20)), lower:data.lower?.pop() || Math.min(...l.slice(-20)), price:c.pop(), previousPrice:c[c.length-2]};
+
+        // Elder Impulse Signals
+        case "INDICATOR_ElderImpulseBullSignal":
+        case "INDICATOR_ElderImpulseBearSignal":
+        case "INDICATOR_ElderImpulseBlueSignal":
+            return {ema:data.ema?.pop() || data.pop(), macd:data.macd?.pop() || data[data.length-2], price:c.pop()};
+
         // SuperTrend Signals
         case "INDICATOR_SuperTrendBullishSignal":
         case "INDICATOR_SuperTrendBearishSignal":
@@ -127,7 +185,7 @@ const determineDataModel = (signalType, data, o,h,l,c,v) => {
         // Keltner Channel Signals
         case "INDICATOR_KeltnerUpperBreakoutSignal":
         case "INDICATOR_KeltnerLowerBreakoutSignal":
-            return {upper:data.upper?.pop() || data.pop(), middle:data.middle?.pop() || data[data.length-2], lower:data.lower?.pop() || data[data.length-3], price:c.pop()};
+            return {upper:data.upper?.pop() || data.pop(), middle:data.middle?.pop() || data[data.length-2], lower:data.lower?.pop() || data[data.length-3], price:c.pop(), previousPrice:c[c.length-2]};
 
         // Heikin-Ashi Signals
         case "INDICATOR_HeikinAshiBullishSignal":
