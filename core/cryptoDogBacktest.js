@@ -1,7 +1,7 @@
 import { loadCandleData } from './clients/cryptoDogAgent.js';
 import { createIndicatorData } from './cryptoDogTools.js';
 import { IndicatorList } from './indicator/Indicators.js';
-import { getInterval, getIntervals } from './clients/cryptoDogRequestHandler.js';
+import { getInterval } from './clients/cryptoDogRequestHandler.js';
 import { signalAgent } from './cryptoDogSignalAgent.js';
 
 /**
@@ -12,11 +12,7 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
     console.log(`📥 Fetching ${iterations} iterations × ${candles} candles = ${iterations * candles} total candles expected`);
     
     // Load historical data
-    const intervalObj = getInterval(signal.timeframe);
-    if (!intervalObj) {
-        throw new Error(`Invalid timeframe: ${signal.timeframe}. Valid timeframes are: ${Object.keys(getIntervals()).join(', ')}`);
-    }
-    const interval = intervalObj.value;
+    const interval = getInterval(signal.timeframe).value;
     const candleBuffer = await loadCandleData('spot', signal.symbol, interval, iterations, candles);
     const { o, h, l, c, v, buffer } = createIndicatorData(candleBuffer, signal.symbol);
     

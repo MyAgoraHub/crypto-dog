@@ -563,10 +563,6 @@ export function registerBacktestCommand(program) {
         .option('--reward <percent>', 'Reward per trade (%)', '5')
         .option('--capital <amount>', 'Initial capital', '10000')
         .action(async (options) => {
-            // Normalize interval - if it's a number, append 'm'
-            if (options.interval && /^\d+$/.test(options.interval)) {
-                options.interval = options.interval + 'm';
-            }
             await showSignalSelector(options);
         });
 }

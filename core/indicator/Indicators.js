@@ -505,30 +505,6 @@ class SupportAndResistance extends CustomIndicator {
       return supportResistanceZones;    
     }
 }
-
-/**
- * Class PriceIndicator
- * @type Indicator
- * */
-class PriceIndicator {
-    static className = 'PriceIndicator';
-
-    /**
-     * @param o {Array<number>}  The Opening Candles
-     * @param h {Array<number>}  The Higher High Candles
-     * @param l {Array<number>}  The Lower Low Candles
-     * @param c {Array<number>}  The Closing Candles
-     * @param v {Array<number>}  The Volume Data
-     * @param args {Object} Additional arguments (not used for price indicator)
-     * @param candles {Array<Array<number>>} o,h,l,c,v array Buffer
-     * @returns {Array<number>} Returns the closing prices
-     */
-    static getData(o, h, l, c, v, args, candles) {
-        // For price-based signals, just return the closing prices
-        return c;
-    }
-}
-
 /**
  *  Class SuperTrend
  *  @type Indicator
@@ -1773,12 +1749,7 @@ class IndicatorList{
             "EMAIndicator",
             "SmaIndicator",
             "FloorPivots",
-            "Woodies",
-            "ZScore",
-            "ZEMAIndicator",
-            "DynamicGridSignals",
-            "SupportAndResistance",
-            "PriceIndicator"
+            "Woodies"
         ];
     }
 
@@ -1822,8 +1793,7 @@ class IndicatorList{
             "ZScore":ZScore.getData,
             "ZEMAIndicator":ZEMAIndicator.getData,
             "DynamicGridSignals":DynamicGridSignals.getData,
-            "SupportAndResistance":SupportAndResistance.getData,
-            "PriceIndicator":PriceIndicator.getData
+            "SupportAndResistance":SupportAndResistance.getData
         }
         return map[key]
     }
@@ -2416,6 +2386,5 @@ export {
     MultiDivergenceDetector,
     DynamicGridSignals,
     SupportAndResistance,
-    KeltnerIndicator,
-    PriceIndicator
+    KeltnerIndicator
 };
