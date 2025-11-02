@@ -118,42 +118,68 @@ class InteractiveTradingBot {
             keys: true   // Enable keyboard scrolling
         });
 
-        // Status and controls (always visible)
-        this.components.statusBox = this.grid.set(10, 0, 2, 12, contrib.log, {
-            fg: "red",
-            selectedFg: "red",
-            label: '🎮 Controls & Status',
-            border: { type: "line", fg: 'red' }
+        // Menu for navigation (replaces keyboard shortcuts)
+        this.components.menu = this.grid.set(10, 0, 2, 6, blessed.list, {
+            fg: "green",
+            selectedFg: "white",
+            selectedBg: "green",
+            label: '🎮 Menu',
+            border: { type: "line", fg: 'green' },
+            keys: true,
+            mouse: true,
+            interactive: true,
+            invertSelected: true,
+            items: [
+                '📊 Analysis',
+                '📈 Buy Long',
+                '📉 Sell Short',
+                '📊 Positions',
+                '🏠 Default View',
+                '❌ Close All',
+                '🚪 Quit'
+            ]
         });
 
-        // Set up key bindings
+        // Status info (compact)
+        this.components.statusBox = this.grid.set(10, 6, 2, 6, contrib.log, {
+            fg: "cyan",
+            selectedFg: "cyan",
+            label: '📊 Status',
+            border: { type: "line", fg: 'cyan' }
+        });
+
+        // Set up menu selection handler
+        this.components.menu.on('select', (item, index) => {
+            switch (index) {
+                case 0: // Analysis
+                    this.performAnalysis();
+                    break;
+                case 1: // Buy Long
+                    this.handleBuySignal();
+                    break;
+                case 2: // Sell Short
+                    this.handleSellSignal();
+                    break;
+                case 3: // Positions
+                    this.showPositionsView();
+                    break;
+                case 4: // Default View
+                    this.showDefaultView();
+                    break;
+                case 5: // Close All
+                    this.closeAllPositions();
+                    break;
+                case 6: // Quit
+                    this.stop();
+                    process.exit(0);
+                    break;
+            }
+        });
+
+        // Keep escape/quit keys as backup
         this.screen.key(['escape', 'q', 'C-c'], () => {
             this.stop();
             process.exit(0);
-        });
-
-        this.screen.key(['b'], () => {
-            this.handleBuySignal();
-        });
-
-        this.screen.key(['s'], () => {
-            this.handleSellSignal();
-        });
-
-        this.screen.key(['a'], () => {
-            this.performAnalysis();
-        });
-
-        this.screen.key(['p'], () => {
-            this.showPositionsView();
-        });
-
-        this.screen.key(['v'], () => {
-            this.showDefaultView();
-        });
-
-        this.screen.key(['c'], () => {
-            this.closeAllPositions();
         });
 
         // Initial UI updates
@@ -269,15 +295,10 @@ class InteractiveTradingBot {
 
     updateStatus() {
         const statusText = [
-            '🎮 CONTROLS:',
-            '[B] Buy Long    [S] Sell Short    [C] Close All',
-            '[A] Analysis    [P] Positions     [V] Default View',
-            '[Q] Quit',
-            '',
             `Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}`,
             `Positions: ${this.positions.length}`,
-            `Current Price: ${this.currentPrice > 0 ? this.currentPrice.toFixed(4) : 'Loading...'}`,
-            `Last Update: ${this.lastPriceUpdate ? this.lastPriceUpdate.toLocaleTimeString() : 'Never'}`
+            `Price: ${this.currentPrice > 0 ? this.currentPrice.toFixed(4) : 'Loading...'}`,
+            `Updated: ${this.lastPriceUpdate ? this.lastPriceUpdate.toLocaleTimeString() : 'Never'}`
         ].join('\n');
 
         this.components.statusBox.setContent(statusText);
@@ -286,7 +307,7 @@ class InteractiveTradingBot {
 
     showDefaultView() {
         this.currentView = 'default';
-        this.components.mainContent.setLabel('🎯 Default View - Press A for Analysis, P for Positions');
+        this.components.mainContent.setLabel('🎯 Default View - Use Menu to Navigate');
         this.components.mainContent.setContent(`
 Welcome to Crypto Dog Trading Bot!
 
@@ -294,16 +315,14 @@ Current Price: ${this.currentPrice > 0 ? this.currentPrice.toFixed(4) : 'Loading
 ${this.lastPriceUpdate ? `Last Update: ${this.lastPriceUpdate.toLocaleTimeString()}` : ''}
 Active Positions: ${this.positions.length}
 
-Available Views:
-• [A] Analysis - Show trading recommendations
-• [P] Positions - Show detailed position information
-• [V] Default - This welcome screen
-
-Trading Controls:
-• [B] Buy Long position
-• [S] Sell Short position
-• [C] Close all positions
-• [Q] Quit
+Use the menu on the bottom left to:
+• 📊 Analysis - View trading recommendations
+• 📈 Buy Long - Open long position
+• 📉 Sell Short - Open short position
+• 📊 Positions - View position details
+• 🏠 Default View - This welcome screen
+• ❌ Close All - Close all positions
+• 🚪 Quit - Exit the application
 
 ${this.positions.length > 0 ? '\nActive Positions:\n' + this.positions.map((pos, i) =>
     `${i+1}. ${pos.side.toUpperCase()} ${pos.amount} @ ${pos.entryPrice.toFixed(4)} (P&L: ${this.calculatePnL(pos).toFixed(4)})`
