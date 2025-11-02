@@ -129,6 +129,7 @@ class InteractiveTradingBot {
             mouse: true,
             interactive: true,
             invertSelected: true,
+            vi: true, // Enable vi-style navigation
             items: [
                 '📊 Analysis',
                 '📈 Buy Long',
@@ -150,36 +151,32 @@ class InteractiveTradingBot {
 
         // Set up menu selection handler
         this.components.menu.on('select', (item, index) => {
-            switch (index) {
-                case 0: // Analysis
-                    this.performAnalysis();
-                    break;
-                case 1: // Buy Long
-                    this.handleBuySignal();
-                    break;
-                case 2: // Sell Short
-                    this.handleSellSignal();
-                    break;
-                case 3: // Positions
-                    this.showPositionsView();
-                    break;
-                case 4: // Default View
-                    this.showDefaultView();
-                    break;
-                case 5: // Close All
-                    this.closeAllPositions();
-                    break;
-                case 6: // Quit
-                    this.stop();
-                    process.exit(0);
-                    break;
+            this.handleMenuSelection(index);
+        });
+
+        // Focus the menu by default
+        this.components.menu.focus();
+
+        // Manual key handling for menu navigation
+        this.screen.key(['up', 'k'], () => {
+            if (this.screen.focused === this.components.menu) {
+                this.components.menu.up();
+                this.screen.render();
             }
         });
 
-        // Keep escape/quit keys as backup
-        this.screen.key(['escape', 'q', 'C-c'], () => {
-            this.stop();
-            process.exit(0);
+        this.screen.key(['down', 'j'], () => {
+            if (this.screen.focused === this.components.menu) {
+                this.components.menu.down();
+                this.screen.render();
+            }
+        });
+
+        this.screen.key(['enter', 'space'], () => {
+            if (this.screen.focused === this.components.menu) {
+                const selected = this.components.menu.selected;
+                this.handleMenuSelection(selected);
+            }
         });
 
         // Initial UI updates
@@ -668,23 +665,29 @@ Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}
         }
     }
 
-    updatePriceInCurrentView() {
-        if (this.currentView === 'default') {
-            this.showDefaultView();
-        }
-        // For other views, price updates are handled in updateViewData
-    }
-
-    updateViewData() {
-        switch (this.currentView) {
-            case 'default':
+    handleMenuSelection(index) {
+        switch (index) {
+            case 0: // Analysis
+                this.performAnalysis();
+                break;
+            case 1: // Buy Long
+                this.handleBuySignal();
+                break;
+            case 2: // Sell Short
+                this.handleSellSignal();
+                break;
+            case 3: // Positions
+                this.showPositionsView();
+                break;
+            case 4: // Default View
                 this.showDefaultView();
                 break;
-            case 'positions':
-                this.updatePositionsView();
+            case 5: // Close All
+                this.closeAllPositions();
                 break;
-            case 'analysis':
-                // Analysis view doesn't need frequent updates
+            case 6: // Quit
+                this.stop();
+                process.exit(0);
                 break;
         }
     }
