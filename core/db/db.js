@@ -9,5 +9,5 @@ await db.read()
 
 // If db.json doesn't exist, db.data will be null
 // Set default data
-db.data ||= { signals: [], settings: {}, bots:[] }
+db.data ||= { signals: [], settings: {}, bots:[], apiKeys: [], positions: [] , trades:[]   }
 export default db

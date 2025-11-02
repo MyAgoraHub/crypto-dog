@@ -982,8 +982,8 @@ class KsiIndicator{
             SMAROCPer4  : 15,
             signalPeriod: 9
         };
-        KST = new KST(input);
-        return KST.getResult();
+        let kst = new KST(input);
+        return kst.getResult();
     }
 }
 
@@ -1753,6 +1753,7 @@ class IndicatorList{
         ];
     }
 
+     
     static getIndicator (key) {
         let map = {
             "MultiDivergenceDetector":MultiDivergenceDetector.getData,
@@ -1795,6 +1796,7 @@ class IndicatorList{
             "DynamicGridSignals":DynamicGridSignals.getData,
             "SupportAndResistance":SupportAndResistance.getData
         }
+        if(key == "all") { return map; }
         return map[key]
     }
 }

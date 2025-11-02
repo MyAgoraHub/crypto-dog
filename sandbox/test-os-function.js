@@ -1,4 +1,4 @@
-import { signalAgent } from './core/cryptoDogSignalAgent.js';
+import { signalAgent } from '../core/cryptoDogSignalAgent.js';
 
 console.log('Testing os function directly:');
 

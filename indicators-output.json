@@ -1,0 +1,151 @@
+{
+  "MultiDivergenceDetector": {
+    "c": 110006.1,
+    "hasDivergence": false,
+    "divergence": [
+      {
+        "indicator": "RSI",
+        "type": "Pending Divergence",
+        "index": 176,
+        "open": 110006.1,
+        "close": 110006.1
+      },
+      {
+        "indicator": "MACD",
+        "type": "Pending Divergence",
+        "index": 176,
+        "open": 110006.1,
+        "close": 110006.1
+      },
+      {
+        "indicator": "Stochastic",
+        "type": "Pending Divergence",
+        "index": 176,
+        "open": 110006.1,
+        "close": 110006.1
+      },
+      {
+        "indicator": "Williams %R",
+        "type": "Pending Divergence",
+        "index": 176,
+        "open": 110006.1,
+        "close": 110006.1
+      }
+    ]
+  },
+  "SuperTrendIndicator": {
+    "trend": "long",
+    "value": 109925.36342134001
+  },
+  "RsiIndicator": 47.25,
+  "AtrIndicator": 55.4928259,
+  "BollingerIndicator": {
+    "middle": 110049.445,
+    "upper": 110123.7978,
+    "lower": 109975.0922,
+    "pb": 0.2085180383
+  },
+  "KeltnerIndicator": {
+    "middle": 110039.1716,
+    "upper": 110150.1572518,
+    "lower": 109928.1859482
+  },
+  "MacdIndicator": {
+    "MACD": -11,
+    "signal": 12.35106838,
+    "histogram": -23.35106838
+  },
+  "WilliamsRIndicator": -70.43169722,
+  "KsiIndicator": {
+    "kst": 0.6703031105,
+    "signal": 0.9674245945
+  },
+  "MfiIndicator": 32.01,
+  "ObvIndicator": -163.36065100000002,
+  "Ema4Indicator_ema8": 110025.8314,
+  "Ema4Indicator_ema13": 110032.171,
+  "Ema4Indicator_ema21": 110032.0369,
+  "Ema4Indicator_ema55": 110058.8422,
+  "Ema4Indicator_ema100": 110132.5525,
+  "Ema4Indicator_ema200": 110294.3538,
+  "Ema10And20_ema10": 110029.2932,
+  "Ema10And20_ema20": 110032.2847,
+  "Sma3Indicator_sma1": 109975.604,
+  "Sma3Indicator_sma2": 110174.611,
+  "Sma3Indicator_sma3": 110296.1005,
+  "AdlIndicator": 11,
+  "AdxIndicator": {
+    "adx": 16.67146052,
+    "pdi": 18.85239746,
+    "mdi": 30.08418621
+  },
+  "AwesomeOscillatorIndicator": -0.76,
+  "CciIndicator": -103.00545593002569,
+  "StochasticIndicator": {
+    "k": 29.56830278,
+    "d": 34.59491425
+  },
+  "IchimokuCloudIndicator": {
+    "conversion": 110029.8,
+    "base": 110031.7,
+    "spanA": 110030.75,
+    "spanB": 109950.85
+  },
+  "WildersSmoothingWeighteMovingAvg": 110129.3169,
+  "WeighteMovingAvg": 110029.5179,
+  "VolumeProfile": {
+    "rangeStart": 110614.49999999996,
+    "rangeEnd": 110666.19999999995,
+    "bullishVolume": 5.412215,
+    "bearishVolume": 24.411877,
+    "totalVolume": 29.824092
+  },
+  "VolumeWeightedAvgPrice": 110224.9576480362,
+  "TrixIndicator": 0.00126915796,
+  "ForceIndexIndiactor": 0,
+  "RocIndicator": -0.03171545151,
+  "PsarIndicator": 110097.01169038337,
+  "EMAIndicator": 110294.3538,
+  "SmaIndicator": 109975.604,
+  "FloorPivots": {
+    "floor": {
+      "pivot": 110013.90000000001,
+      "r1": 110034.20000000001,
+      "r2": 110062.30000000002,
+      "r3": 110082.6,
+      "s1": 109985.80000000002,
+      "s2": 109965.50000000001,
+      "s3": 109937.40000000002
+    }
+  },
+  "Woodies": {
+    "woodies": {
+      "pivot": 110011.95000000001,
+      "r1": 110030.30000000002,
+      "r2": 110060.35,
+      "s1": 109981.90000000002,
+      "s2": 109963.55000000002
+    }
+  },
+  "ZScore_o": 0.10858474761903009,
+  "ZScore_h": -0.16749604957526354,
+  "ZScore_l": 0.46444665754476205,
+  "ZScore_c": 0.15550927199978884,
+  "ZScore_v": -0.8907871977915912,
+  "ZEMAIndicator": 110027.7257,
+  "DynamicGridSignals": {
+    "o": 110041.9,
+    "l": 109993.6,
+    "h": 110042,
+    "c": 110006.1,
+    "v": 1.588874,
+    "grid": [
+      109735.6,
+      109921.72,
+      110107.84,
+      110293.96,
+      110480.08,
+      110666.2
+    ]
+  }
+}

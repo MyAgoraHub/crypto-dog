@@ -1,4 +1,4 @@
-import { signalAgent } from './core/cryptoDogSignalAgent.js';
+import { signalAgent } from '../core/cryptoDogSignalAgent.js';
 
 // Create test data with a clear uptrend and retracement
 const c = [];

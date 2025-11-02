@@ -1,4 +1,4 @@
-import { IndicatorList } from './core/indicator/Indicators.js';
+import { IndicatorList } from '../core/indicator/Indicators.js';
 
 // Create more test data (200 candles)
 const c = Array.from({length: 200}, (_, i) => 100 + Math.sin(i * 0.1) * 10 + i * 0.1);

@@ -19,5 +19,44 @@
     }
   ],
   "settings": {},
-  "bots": []
+  "apiKeys": [
+    {
+      "environment": "testnet",
+      "apiKey": "qwerty_1234",
+      "apiSecret": "Qwerty_987654321",
+      "createdAt": "2025-11-02T14:56:01.667Z",
+      "updatedAt": "2025-11-02T14:56:01.668Z",
+      "id": "testnet_1762081999603"
+    }
+  ],
+  "bots": [],
+  "positions": [
+    {
+      "id": "pos_1762105404876",
+      "symbol": "BTCUSDT",
+      "side": "long",
+      "amount": 1000,
+      "entryPrice": 110035.7,
+      "stopLoss": 107834.98599999999,
+      "takeProfit": 114437.128,
+      "timestamp": "2025-11-02T17:43:24.876Z",
+      "status": "closed",
+      "exitPrice": 110249.1,
+      "exitTime": "2025-11-02T18:24:18.850Z",
+      "finalPnL": 213400.00000000873,
+      "finalPnLPercent": 0.19393705860916843,
+      "updatedAt": "2025-11-02T18:24:18.851Z"
+    },
+    {
+      "id": "pos_1762105725752",
+      "symbol": "ADAUSDT",
+      "side": "long",
+      "amount": 2000,
+      "entryPrice": 0.5976,
+      "stopLoss": 0.5856480000000001,
+      "takeProfit": 0.6215040000000001,
+      "timestamp": "2025-11-02T17:48:45.752Z",
+      "status": "open"
+    }
+  ]
 }

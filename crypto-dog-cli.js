@@ -14,6 +14,8 @@ import { registerBacktestCommand } from './commands/backtest.js';
 import { registerLiveFeedCommand } from './commands/live-feed.js';
 import { registerCombinationsCommand } from './commands/combinations.js';
 import { registerTradesCommand } from './commands/trades.js';
+import { registerApiKeysCommand } from './commands/api-keys.js';
+import { registerTradingBotCommand } from './commands/trade-bot.js';
 
 const program = new Command();
 
@@ -51,5 +53,7 @@ registerBacktestCommand(program);
 registerLiveFeedCommand(program);
 registerCombinationsCommand(program);
 registerTradesCommand(program);
+registerApiKeysCommand(program);
+registerTradingBotCommand(program);
 
 program.parse();

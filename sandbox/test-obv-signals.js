@@ -1,5 +1,5 @@
-import { IndicatorList } from './core/indicator/Indicators.js';
-import { signalAgent } from './core/cryptoDogSignalAgent.js';
+import { IndicatorList } from '../core/indicator/Indicators.js';
+import { signalAgent } from '../core/cryptoDogSignalAgent.js';
 
 // Create test data
 const c = [];

@@ -1,4 +1,4 @@
-import { backtestSignal } from './core/cryptoDogBacktest.js';
+import { backtestSignal } from '../core/cryptoDogBacktest.js';
 
 const testSignal = {
     symbol: 'BTCUSDT',

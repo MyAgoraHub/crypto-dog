@@ -1,4 +1,4 @@
-import { IndicatorList } from './core/indicator/Indicators.js';
+import { IndicatorList } from '../core/indicator/Indicators.js';
 
 console.log('Testing RsiIndicator...');
 try {

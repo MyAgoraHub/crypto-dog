@@ -1,5 +1,5 @@
-import { IndicatorList } from './core/indicator/Indicators.js';
-import { signalAgent } from './core/cryptoDogSignalAgent.js';
+import { IndicatorList } from '../core/indicator/Indicators.js';
+import { signalAgent } from '../core/cryptoDogSignalAgent.js';
 
 // Create test data with some volatility
 const c = Array(100).fill(0).map((_, i) => 100 + Math.sin(i * 0.1) * 10 + Math.random() * 5);

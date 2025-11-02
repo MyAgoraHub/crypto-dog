@@ -1,4 +1,4 @@
-import { backtestSignal } from './core/cryptoDogBacktest.js';
+import { backtestSignal } from '../core/cryptoDogBacktest.js';
 
 // Test OBV Bullish signal
 const obvBullishSignal = {
