@@ -107,13 +107,13 @@ class InteractiveTradingBot {
         });
 
         // Main content area (changes based on view)
-        this.components.mainContent = this.grid.set(2, 0, 8, 12, contrib.log, {
+        this.components.mainContent = this.grid.set(2, 0, 8, 12, blessed.box, {
             fg: 'white',
             selectedFg: 'white',
             label: 'Main Content',
             border: { type: "line", fg: 'white' },
             scrollable: true,
-            alwaysScroll: true,
+            alwaysScroll: false, // Don't always scroll to bottom
             mouse: true, // Enable mouse scrolling
             keys: true   // Enable keyboard scrolling
         });
@@ -125,11 +125,11 @@ class InteractiveTradingBot {
             selectedBg: "green",
             label: '🎮 Menu',
             border: { type: "line", fg: 'green' },
-            keys: true,
+            keys: false, // Disable built-in keys to avoid conflicts
             mouse: true,
             interactive: true,
             invertSelected: true,
-            vi: true, // Enable vi-style navigation
+            vi: false, // Disable vi keys
             items: [
                 '📊 Analysis',
                 '📈 Buy Long',
@@ -140,6 +140,10 @@ class InteractiveTradingBot {
                 '🚪 Quit'
             ]
         });
+
+        // Initialize menu selection index
+        this.menuSelectedIndex = 0;
+        this.components.menu.select(0);
 
         // Status info (compact)
         this.components.statusBox = this.grid.set(10, 6, 2, 6, contrib.log, {
@@ -160,22 +164,23 @@ class InteractiveTradingBot {
         // Manual key handling for menu navigation
         this.screen.key(['up', 'k'], () => {
             if (this.screen.focused === this.components.menu) {
-                this.components.menu.up();
+                this.menuSelectedIndex = Math.max(0, this.menuSelectedIndex - 1);
+                this.components.menu.select(this.menuSelectedIndex);
                 this.screen.render();
             }
         });
 
         this.screen.key(['down', 'j'], () => {
             if (this.screen.focused === this.components.menu) {
-                this.components.menu.down();
+                this.menuSelectedIndex = Math.min(this.components.menu.items.length - 1, this.menuSelectedIndex + 1);
+                this.components.menu.select(this.menuSelectedIndex);
                 this.screen.render();
             }
         });
 
         this.screen.key(['enter', 'space'], () => {
             if (this.screen.focused === this.components.menu) {
-                const selected = this.components.menu.selected;
-                this.handleMenuSelection(selected);
+                this.handleMenuSelection(this.menuSelectedIndex);
             }
         });
 
@@ -239,18 +244,33 @@ class InteractiveTradingBot {
             return;
         }
 
-        let content = '';
-        this.positions.forEach((pos, index) => {
+        let content = `📊 POSITIONS\n`;
+        content += `═`.repeat(30) + '\n';
+
+        if (this.positions.length === 0) {
+            content += '\nNo positions\n';
+        } else {
+            // Show only first position to fit in space
+            const pos = this.positions[0];
             const pnl = this.calculatePnL(pos);
             const pnlPercent = this.calculatePnLPercent(pos);
-            const status = pnl >= 0 ? 'PROFIT' : 'LOSS';
 
-            content += `${index + 1}. ${pos.side.toUpperCase()} ${pos.amount}\n`;
-            content += `   Entry: ${pos.entryPrice.toFixed(2)}\n`;
-            content += `   Current: ${this.currentPrice.toFixed(2)}\n`;
-            content += `   P&L: ${pnl.toFixed(2)} (${pnlPercent.toFixed(2)}%)\n`;
-            content += `   Status: ${status}\n\n`;
-        });
+            content += `${pos.side.toUpperCase()} ${pos.amount}\n`;
+            content += `Entry: ${pos.entryPrice.toFixed(0)}\n`;
+            content += `P&L: ${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}\n`;
+            content += `(${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(1)}%)\n`;
+
+            if (this.positions.length > 1) {
+                content += `\n+${this.positions.length - 1} more\n`;
+            }
+
+            // Total P&L only
+            const totalPnL = this.positions.reduce((sum, pos) => sum + this.calculatePnL(pos), 0);
+            content += `═`.repeat(30) + '\n';
+            content += `Total: ${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}\n`;
+        }
+
+        content += '\nMenu: navigate';
 
         this.components.positionsBox.setContent(content);
         this.screen.render();
@@ -303,6 +323,8 @@ class InteractiveTradingBot {
     }
 
     showDefaultView() {
+        if (!this.screen) return; // Skip if UI not initialized
+        
         this.currentView = 'default';
         this.components.mainContent.setLabel('🎯 Default View - Use Menu to Navigate');
         this.components.mainContent.setContent(`
@@ -318,6 +340,7 @@ Use the menu on the bottom left to:
 • 📉 Sell Short - Open short position
 • 📊 Positions - View position details
 • 🏠 Default View - This welcome screen
+• 🏠 Default View - This welcome screen
 • ❌ Close All - Close all positions
 • 🚪 Quit - Exit the application
 
@@ -331,51 +354,67 @@ Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}
     }
 
     showAnalysisView() {
+        if (!this.screen) return; // Skip if UI not initialized
+        
         this.currentView = 'analysis';
 
-        if (!this.evaluator.signals.overall) {
-            this.components.mainContent.setLabel('🔍 Analysis & Recommendations');
-            this.components.mainContent.setContent('Run analysis with [A] key first');
-            this.screen.render();
-            return;
-        }
-
-        const recommendation = this.evaluator.signals.overall.summary;
-        const signals = this.evaluator.signals;
-
-        let content = `📊 TRADING ANALYSIS\n`;
-        content += `═`.repeat(50) + '\n\n';
-
-        content += `${recommendation}\n\n`;
-
-        content += `Signal Breakdown:\n`;
-        content += `• Trend: ${signals.trend?.direction || 'N/A'} (${signals.trend?.strength || 'N/A'})\n`;
-        content += `• Momentum: ${signals.momentum?.direction || 'N/A'} (${signals.momentum?.strength || 'N/A'})\n`;
-        content += `• Volatility: ${signals.volatility?.direction || 'N/A'} (${signals.volatility?.strength || 'N/A'})\n`;
-        content += `• Volume: ${signals.volume?.direction || 'N/A'} (${signals.volume?.strength || 'N/A'})\n`;
-        content += `• Static Indicators: ${signals.staticIndicators?.direction || 'N/A'} (${signals.staticIndicators?.strength || 'N/A'})\n\n`;
-
-        if (signals.staticIndicators?.signals?.length > 0) {
-            content += `Static Indicator Details:\n`;
-            signals.staticIndicators.signals.forEach(signal => {
-                content += `• ${signal.indicator}: ${signal.signal} (${signal.strength})\n`;
-            });
-            content += '\n';
-        }
-
-        content += `Current Price: ${this.currentPrice.toFixed(4)}\n`;
-        content += `Analysis Time: ${new Date().toLocaleTimeString()}\n\n`;
-
-        content += `Press [V] to return to default view\n`;
-        content += `Press [B] to Buy Long or [S] to Sell Short\n`;
-        content += `Use ↑↓ arrow keys to scroll through analysis`;
-
-        this.components.mainContent.setLabel('🔍 Analysis & Recommendations');
-        this.components.mainContent.setContent(content);
+        // Aggressive clearing to prevent floating characters
+        // Fill the entire box with spaces first to clear any remnants
+        const boxWidth = this.components.mainContent.width - 4; // Account for borders
+        const boxHeight = this.components.mainContent.height - 2; // Account for borders
+        const clearString = ' '.repeat(boxWidth) + '\n';
+        const fullClear = clearString.repeat(boxHeight);
         
-        // Reset scroll position to top and ensure it's scrollable
-        this.components.mainContent.scrollTo(0);
+        this.components.mainContent.setContent(fullClear);
+        this.components.mainContent.setLabel('');
         this.screen.render();
+        
+        // Small delay to ensure clearing takes effect
+        setTimeout(() => {
+            if (!this.evaluator.signals?.overall) {
+                this.components.mainContent.setLabel('🔍 Analysis & Recommendations');
+                this.components.mainContent.setContent('Use the menu to run analysis first');
+                this.screen.render();
+                return;
+            }
+
+            const recommendation = this.evaluator.signals.overall.summary || 'Analysis completed but no recommendation available';
+            const signals = this.evaluator.signals;
+
+            let content = `📊 TRADING ANALYSIS\n`;
+            content += `═`.repeat(35) + '\n\n';
+
+            content += `${recommendation}\n\n`;
+
+            content += `Signal Breakdown:\n`;
+            content += `• Trend: ${signals.trend?.direction || 'N/A'} (${signals.trend?.strength || 'N/A'})\n`;
+            content += `• Momentum: ${signals.momentum?.direction || 'N/A'} (${signals.momentum?.strength || 'N/A'})\n`;
+            content += `• Volatility: ${signals.volatility?.direction || 'N/A'} (${signals.volatility?.strength || 'N/A'})\n`;
+            content += `• Volume: ${signals.volume?.direction || 'N/A'} (${signals.volume?.strength || 'N/A'})\n`;
+            content += `• Static Indicators: ${signals.staticIndicators?.direction || 'N/A'} (${signals.staticIndicators?.strength || 'N/A'})\n\n`;
+
+            if (signals.staticIndicators?.signals?.length > 0) {
+                content += `Static Indicator Details:\n`;
+                signals.staticIndicators.signals.forEach(signal => {
+                    content += `• ${signal.indicator}: ${signal.signal} (${signal.strength})\n`;
+                });
+                content += '\n';
+            }
+
+            content += `Current Price: ${this.currentPrice.toFixed(4)}\n`;
+            content += `Analysis Time: ${new Date().toLocaleTimeString()}\n\n`;
+
+            content += `Use the menu to navigate back or execute trades`;
+
+            this.components.mainContent.setLabel('🔍 Analysis & Recommendations');
+            this.components.mainContent.setContent(content);
+            
+            // Reset scroll position and force render
+            if (this.components.mainContent.scrollTo) {
+                this.components.mainContent.scrollTo(0);
+            }
+            this.screen.render();
+        }, 10);
     }
 
     showPositionsView() {
@@ -384,45 +423,66 @@ Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}
     }
 
     updatePositionsView() {
+        if (!this.screen) return; // Skip if UI not initialized
+        
         if (this.currentView !== 'positions') return;
 
-        let content = `📊 ACTIVE POSITIONS\n`;
-        content += `═`.repeat(50) + '\n\n';
+        // Aggressive clearing to prevent floating characters
+        // Fill the entire box with spaces first to clear any remnants
+        const boxWidth = this.components.mainContent.width - 4; // Account for borders
+        const boxHeight = this.components.mainContent.height - 2; // Account for borders
+        const clearString = ' '.repeat(boxWidth) + '\n';
+        const fullClear = clearString.repeat(boxHeight);
+        
+        this.components.mainContent.setContent(fullClear);
+        this.components.mainContent.setLabel('');
+        this.screen.render();
+        
+        // Small delay to ensure clearing takes effect
+        setTimeout(() => {
+            // Now set the actual content
+            let content = `📊 POSITIONS\n`;
+            content += `═`.repeat(30) + '\n';
 
-        if (this.positions.length === 0) {
-            content += 'No active positions\n\n';
-        } else {
-            this.positions.forEach((pos, index) => {
+            if (this.positions.length === 0) {
+                content += '\nNo positions\n';
+            } else {
+                // Show only first position to fit in space
+                const pos = this.positions[0];
                 const pnl = this.calculatePnL(pos);
                 const pnlPercent = this.calculatePnLPercent(pos);
-                const status = pnl >= 0 ? 'PROFIT' : 'LOSS';
 
-                content += `Position ${index + 1}:\n`;
-                content += `Side: ${pos.side.toUpperCase()}\n`;
-                content += `Amount: ${pos.amount}\n`;
-                content += `Entry Price: ${pos.entryPrice.toFixed(4)}\n`;
-                content += `Current Price: ${this.currentPrice.toFixed(4)}\n`;
-                content += `P&L: ${pnl.toFixed(4)} (${pnlPercent.toFixed(2)}%)\n`;
-                content += `Status: ${status}\n`;
-                content += `Stop Loss: ${pos.stopLoss.toFixed(4)}\n`;
-                content += `Take Profit: ${pos.takeProfit.toFixed(4)}\n\n`;
-            });
+                content += `${pos.side.toUpperCase()} ${pos.amount}\n`;
+                content += `Entry: ${pos.entryPrice.toFixed(0)}\n`;
+                content += `P&L: ${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}\n`;
+                content += `(${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(1)}%)\n`;
 
-            // Total P&L
-            const totalPnL = this.positions.reduce((sum, pos) => sum + this.calculatePnL(pos), 0);
-            const totalPnLPercent = this.positions.reduce((sum, pos) => sum + this.calculatePnLPercent(pos), 0);
-            content += `═`.repeat(50) + '\n';
-            content += `Total P&L: ${totalPnL >= 0 ? '📈' : '📉'} ${totalPnL.toFixed(2)} (${totalPnLPercent.toFixed(2)}%)\n`;
-        }
+                if (this.positions.length > 1) {
+                    content += `\n+${this.positions.length - 1} more\n`;
+                }
 
-        content += `\nPress [V] to return to default view`;
+                // Total P&L only
+                const totalPnL = this.positions.reduce((sum, pos) => sum + this.calculatePnL(pos), 0);
+                content += `═`.repeat(30) + '\n';
+                content += `Total: ${totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(2)}\n`;
+            }
 
-        this.components.mainContent.setLabel('📊 Active Positions');
-        this.components.mainContent.setContent(content);
-        this.screen.render();
+            content += '\nMenu: navigate';
+
+            this.components.mainContent.setLabel('📊 Active Positions');
+            this.components.mainContent.setContent(content);
+            
+            // Reset scroll position and force render
+            if (this.components.mainContent.scrollTo) {
+                this.components.mainContent.scrollTo(0);
+            }
+            this.screen.render();
+        }, 10);
     }
 
     updatePriceInCurrentView() {
+        if (!this.screen) return; // Skip if UI not initialized
+        
         if (this.currentView === 'default') {
             this.showDefaultView();
         }
@@ -430,6 +490,8 @@ Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}
     }
 
     updateViewData() {
+        if (!this.screen) return; // Skip if UI not initialized
+        
         switch (this.currentView) {
             case 'default':
                 this.showDefaultView();
@@ -477,6 +539,29 @@ Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}
     async start() {
         this.isRunning = true;
 
+        // Temporarily disable console suppression for debugging
+        // Suppress console output for the entire bot session to prevent websocket logs
+        this.originalConsole = {
+            log: console.log,
+            info: console.info,
+            warn: console.warn,
+            error: console.error,
+            debug: console.debug
+        };
+        
+        // Replace console functions with no-ops
+        console.log = (msg) => {
+            // Temporarily allow log for debugging
+            this.originalConsole.log(msg);
+        };
+        console.info = () => {};
+        console.warn = () => {};
+        console.error = (msg) => {
+            // Keep error logging for important errors
+            this.originalConsole.error(msg);
+        };
+        console.debug = () => {};
+
         // Create and start the trade bot agent
         this.agent = new cryptoDogTradeBotAgent();
 
@@ -490,6 +575,9 @@ Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}
             this.updatePriceInCurrentView();
             this.updateStatus(); // Also update the status box with new price
         };
+
+        // Load existing positions from database
+        await this.loadPositionsFromDB();
 
         // Set up real-time data handling
         this.agent.startRealTimeKlineFeed(this.options.interval, this.options.symbol);
@@ -515,16 +603,20 @@ Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}
                 this.checkStopLossAndTakeProfit();
             }
         };
-
-        // Load existing positions from database
-        await this.loadPositionsFromDB();
-
-        console.log(chalk.green('✅ Trading bot started successfully!'));
-        console.log(chalk.gray('Press [B] to buy, [S] to sell, [A] for analysis, [P] for positions, [V] for default view, [Q] to quit\n'));
     }
 
     stop() {
         this.isRunning = false;
+        
+        // Restore console functions
+        if (this.originalConsole) {
+            console.log = this.originalConsole.log;
+            console.info = this.originalConsole.info;
+            console.warn = this.originalConsole.warn;
+            console.error = this.originalConsole.error;
+            console.debug = this.originalConsole.debug;
+        }
+        
         if (this.agent) {
             // Stop the agent (if it has a stop method)
         }
@@ -592,8 +684,15 @@ Status: ${this.isRunning ? '🟢 Running' : '🔴 Stopped'}
         }
 
         this.evaluator.evaluateAllSignals();
+        
+        // Debug: Check if signals were generated
+        if (!this.evaluator.signals?.overall) {
+            this.showMessage('Analysis failed - no signals generated');
+            return;
+        }
+        
         this.showAnalysisView();
-        this.showMessage('📊 Analysis completed - press V to return to default view');
+        this.showMessage('📊 Analysis completed - use menu to navigate');
     }
 
     async closeAllPositions() {
