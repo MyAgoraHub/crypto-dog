@@ -11,6 +11,9 @@ export function useTradeBotAgent() {
   const minLoadSize = 201;
   
   let wsUnsubscribe = null;
+  let pricePollingInterval = null;
+  let currentSymbol = null;
+  let currentCategory = null;
 
   const isKlineDataLoaded = () => {
     return klineData.value.length > 0;
@@ -84,6 +87,10 @@ export function useTradeBotAgent() {
     try {
       // Stop any existing subscription
       stopRealTimeKlineFeed();
+
+      // Store current config for polling
+      currentSymbol = symbol;
+      currentCategory = category;
 
       console.log('🚀 Starting real-time kline feed for', symbol, interval, category);
 
@@ -193,6 +200,33 @@ export function useTradeBotAgent() {
 
       console.log('✅ Subscribed to', topic);
 
+      // Start polling for price updates as backup (every 3 seconds)
+      const pollPrice = async () => {
+        try {
+          const tickerResponse = await apiClient.get('/api/tickers', {
+            params: {
+              category: currentCategory,
+              symbol: currentSymbol
+            }
+          });
+
+          if (tickerResponse.data?.result?.list?.[0]) {
+            const newPrice = parseFloat(tickerResponse.data.result.list[0].lastPrice);
+            if (newPrice !== currentPrice.value) {
+              console.log('💰 Price polled:', currentPrice.value, '→', newPrice);
+              currentPrice.value = newPrice;
+            }
+          }
+        } catch (err) {
+          console.error('❌ Error polling price:', err.message);
+        }
+      };
+
+      // Poll immediately and then every 3 seconds
+      pollPrice();
+      pricePollingInterval = setInterval(pollPrice, 3000);
+      console.log('🔄 Started price polling (3s interval)');
+
     } catch (error) {
       console.error('❌ Failed to start kline feed:', error);
       throw error;
@@ -200,11 +234,22 @@ export function useTradeBotAgent() {
   };
 
   const stopRealTimeKlineFeed = () => {
+    console.log('🛑 Stopping kline feed...');
+    
     if (wsUnsubscribe) {
       wsUnsubscribe();
       wsUnsubscribe = null;
     }
+    
+    if (pricePollingInterval) {
+      clearInterval(pricePollingInterval);
+      pricePollingInterval = null;
+      console.log('🛑 Stopped price polling');
+    }
+    
     isSubscribed.value = false;
+    currentSymbol = null;
+    currentCategory = null;
   };
 
   // Cleanup on unmount
