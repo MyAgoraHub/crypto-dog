@@ -448,6 +448,102 @@ app.post('/api/backtest', async (req, res) => {
   }
 });
 
+// Calculate all indicators from kline data (like CLI agent)
+app.post('/api/indicators/calculate-all', async (req, res) => {
+  try {
+    const { klineData } = req.body;
+
+    console.log('📊 Calculate-all request received');
+    console.log('Kline data length:', klineData?.length);
+
+    if (!klineData || !Array.isArray(klineData) || klineData.length < 50) {
+      console.error('❌ Invalid klineData:', { 
+        isArray: Array.isArray(klineData), 
+        length: klineData?.length 
+      });
+      return res.status(400).json({ 
+        error: 'Invalid klineData. Must be array with at least 50 candles' 
+      });
+    }
+
+    console.log('First candle:', klineData[0]);
+    console.log('Last candle:', klineData[klineData.length - 1]);
+
+    // Import indicator list
+    const { IndicatorList } = await import('./core/indicator/Indicators.js');
+    const { createIndicatorData } = await import('./core/cryptoDogTools.js');
+
+    console.log('📦 Creating indicator data...');
+    
+    // Prepare indicator data
+    const { o, h, l, c, v, buffer } = createIndicatorData(klineData);
+
+    console.log('Created arrays:', { 
+      o: o?.length, 
+      h: h?.length, 
+      l: l?.length, 
+      c: c?.length, 
+      v: v?.length 
+    });
+
+    const staticIndicators = [
+      "SuperTrendIndicator",
+      "VolumeProfile",
+      "FloorPivots",
+      "Woodies",
+      "DynamicGridSignals"
+    ];
+
+    const indicators = {};
+    const indicatorMap = IndicatorList.getIndicator("all");
+
+    console.log('📈 Calculating indicators...');
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const key in indicatorMap) {
+      // Skip these for now
+      if (["Ema3Indicator", "SupportAndResistance"].includes(key)) { 
+        continue; 
+      }
+
+      try {
+        const indicatorFunc = indicatorMap[key];
+        let result = indicatorFunc(o, h, l, c, v, {}, buffer);
+
+        if (Array.isArray(result)) {
+          indicators[key] = result.pop();
+          successCount++;
+        } else {
+          Object.keys(result).forEach(subKey => {
+            if (Array.isArray(result[subKey])) {
+              indicators[`${key}_${subKey}`] = result[subKey].pop();
+              successCount++;
+            }
+          });
+        }
+      } catch (error) {
+        errorCount++;
+        console.error(`❌ Error calculating ${key}:`, error.message);
+        // Continue with other indicators
+      }
+    }
+
+    console.log('✅ Calculation complete:', { 
+      successCount, 
+      errorCount, 
+      totalIndicators: Object.keys(indicators).length 
+    });
+    console.log('Indicator keys:', Object.keys(indicators).slice(0, 10), '...');
+
+    res.json(indicators);
+
+  } catch (error) {
+    console.error('❌ Error calculating indicators:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Create HTTP server
 const server = createServer(app);
 

@@ -36,6 +36,11 @@ const routes = [
     name: 'Backtest',
     component: () => import('../views/BacktestView.vue'),
   },
+  {
+    path: '/tradebot',
+    name: 'TradeBot',
+    component: () => import('../views/TradeBotView.vue'),
+  },
 ];
 
 const router = createRouter({
