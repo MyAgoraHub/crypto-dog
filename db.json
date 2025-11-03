@@ -302,6 +302,49 @@
       "finalPnL": -0.00980000000000291,
       "finalPnLPercent": -0.008907066575780878,
       "updatedAt": "2025-11-02T21:56:38.825Z"
+    },
+    {
+      "id": "pos_1762158358120",
+      "symbol": "ADAUSDT",
+      "side": "short",
+      "amount": 0.001,
+      "entryPrice": 0.5773,
+      "stopLoss": 0.5830730000000001,
+      "takeProfit": 0.565754,
+      "timestamp": "2025-11-03T08:25:58.120Z",
+      "status": "closed",
+      "exitPrice": 0.5772,
+      "exitTime": "2025-11-03T08:26:20.026Z",
+      "finalPnL": 9.999999999998898e-8,
+      "finalPnLPercent": 0.0173220162826934,
+      "updatedAt": "2025-11-03T08:26:20.026Z"
+    },
+    {
+      "id": "pos_1762158358272",
+      "symbol": "ADAUSDT",
+      "side": "short",
+      "amount": 0.001,
+      "entryPrice": 0.5773,
+      "stopLoss": 0.5830730000000001,
+      "takeProfit": 0.565754,
+      "timestamp": "2025-11-03T08:25:58.272Z",
+      "status": "closed",
+      "exitPrice": 0.5772,
+      "exitTime": "2025-11-03T08:26:20.028Z",
+      "finalPnL": 9.999999999998898e-8,
+      "finalPnLPercent": 0.0173220162826934,
+      "updatedAt": "2025-11-03T08:26:20.028Z"
+    },
+    {
+      "id": "pos_1762158381985",
+      "symbol": "ADAUSDT",
+      "side": "short",
+      "amount": 20000,
+      "entryPrice": 0.5774,
+      "stopLoss": 0.5831740000000001,
+      "takeProfit": 0.565852,
+      "timestamp": "2025-11-03T08:26:21.985Z",
+      "status": "open"
     }
   ]
 }

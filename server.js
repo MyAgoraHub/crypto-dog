@@ -17,6 +17,7 @@ import {
   deleteSignal,
   getSignalById 
 } from './core/repository/dbManager.js';
+import { backtestSignal } from './core/cryptoDogBacktest.js';
 import {
   rsiMarketData,
   superTrendMarketData,
@@ -317,6 +318,133 @@ app.delete('/api/signals/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting signal:', error);
     res.status(500).json({ error: 'Failed to delete signal' });
+  }
+});
+
+// Backtest endpoint
+app.post('/api/backtest', async (req, res) => {
+  try {
+    const {
+      symbol,
+      timeframe,
+      signalType,
+      indicator,
+      value,
+      iterations = 10,
+      candles = 200,
+      risk = 2,
+      reward = 5,
+      capital = 10000
+    } = req.body;
+
+    console.log('Running backtest with params:', {
+      symbol,
+      timeframe,
+      signalType,
+      indicator,
+      value,
+      iterations,
+      candles,
+      risk,
+      reward,
+      capital
+    });
+
+    // Map signal type to evaluate function (matching CLI backtest.js)
+    const evaluateFunctionMap = {
+      'INDICATOR_RsiObSignal': 'signalAgent.ob',
+      'INDICATOR_RsiOsSignal': 'signalAgent.os',
+      'INDICATOR_CrocodileDiveSignal': 'signalAgent.crocodileDive',
+      'INDICATOR_CrocodileSignal': 'signalAgent.crocodile',
+      'INDICATOR_CrossUpSignal': 'signalAgent.crossOver',
+      'INDICATOR_CrossDownSignal': 'signalAgent.crossUnder',
+      'INDICATOR_DivergenceDetector': 'signalAgent.multiDiv',
+      'INDICATOR_UptrendSignal': 'signalAgent.uptrendTrend',
+      'INDICATOR_DownTrendSignal': 'signalAgent.downTrend',
+      'INDICATOR_Woodies': 'signalAgent.woodies',
+      'INDICATOR_SuperTrendSignal': 'signalAgent.superTrend',
+      'PRICE_ACTION_GT': 'signalAgent.gt',
+      'PRICE_ACTION_LT': 'signalAgent.lt',
+      'PRICE_ACTION_GTE': 'signalAgent.gte',
+      'PRICE_ACTION_LTE': 'signalAgent.lte',
+      'PRICE_ACTION_EQ': 'signalAgent.eq',
+      'INDICATOR_MacdBullishSignal': 'signalAgent.macdBullish',
+      'INDICATOR_MacdBearishSignal': 'signalAgent.macdBearish',
+      'INDICATOR_BollingerUpperTouchSignal': 'signalAgent.bollingerUpperTouch',
+      'INDICATOR_BollingerLowerTouchSignal': 'signalAgent.bollingerLowerTouch',
+      'INDICATOR_StochasticOverboughtSignal': 'signalAgent.stochasticOverbought',
+      'INDICATOR_StochasticOversoldSignal': 'signalAgent.stochasticOversold',
+      'INDICATOR_WilliamsOverboughtSignal': 'signalAgent.williamsOverbought',
+      'INDICATOR_WilliamsOversoldSignal': 'signalAgent.williamsOversold',
+      'INDICATOR_GoldenCrossSignal': 'signalAgent.goldenCross',
+      'INDICATOR_DeathCrossSignal': 'signalAgent.deathCross',
+      'INDICATOR_VolumeSpikeSignal': 'signalAgent.volumeSpike',
+      'INDICATOR_IchimokuBullishSignal': 'signalAgent.ichimokuBullish',
+      'INDICATOR_IchimokuBearishSignal': 'signalAgent.ichimokuBearish',
+      'INDICATOR_AdxStrongTrendSignal': 'signalAgent.adxStrongTrend',
+      'INDICATOR_MfiOverboughtSignal': 'signalAgent.mfiOverbought',
+      'INDICATOR_MfiOversoldSignal': 'signalAgent.mfiOversold',
+      'INDICATOR_AtrHighVolatilitySignal': 'signalAgent.atrHighVolatility',
+      'INDICATOR_ParabolicSarBullishSignal': 'signalAgent.parabolicSarBullish',
+      'INDICATOR_ParabolicSarBearishSignal': 'signalAgent.parabolicSarBearish',
+      'INDICATOR_CciOverboughtSignal': 'signalAgent.cciOverbought',
+      'INDICATOR_CciOversoldSignal': 'signalAgent.cciOversold',
+      'INDICATOR_MacdHistogramPositiveSignal': 'signalAgent.macdHistogramPositive',
+      'INDICATOR_MacdHistogramNegativeSignal': 'signalAgent.macdHistogramNegative',
+      'INDICATOR_BollingerSqueezeSignal': 'signalAgent.bollingerSqueeze',
+      'INDICATOR_BollingerExpansionSignal': 'signalAgent.bollingerExpansion',
+      'INDICATOR_StochasticBullishCrossSignal': 'signalAgent.stochasticBullishCross',
+      'INDICATOR_StochasticBearishCrossSignal': 'signalAgent.stochasticBearishCross',
+      'INDICATOR_MaSupportSignal': 'signalAgent.maSupport',
+      'INDICATOR_MaResistanceSignal': 'signalAgent.maResistance',
+      'INDICATOR_ObvBullishSignal': 'signalAgent.obvBullish',
+      'INDICATOR_ObvBearishSignal': 'signalAgent.obvBearish',
+      'INDICATOR_IchimokuTkCrossBullishSignal': 'signalAgent.ichimokuTkCrossBullish',
+      'INDICATOR_IchimokuTkCrossBearishSignal': 'signalAgent.ichimokuTkCrossBearish',
+      'INDICATOR_FibonacciRetracementSignal': 'signalAgent.fibonacciRetracement',
+      'INDICATOR_SupportBreakoutSignal': 'signalAgent.supportBreakout',
+      'INDICATOR_ResistanceBreakoutSignal': 'signalAgent.resistanceBreakout',
+      'INDICATOR_AdxWeakTrendSignal': 'signalAgent.adxWeakTrend',
+      'INDICATOR_TemaBullishSignal': 'signalAgent.temaBullish',
+      'INDICATOR_TemaBearishSignal': 'signalAgent.temaBearish',
+      'INDICATOR_KeltnerUpperBreakoutSignal': 'signalAgent.keltnerUpperBreakout',
+      'INDICATOR_KeltnerLowerBreakoutSignal': 'signalAgent.keltnerLowerBreakout',
+      'INDICATOR_DonchianUpperBreakoutSignal': 'signalAgent.donchianUpperBreakout',
+      'INDICATOR_DonchianLowerBreakoutSignal': 'signalAgent.donchianLowerBreakout',
+      'INDICATOR_ElderImpulseBullSignal': 'signalAgent.elderImpulseBull',
+      'INDICATOR_ElderImpulseBearSignal': 'signalAgent.elderImpulseBear',
+      'INDICATOR_ElderImpulseBlueSignal': 'signalAgent.elderImpulseBlue'
+    };
+
+    // Create signal object for backtesting
+    const signal = {
+      symbol,
+      timeframe,
+      signalType,
+      indicator,
+      value,
+      evaluate: evaluateFunctionMap[signalType] || 'signalAgent.gt', // Add evaluate function
+      indicatorArgs: {}
+    };
+
+    // Run backtest
+    const results = await backtestSignal(
+      signal,
+      parseInt(iterations),
+      parseInt(candles),
+      parseFloat(risk),
+      parseFloat(reward),
+      parseFloat(capital)
+    );
+
+    res.json(results);
+  } catch (error) {
+    console.error('Error running backtest:', error);
+    res.status(500).json({ 
+      error: 'Failed to run backtest',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

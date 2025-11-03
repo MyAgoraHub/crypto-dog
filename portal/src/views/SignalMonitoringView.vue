@@ -7,7 +7,7 @@ const loading = ref(true);
 const error = ref(null);
 const filterType = ref('triggered'); // 'all', 'active', 'triggered'
 const lastUpdate = ref(null);
-const autoRefresh = ref(true);
+const autoRefresh = ref(false);
 
 const fetchSignals = async () => {
   loading.value = true;

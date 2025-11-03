@@ -31,6 +31,11 @@ const routes = [
     name: 'SignalConfig',
     component: () => import('../views/SignalConfigView.vue'),
   },
+  {
+    path: '/backtest',
+    name: 'Backtest',
+    component: () => import('../views/BacktestView.vue'),
+  },
 ];
 
 const router = createRouter({
