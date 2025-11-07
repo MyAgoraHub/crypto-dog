@@ -1,0 +1,64 @@
+[
+  {
+    "timestamp": "2025-11-07T17:54:45.794Z",
+    "symbol": "BTCUSDT",
+    "interval": "5m",
+    "candle": {
+      "timestamp": 1762537800000,
+      "open": 101999.6,
+      "high": 102067.1,
+      "low": 101905.1,
+      "close": 102060.2,
+      "volume": 25.502952
+    },
+    "prediction": {
+      "action": "BUY",
+      "score": 54,
+      "confidence": 54,
+      "signals": [
+        "✅ SuperTrend: LONG",
+        "✅ MACD: Bullish (59.32)",
+        "🔥 ADX: Strong trend (26.3)"
+      ],
+      "indicators": {
+        "superTrend": "long",
+        "rsi": 60.08,
+        "macdHist": 59.32,
+        "bbPosition": 0.72,
+        "stochastic": 62.78,
+        "adx": 26.32
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:55:14.829Z",
+    "symbol": "BTCUSDT",
+    "interval": "5m",
+    "candle": {
+      "timestamp": 1762537800000,
+      "open": 101999.6,
+      "high": 102067.1,
+      "low": 101905.1,
+      "close": 102060.2,
+      "volume": 25.502952
+    },
+    "prediction": {
+      "action": "BUY",
+      "score": 54,
+      "confidence": 54,
+      "signals": [
+        "✅ SuperTrend: LONG",
+        "✅ MACD: Bullish (59.32)",
+        "🔥 ADX: Strong trend (26.3)"
+      ],
+      "indicators": {
+        "superTrend": "long",
+        "rsi": 60.08,
+        "macdHist": 59.32,
+        "bbPosition": 0.72,
+        "stochastic": 62.78,
+        "adx": 26.32
+      }
+    }
+  }
+]

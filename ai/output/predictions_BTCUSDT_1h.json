@@ -1,0 +1,312 @@
+[
+  {
+    "timestamp": "2025-11-07T17:34:09.300Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102675.8,
+      "volume": 381.396295
+    },
+    "prediction": {
+      "action": "HOLD",
+      "score": -5.5,
+      "confidence": 5.5,
+      "signals": [
+        "✅ SuperTrend: LONG",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-36.45)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)",
+        "⏸️  Confidence too low (5 < 50)"
+      ],
+      "indicators": {
+        "superTrend": "long",
+        "rsi": 59.71,
+        "macdHist": -36.45,
+        "bbPosition": 0.95,
+        "stochastic": 98.58,
+        "adx": 31.56
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:36:11.001Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102675.8,
+      "volume": 381.396295
+    },
+    "prediction": {
+      "action": "HOLD",
+      "score": -5.5,
+      "confidence": 5.5,
+      "signals": [
+        "✅ SuperTrend: LONG",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-36.45)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)",
+        "⏸️  Confidence too low (5 < 50)"
+      ],
+      "indicators": {
+        "superTrend": "long",
+        "rsi": 59.71,
+        "macdHist": -36.45,
+        "bbPosition": 0.95,
+        "stochastic": 98.58,
+        "adx": 31.56
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:36:42.824Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102675.8,
+      "volume": 381.396295
+    },
+    "prediction": {
+      "action": "HOLD",
+      "score": -5.5,
+      "confidence": 5.5,
+      "signals": [
+        "✅ SuperTrend: LONG",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-36.45)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)",
+        "⏸️  Confidence too low (5 < 50)"
+      ],
+      "indicators": {
+        "superTrend": "long",
+        "rsi": 59.71,
+        "macdHist": -36.45,
+        "bbPosition": 0.95,
+        "stochastic": 98.58,
+        "adx": 31.56
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:37:50.666Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102675.8,
+      "volume": 381.396295
+    },
+    "prediction": {
+      "action": "HOLD",
+      "score": -5.5,
+      "confidence": 5.5,
+      "signals": [
+        "✅ SuperTrend: LONG",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-36.45)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)",
+        "⏸️  Confidence too low (5 < 50)"
+      ],
+      "indicators": {
+        "superTrend": "long",
+        "rsi": 59.71,
+        "macdHist": -36.45,
+        "bbPosition": 0.95,
+        "stochastic": 98.58,
+        "adx": 31.56
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:39:47.072Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102330.2,
+      "volume": 451.689289
+    },
+    "prediction": {
+      "action": "STRONG_SELL",
+      "score": -72,
+      "confidence": 72,
+      "signals": [
+        "⛔ SuperTrend: SHORT",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-50.24)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)"
+      ],
+      "indicators": {
+        "superTrend": "short",
+        "rsi": 57.42,
+        "macdHist": -50.24,
+        "bbPosition": 0.85,
+        "stochastic": 88.62,
+        "adx": 31.56
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:48:36.603Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102330.2,
+      "volume": 451.689289
+    },
+    "prediction": {
+      "action": "STRONG_SELL",
+      "score": -72,
+      "confidence": 72,
+      "signals": [
+        "⛔ SuperTrend: SHORT",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-50.24)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)"
+      ],
+      "indicators": {
+        "superTrend": "short",
+        "rsi": 57.42,
+        "macdHist": -50.24,
+        "bbPosition": 0.85,
+        "stochastic": 88.62,
+        "adx": 31.56
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:49:19.280Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102330.2,
+      "volume": 451.689289
+    },
+    "prediction": {
+      "action": "STRONG_SELL",
+      "score": -72,
+      "confidence": 72,
+      "signals": [
+        "⛔ SuperTrend: SHORT",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-50.24)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)"
+      ],
+      "indicators": {
+        "superTrend": "short",
+        "rsi": 57.42,
+        "macdHist": -50.24,
+        "bbPosition": 0.85,
+        "stochastic": 88.62,
+        "adx": 31.56
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:53:04.000Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102330.2,
+      "volume": 451.689289
+    },
+    "prediction": {
+      "action": "STRONG_SELL",
+      "score": -72,
+      "confidence": 72,
+      "signals": [
+        "⛔ SuperTrend: SHORT",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-50.24)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)"
+      ],
+      "indicators": {
+        "superTrend": "short",
+        "rsi": 57.42,
+        "macdHist": -50.24,
+        "bbPosition": 0.85,
+        "stochastic": 88.62,
+        "adx": 31.56
+      }
+    }
+  },
+  {
+    "timestamp": "2025-11-07T17:53:15.492Z",
+    "symbol": "BTCUSDT",
+    "interval": "1h",
+    "candle": {
+      "timestamp": 1762534800000,
+      "open": 101167.6,
+      "high": 102725,
+      "low": 100939.1,
+      "close": 102330.2,
+      "volume": 451.689289
+    },
+    "prediction": {
+      "action": "STRONG_SELL",
+      "score": -72,
+      "confidence": 72,
+      "signals": [
+        "⛔ SuperTrend: SHORT",
+        "🟢 RSI: Bullish zone",
+        "⛔ MACD: Bearish (-50.24)",
+        "⛔ BB: Near upper band",
+        "⛔ Stoch: Overbought",
+        "🔥 ADX: Strong trend (31.6)"
+      ],
+      "indicators": {
+        "superTrend": "short",
+        "rsi": 57.42,
+        "macdHist": -50.24,
+        "bbPosition": 0.85,
+        "stochastic": 88.62,
+        "adx": 31.56
+      }
+    }
+  }
+]

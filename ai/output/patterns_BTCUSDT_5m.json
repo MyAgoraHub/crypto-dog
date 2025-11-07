@@ -1,0 +1,296 @@
+[
+  {
+    "name": "BB Squeeze (Breakout Ready)",
+    "expectedLabel": "NEUTRAL",
+    "matches": 1594,
+    "correct": 1385,
+    "support": 37.09,
+    "confidence": 86.89,
+    "labelDistribution": {
+      "UP": 100,
+      "DOWN": 109,
+      "NEUTRAL": 1385
+    },
+    "meetsThreshold": true
+  },
+  {
+    "name": "ADX Weak Trend",
+    "expectedLabel": "NEUTRAL",
+    "matches": 1496,
+    "correct": 1298,
+    "support": 34.81,
+    "confidence": 86.76,
+    "labelDistribution": {
+      "UP": 92,
+      "DOWN": 106,
+      "NEUTRAL": 1298
+    },
+    "meetsThreshold": true
+  },
+  {
+    "name": "SuperTrend Short",
+    "expectedLabel": "DOWN",
+    "matches": 2104,
+    "correct": 200,
+    "support": 48.95,
+    "confidence": 9.51,
+    "labelDistribution": {
+      "UP": 158,
+      "DOWN": 200,
+      "NEUTRAL": 1746
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "MACD Bearish Histogram",
+    "expectedLabel": "DOWN",
+    "matches": 2159,
+    "correct": 185,
+    "support": 50.23,
+    "confidence": 8.57,
+    "labelDistribution": {
+      "UP": 162,
+      "DOWN": 185,
+      "NEUTRAL": 1812
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "RSI Bullish",
+    "expectedLabel": "UP",
+    "matches": 2737,
+    "correct": 153,
+    "support": 63.68,
+    "confidence": 5.59,
+    "labelDistribution": {
+      "UP": 153,
+      "DOWN": 190,
+      "NEUTRAL": 2394
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "ADX Strong Trend",
+    "expectedLabel": "UP",
+    "matches": 1871,
+    "correct": 125,
+    "support": 43.53,
+    "confidence": 6.68,
+    "labelDistribution": {
+      "UP": 125,
+      "DOWN": 154,
+      "NEUTRAL": 1592
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "SuperTrend Long",
+    "expectedLabel": "UP",
+    "matches": 2194,
+    "correct": 122,
+    "support": 51.05,
+    "confidence": 5.56,
+    "labelDistribution": {
+      "UP": 122,
+      "DOWN": 128,
+      "NEUTRAL": 1944
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "MACD Bullish Histogram",
+    "expectedLabel": "UP",
+    "matches": 2139,
+    "correct": 118,
+    "support": 49.77,
+    "confidence": 5.52,
+    "labelDistribution": {
+      "UP": 118,
+      "DOWN": 143,
+      "NEUTRAL": 1878
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "BB Near Lower Band",
+    "expectedLabel": "UP",
+    "matches": 948,
+    "correct": 97,
+    "support": 22.06,
+    "confidence": 10.23,
+    "labelDistribution": {
+      "UP": 97,
+      "DOWN": 97,
+      "NEUTRAL": 754
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "Strong Bearish (SuperTrend + MACD + RSI)",
+    "expectedLabel": "DOWN",
+    "matches": 1076,
+    "correct": 92,
+    "support": 25.03,
+    "confidence": 8.55,
+    "labelDistribution": {
+      "UP": 82,
+      "DOWN": 92,
+      "NEUTRAL": 902
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "MACD Strong Bullish",
+    "expectedLabel": "UP",
+    "matches": 1074,
+    "correct": 82,
+    "support": 24.99,
+    "confidence": 7.64,
+    "labelDistribution": {
+      "UP": 82,
+      "DOWN": 96,
+      "NEUTRAL": 896
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "Stochastic Oversold",
+    "expectedLabel": "UP",
+    "matches": 864,
+    "correct": 77,
+    "support": 20.1,
+    "confidence": 8.91,
+    "labelDistribution": {
+      "UP": 77,
+      "DOWN": 85,
+      "NEUTRAL": 702
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "High Volume Bullish",
+    "expectedLabel": "UP",
+    "matches": 1456,
+    "correct": 74,
+    "support": 33.88,
+    "confidence": 5.08,
+    "labelDistribution": {
+      "UP": 74,
+      "DOWN": 92,
+      "NEUTRAL": 1290
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "Stochastic Overbought",
+    "expectedLabel": "DOWN",
+    "matches": 928,
+    "correct": 61,
+    "support": 21.59,
+    "confidence": 6.57,
+    "labelDistribution": {
+      "UP": 60,
+      "DOWN": 61,
+      "NEUTRAL": 807
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "BB Near Upper Band",
+    "expectedLabel": "DOWN",
+    "matches": 882,
+    "correct": 57,
+    "support": 20.52,
+    "confidence": 6.46,
+    "labelDistribution": {
+      "UP": 39,
+      "DOWN": 57,
+      "NEUTRAL": 786
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "Strong Bullish (SuperTrend + MACD + RSI)",
+    "expectedLabel": "UP",
+    "matches": 1168,
+    "correct": 55,
+    "support": 27.18,
+    "confidence": 4.71,
+    "labelDistribution": {
+      "UP": 55,
+      "DOWN": 59,
+      "NEUTRAL": 1054
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "Reversal Signal (Oversold RSI + Bullish Stoch)",
+    "expectedLabel": "UP",
+    "matches": 364,
+    "correct": 49,
+    "support": 8.47,
+    "confidence": 13.46,
+    "labelDistribution": {
+      "UP": 49,
+      "DOWN": 55,
+      "NEUTRAL": 260
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "RSI Oversold",
+    "expectedLabel": "UP",
+    "matches": 173,
+    "correct": 24,
+    "support": 4.03,
+    "confidence": 13.87,
+    "labelDistribution": {
+      "UP": 24,
+      "DOWN": 33,
+      "NEUTRAL": 116
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "Bullish Convergence (RSI + MACD)",
+    "expectedLabel": "UP",
+    "matches": 214,
+    "correct": 23,
+    "support": 4.98,
+    "confidence": 10.75,
+    "labelDistribution": {
+      "UP": 23,
+      "DOWN": 19,
+      "NEUTRAL": 172
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "Bearish Convergence (RSI + MACD)",
+    "expectedLabel": "DOWN",
+    "matches": 214,
+    "correct": 20,
+    "support": 4.98,
+    "confidence": 9.35,
+    "labelDistribution": {
+      "UP": 10,
+      "DOWN": 20,
+      "NEUTRAL": 184
+    },
+    "meetsThreshold": false
+  },
+  {
+    "name": "RSI Overbought",
+    "expectedLabel": "DOWN",
+    "matches": 100,
+    "correct": 9,
+    "support": 2.33,
+    "confidence": 9,
+    "labelDistribution": {
+      "UP": 10,
+      "DOWN": 9,
+      "NEUTRAL": 81
+    },
+    "meetsThreshold": false
+  }
+]

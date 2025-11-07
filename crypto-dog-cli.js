@@ -16,6 +16,8 @@ import { registerCombinationsCommand } from './commands/combinations.js';
 import { registerTradesCommand } from './commands/trades.js';
 import { registerApiKeysCommand } from './commands/api-keys.js';
 import { registerTradingBotCommand } from './commands/trade-bot.js';
+import { registerAIPredictCommand } from './commands/ai-predict.js';
+import { registerAIReportCommand } from './commands/ai-report.js';
 
 const program = new Command();
 
@@ -51,5 +53,7 @@ registerCombinationsCommand(program);
 registerTradesCommand(program);
 registerApiKeysCommand(program);
 registerTradingBotCommand(program);
+registerAIPredictCommand(program);
+registerAIReportCommand(program);
 
 program.parse();

@@ -1,0 +1,90 @@
+{
+  "name": "Crypto Dog AI Configuration",
+  "version": "1.0.0",
+  "description": "Central configuration for all AI analysis scripts",
+  
+  "dataSource": {
+    "inputFile": "../cryptoDogAiContext_BTCUSDT_15m.csv",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m"
+  },
+  
+  "labelCreator": {
+    "lookAhead": 3,
+    "upThreshold": 0.3,
+    "downThreshold": -0.3,
+    "description": "Look ahead 3 candles, label as UP if >0.3% gain, DOWN if <-0.3% loss"
+  },
+  
+  "featureAnalyzer": {
+    "minCorrelation": 0.1,
+    "description": "Minimum correlation to consider an indicator predictive"
+  },
+  
+  "patternDetector": {
+    "minSupport": 0.05,
+    "minConfidence": 0.65,
+    "description": "Pattern must occur 5%+ of time and be correct 65%+ of time"
+  },
+  
+  "predictor": {
+    "weights": {
+      "superTrend": 25,
+      "rsi": 20,
+      "macd": 20,
+      "bollinger": 15,
+      "stochastic": 10,
+      "adx": 10
+    },
+    "thresholds": {
+      "strongBuy": 60,
+      "buy": 40,
+      "sell": -40,
+      "strongSell": -60
+    },
+    "filters": {
+      "minConfidence": 50,
+      "useADXFilter": true,
+      "useBBFilter": false
+    },
+    "description": "Weighted scoring system with confidence thresholds"
+  },
+  
+  "backtester": {
+    "initialCapital": 10000,
+    "positionSize": 0.95,
+    "tradeFee": 0.001,
+    "stopLossPercent": 2.0,
+    "takeProfitPercent": 3.0,
+    "minConfidence": 50,
+    "onlyStrongSignals": false,
+    "description": "Simulate trading with realistic fees and risk management"
+  },
+  
+  "optimization": {
+    "enabled": false,
+    "parameters": {
+      "stopLoss": [1.5, 2.0, 2.5, 3.0],
+      "takeProfit": [2.0, 3.0, 4.0, 5.0],
+      "minConfidence": [50, 60, 70, 80],
+      "lookAhead": [3, 5, 7, 10]
+    },
+    "description": "Parameter grid for optimization (not yet implemented)"
+  },
+  
+  "notes": {
+    "currentPerformance": {
+      "winRate": "43.18%",
+      "totalReturn": "-4.81%",
+      "profitFactor": "1.04",
+      "status": "Needs improvement before live trading"
+    },
+    "recommendedChanges": [
+      "Increase minConfidence to 70+",
+      "Increase strongBuy threshold to 70",
+      "Enable trailing stop loss",
+      "Add multi-timeframe confirmation",
+      "Consider ML model for better accuracy"
+    ]
+  }
+}

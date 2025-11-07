@@ -104,6 +104,13 @@ export class cryptoDogTradeBotAgent {
         }
     }
 
+    getCurrentKlineLength() {
+        return this.klineData.length;
+    }
+
+    getIndicatorValues() {
+        return this.indicators;
+    }
     // Get current indicator values for display
     async startRealTimeKlineFeed(interval, symbol) {
         const { getKlineCandles, getInterval } = await import('./clients/cryptoDogRequestHandler.js');
@@ -143,6 +150,8 @@ export class cryptoDogTradeBotAgent {
                     if(this.refreshIndicatorData){ 
                         this.refreshIndicatorData = false;
                     }
+                    console.log(this.indicators["RsiIndicator"])
+
                 }
             }
         });
