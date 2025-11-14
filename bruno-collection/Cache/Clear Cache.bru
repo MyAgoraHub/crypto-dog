@@ -1,0 +1,41 @@
+meta {
+  name: Clear Cache
+  type: http
+  seq: 2
+}
+
+delete {
+  url: {{baseUrl}}/api/cache?category={{category}}&symbol={{symbol}}&interval={{interval}}
+  body: none
+  auth: none
+}
+
+params:query {
+  category: {{category}}
+  symbol: {{symbol}}
+  interval: {{interval}}
+}
+
+docs {
+  # Clear Cache
+  
+  Clears cached data for specific parameters or all cache if no params provided.
+  
+  ## Query Parameters (all optional)
+  - `category`: Clear cache for specific category
+  - `symbol`: Clear cache for specific symbol
+  - `interval`: Clear cache for specific interval
+  
+  ## Examples
+  - `/api/cache` - Clear all cache
+  - `/api/cache?symbol=BTCUSDT` - Clear BTCUSDT cache
+  - `/api/cache?symbol=BTCUSDT&interval=15` - Clear BTCUSDT 15min cache
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Cache cleared"
+  }
+  ```
+}

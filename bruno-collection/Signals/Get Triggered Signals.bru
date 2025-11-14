@@ -1,0 +1,23 @@
+meta {
+  name: Get Triggered Signals
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/signals/triggered
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Triggered Signals
+  
+  Retrieves signals that have been triggered at least once (triggerCount > 0).
+  
+  ## Response
+  Same format as Get All Signals, filtered to triggered signals.
+  
+  ## Debug Info
+  Server logs total signals, triggered count, and IDs for debugging.
+}

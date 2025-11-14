@@ -1,0 +1,29 @@
+meta {
+  name: Get Tickers
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/tickers?category={{category}}&symbol={{symbol}}
+  body: none
+  auth: none
+}
+
+params:query {
+  category: {{category}}
+  symbol: {{symbol}}
+}
+
+docs {
+  # Get Ticker Data
+  
+  Fetches current ticker information for a specific symbol.
+  
+  ## Query Parameters
+  - `category` (optional): Trading category (default: "spot")
+  - `symbol` (optional): Trading pair (default: "BTCUSDT")
+  
+  ## Response
+  Current price, volume, and market data for the symbol.
+}

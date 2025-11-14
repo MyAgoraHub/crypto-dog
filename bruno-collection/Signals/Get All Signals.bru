@@ -1,0 +1,38 @@
+meta {
+  name: Get All Signals
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/signals
+  body: none
+  auth: none
+}
+
+docs {
+  # Get All Signals
+  
+  Retrieves all trading signals from the database.
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "signals": [
+      {
+        "id": "signal-123",
+        "symbol": "BTCUSDT",
+        "timeframe": "15",
+        "signalType": "INDICATOR_RsiObSignal",
+        "indicator": "rsi",
+        "value": 70,
+        "active": true,
+        "triggerCount": 5,
+        "lastTriggered": 1700000000000,
+        "createdAt": 1699000000000
+      }
+    ]
+  }
+  ```
+}

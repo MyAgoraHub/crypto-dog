@@ -1,0 +1,43 @@
+meta {
+  name: Get Signal by ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/signals/signal-123
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Signal by ID
+  
+  Retrieves a specific signal by its unique ID.
+  
+  ## Path Parameters
+  - `id`: Signal ID
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "signal": {
+      "id": "signal-123",
+      "symbol": "BTCUSDT",
+      "timeframe": "15",
+      "signalType": "INDICATOR_RsiObSignal",
+      "indicator": "rsi",
+      "value": 70,
+      "active": true
+    }
+  }
+  ```
+  
+  ## Error Response (404)
+  ```json
+  {
+    "error": "Signal not found"
+  }
+  ```
+}

@@ -1,0 +1,91 @@
+meta {
+  name: Get Single Indicator
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/indicator/rsi?category={{category}}&symbol={{symbol}}&interval={{interval}}&iterations=5&candles=200
+  body: none
+  auth: none
+}
+
+params:query {
+  category: {{category}}
+  symbol: {{symbol}}
+  interval: {{interval}}
+  iterations: 5
+  candles: 200
+}
+
+docs {
+  # Get Single Indicator
+  
+  Calculates and returns data for a specific technical indicator.
+  
+  ## Path Parameters
+  - `name`: Indicator name (rsi, macd, bollinger, ema, sma, etc.)
+  
+  ## Query Parameters
+  - `category` (optional): Trading category (default: "spot")
+  - `symbol` (optional): Trading pair (default: "BTCUSDT")
+  - `interval` (optional): Time interval (default: "15")
+  - `iterations` (optional): Number of data points (default: 5)
+  - `candles` (optional): Historical candles to analyze (default: 200)
+  
+  ## Example Indicators
+  Replace `rsi` in URL with:
+  
+  ### Oscillators & Momentum
+  - rsi - Relative Strength Index
+  - macd - Moving Average Convergence Divergence
+  - stochastic - Stochastic Oscillator
+  - williamsr - Williams %R
+  - cci - Commodity Channel Index
+  - mfi - Money Flow Index
+  - ksi - KSI Indicator
+  - awesomeoscillator - Awesome Oscillator
+  - roc - Rate of Change
+  
+  ### Trend Indicators
+  - supertrend - SuperTrend
+  - adx - Average Directional Index
+  - ichimoku - Ichimoku Cloud
+  - psar - Parabolic SAR
+  
+  ### Moving Averages
+  - ema - Exponential Moving Average
+  - sma - Simple Moving Average
+  - wma - Weighted Moving Average
+  - zema - Zero-Lag EMA
+  - ema3 - Triple EMA
+  - ema4 - Quad EMA
+  - ema10and20 - EMA 10 & 20
+  - sma3 - Triple SMA
+  - emamulti - Multi-Period EMA (20, 50, 200)
+  - smamulti - Multi-Period SMA (20, 50, 200)
+  - wilderswma - Wilder's WMA
+  
+  ### Volatility
+  - bollinger - Bollinger Bands
+  - atr - Average True Range
+  
+  ### Volume
+  - obv - On-Balance Volume
+  - adl - Accumulation/Distribution Line
+  - volumeprofile - Volume Profile
+  - vwap - Volume Weighted Average Price
+  - forceindex - Force Index
+  
+  ### Support/Resistance & Patterns
+  - floorpivots - Floor Pivot Points
+  - woodies - Woodies Pivot Points
+  - supportandresistance - Support & Resistance Levels
+  - patternrecognition - Pattern Recognition
+  
+  ### Advanced
+  - multidivergence - Multi-Divergence Detector
+  - dynamicgridsignals - Dynamic Grid Signals
+  - trix - TRIX
+  - zscore - Z-Score
+}

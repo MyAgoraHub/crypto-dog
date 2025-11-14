@@ -1,0 +1,24 @@
+meta {
+  name: Get Cache Stats
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/cache/stats
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Cache Statistics
+  
+  Returns statistics about the server's internal cache.
+  
+  ## Response
+  Information about cached data including:
+  - Number of cached items
+  - Cache size
+  - Hit/miss rates
+  - Cached symbols and intervals
+}

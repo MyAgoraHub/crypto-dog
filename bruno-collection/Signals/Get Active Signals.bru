@@ -1,0 +1,20 @@
+meta {
+  name: Get Active Signals
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/signals/active
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Active Signals
+  
+  Retrieves only active trading signals (where active = true).
+  
+  ## Response
+  Same format as Get All Signals, but filtered to active signals only.
+}

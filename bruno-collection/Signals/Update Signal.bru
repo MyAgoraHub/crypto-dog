@@ -1,0 +1,47 @@
+meta {
+  name: Update Signal
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{baseUrl}}/api/signals/signal-123
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "id": "signal-123",
+    "symbol": "BTCUSDT",
+    "timeframe": "15",
+    "signalType": "INDICATOR_RsiObSignal",
+    "indicator": "rsi",
+    "value": 75,
+    "evaluate": "signalAgent.ob",
+    "active": true,
+    "indicatorArgs": {},
+    "triggerCount": 5
+  }
+}
+
+docs {
+  # Update Signal
+  
+  Updates an existing signal. The entire signal object must be provided.
+  
+  ## Path Parameters
+  - `id`: Signal ID to update
+  
+  ## Request Body
+  Complete signal object with updated values.
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Signal updated",
+    "signal": { ... }
+  }
+  ```
+}

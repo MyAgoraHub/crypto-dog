@@ -1,0 +1,61 @@
+meta {
+  name: Calculate All Indicators
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/indicators/calculate-all
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "klineData": [
+      {
+        "timestamp": 1700000000000,
+        "open": 35000,
+        "high": 35500,
+        "low": 34800,
+        "close": 35200,
+        "volume": 1000
+      }
+    ]
+  }
+}
+
+docs {
+  # Calculate All Indicators from Kline Data
+  
+  Processes raw OHLCV data and calculates all available indicators.
+  
+  ## Request Body
+  ```json
+  {
+    "klineData": [
+      {
+        "timestamp": 1700000000000,
+        "open": 35000,
+        "high": 35500,
+        "low": 34800,
+        "close": 35200,
+        "volume": 1000
+      },
+      // ... more candles (minimum 50 required)
+    ]
+  }
+  ```
+  
+  ## Requirements
+  - Minimum 50 candles required
+  - Each candle must have: timestamp, open, high, low, close, volume
+  
+  ## Response
+  Object with calculated indicator values:
+  - Each indicator returns its latest calculated value
+  - Multi-value indicators return separate keys (e.g., MACD_signal, MACD_histogram)
+  
+  ## Use Case
+  Perfect for offline analysis or when you already have candle data.
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Delete Signal
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/api/signals/signal-123
+  body: none
+  auth: none
+}
+
+docs {
+  # Delete Signal
+  
+  Deletes a signal by ID.
+  
+  ## Path Parameters
+  - `id`: Signal ID to delete
+  
+  ## Response
+  ```json
+  {
+    "success": true,
+    "message": "Signal deleted"
+  }
+  ```
+}

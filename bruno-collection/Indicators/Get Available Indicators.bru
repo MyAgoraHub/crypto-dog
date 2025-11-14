@@ -1,0 +1,40 @@
+meta {
+  name: Get Available Indicators
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/indicators
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Available Indicators
+  
+  Returns a list of all available technical indicators.
+  
+  ## Response
+  Object with `indicators` array containing:
+  - id: Indicator identifier
+  - name: Display name
+  - available: Boolean status
+  
+  ## Available Indicators
+  - RSI (Relative Strength Index)
+  - MACD (Moving Average Convergence Divergence)
+  - Bollinger Bands
+  - EMA (Exponential Moving Average)
+  - SMA (Simple Moving Average)
+  - ATR (Average True Range)
+  - Stochastic
+  - Williams %R
+  - CCI (Commodity Channel Index)
+  - ADX (Average Directional Index)
+  - MFI (Money Flow Index)
+  - Ichimoku Cloud
+  - SuperTrend
+  - Multi-Period EMA/SMA
+  - Multi-Divergence Detector
+}

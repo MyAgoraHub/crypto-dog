@@ -1,0 +1,31 @@
+meta {
+  name: Get Order Book
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/orderbook?category={{category}}&symbol={{symbol}}&limit=25
+  body: none
+  auth: none
+}
+
+params:query {
+  category: {{category}}
+  symbol: {{symbol}}
+  limit: 25
+}
+
+docs {
+  # Get Order Book
+  
+  Fetches current order book (bids and asks) for a trading pair.
+  
+  ## Query Parameters
+  - `category` (optional): Trading category (default: "spot")
+  - `symbol` (optional): Trading pair (default: "BTCUSDT")
+  - `limit` (optional): Depth of order book (default: 25)
+  
+  ## Response
+  Object with `bids` and `asks` arrays containing price and quantity.
+}

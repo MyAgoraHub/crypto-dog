@@ -1,0 +1,33 @@
+meta {
+  name: Get Candles
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/candles?category={{category}}&symbol={{symbol}}&interval={{interval}}&limit=50
+  body: none
+  auth: none
+}
+
+params:query {
+  category: {{category}}
+  symbol: {{symbol}}
+  interval: {{interval}}
+  limit: 50
+}
+
+docs {
+  # Get Candle Data
+  
+  Fetches OHLCV (Open, High, Low, Close, Volume) candlestick data.
+  
+  ## Query Parameters
+  - `category` (optional): Trading category (default: "spot")
+  - `symbol` (optional): Trading pair (default: "BTCUSDT")
+  - `interval` (optional): Time interval (default: "15")
+  - `limit` (optional): Number of candles (default: 50)
+  
+  ## Response
+  Array of candle objects with timestamp, open, high, low, close, volume.
+}

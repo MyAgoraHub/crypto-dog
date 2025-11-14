@@ -1,0 +1,78 @@
+meta {
+  name: Get Batch Indicators
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/indicators/batch
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "category": "spot",
+    "symbol": "BTCUSDT",
+    "interval": "15",
+    "iterations": 5,
+    "candles": 200,
+    "forceRefresh": false,
+    "indicators": [
+      "rsi",
+      "macd",
+      "bollinger",
+      "ema"
+    ]
+  }
+}
+
+docs {
+  # Get Batch Indicators
+  
+  Calculate multiple indicators in a single request.
+  
+  ## Request Body
+  
+  ### Simple Format (shared parameters):
+  ```json
+  {
+    "category": "spot",
+    "symbol": "BTCUSDT",
+    "interval": "15",
+    "iterations": 5,
+    "candles": 200,
+    "forceRefresh": false,
+    "indicators": ["rsi", "macd", "bollinger"]
+  }
+  ```
+  
+  ### Advanced Format (per-indicator parameters):
+  ```json
+  {
+    "indicators": [
+      {
+        "name": "rsi",
+        "symbol": "BTCUSDT",
+        "interval": "15",
+        "limit": 5,
+        "candles": 200,
+        "forceRefresh": true
+      },
+      {
+        "name": "macd",
+        "symbol": "ETHUSDT",
+        "interval": "1h",
+        "limit": 10
+      }
+    ]
+  }
+  ```
+  
+  ## Response
+  Object with `results` array containing:
+  - indicator: Name
+  - status: "fulfilled" or "rejected"
+  - data: Indicator data (if successful)
+  - error: Error message (if failed)
+}

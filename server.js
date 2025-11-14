@@ -18,6 +18,7 @@ import {
   getSignalById 
 } from './core/repository/dbManager.js';
 import { backtestSignal } from './core/cryptoDogBacktest.js';
+import { CryptoDogWebSocketHandler } from './core/clients/cryptoDogWebsocketHandler.js';
 import {
   rsiMarketData,
   superTrendMarketData,
@@ -34,7 +35,32 @@ import {
   multiDivergenceDetectorMarketData,
   emaMultiPeriodMarketData,
   smaMultiPeriodMarketData,
-  ichimokuCloudMarketData
+  ichimokuCloudMarketData,
+  ksiMarketData,
+  obvMarketData,
+  ema4MarketData,
+  ema3MarketData,
+  ema10And20MarketData,
+  sma3MarketData,
+  adlMarketData,
+  awesomeOscillatorMarketData,
+  wmaMarketData,
+  wildersWmaMarketData,
+  volumeProfileMarketData,
+  vwapMarketData,
+  trixMarketData,
+  forceIndexMarketData,
+  rocMarketData,
+  psarMarketData,
+  zemaMarketData,
+  zScoreMarketData,
+  patternRecognitionMarketData,
+  floorPivotsMarketData,
+  woodiesMarketData,
+  dynamicGridSignalsMarketData,
+  supportAndResistanceMarketData,
+  getCacheStats,
+  clearCache
 } from './core/indicator/impl/indicatorManager.js';
 
 const app = express();
@@ -127,7 +153,30 @@ const indicatorMap = {
   mfi: mfiMarketData,
   multidivergence: multiDivergenceDetectorMarketData,
   emamulti: emaMultiPeriodMarketData,
-  smamulti: smaMultiPeriodMarketData
+  smamulti: smaMultiPeriodMarketData,
+  ksi: ksiMarketData,
+  obv: obvMarketData,
+  ema4: ema4MarketData,
+  ema3: ema3MarketData,
+  ema10and20: ema10And20MarketData,
+  sma3: sma3MarketData,
+  adl: adlMarketData,
+  awesomeoscillator: awesomeOscillatorMarketData,
+  wma: wmaMarketData,
+  wilderswma: wildersWmaMarketData,
+  volumeprofile: volumeProfileMarketData,
+  vwap: vwapMarketData,
+  trix: trixMarketData,
+  forceindex: forceIndexMarketData,
+  roc: rocMarketData,
+  psar: psarMarketData,
+  zema: zemaMarketData,
+  zscore: zScoreMarketData,
+  patternrecognition: patternRecognitionMarketData,
+  floorpivots: floorPivotsMarketData,
+  woodies: woodiesMarketData,
+  dynamicgridsignals: dynamicGridSignalsMarketData,
+  supportandresistance: supportAndResistanceMarketData
 };
 
 // Get indicator data

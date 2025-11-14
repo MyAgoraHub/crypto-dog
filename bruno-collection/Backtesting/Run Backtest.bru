@@ -1,0 +1,75 @@
+meta {
+  name: Run Backtest
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/backtest
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "signalType": "INDICATOR_RsiObSignal",
+    "indicator": "RsiIndicator",
+    "value": 70,
+    "iterations": 10,
+    "candles": 200,
+    "risk": 2,
+    "reward": 5,
+    "capital": 10000
+  }
+}
+
+docs {
+  # Run Backtest
+  
+  Simulates trading strategy over historical data.
+  
+  ## Request Body
+  ```json
+  {
+    "symbol": "BTCUSDT",
+    "timeframe": "15",
+    "signalType": "INDICATOR_RsiObSignal",
+    "indicator": "rsi",
+    "value": 70,
+    "iterations": 10,        // Number of periods to test
+    "candles": 200,          // Historical candles per iteration
+    "risk": 2,               // Risk % per trade
+    "reward": 5,             // Reward % per trade
+    "capital": 10000         // Starting capital
+  }
+  ```
+  
+  ## Signal Types
+  All signal types from the Create Signal endpoint are supported.
+  The server maps signal types to evaluation functions automatically.
+  
+  ## Response
+  ```json
+  {
+    "config": { ... },
+    "metrics": {
+      "totalTrades": 50,
+      "winningTrades": 30,
+      "losingTrades": 20,
+      "winRate": 60,
+      "totalReturn": 15.5,
+      "avgWin": 5.2,
+      "avgLoss": -2.1,
+      "profitFactor": 2.47,
+      "maxDrawdown": -8.3
+    },
+    "trades": [ ... ],
+    "equity": [ ... ]
+  }
+  ```
+  
+  ## Use Case
+  Test signal strategies before deploying them live.
+}
