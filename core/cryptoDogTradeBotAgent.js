@@ -49,6 +49,9 @@ export class cryptoDogTradeBotAgent {
         return !isSameTimestamp && !isIdenticalData;
     }
 
+    getCurrentKlineCandle() {    
+        return this.klineData.pop();    
+    }
     loadData(open, close, high, low, volume, timestamp, start, end) {
         let currentDate = new Date();
         let addNewCandle = new Date(end) <= currentDate;
@@ -150,8 +153,6 @@ export class cryptoDogTradeBotAgent {
                     if(this.refreshIndicatorData){ 
                         this.refreshIndicatorData = false;
                     }
-                    console.log(this.indicators["RsiIndicator"])
-
                 }
             }
         });

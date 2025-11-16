@@ -1,0 +1,15 @@
+{
+  "name": "bruno-collection",
+  "version": "1.0.0",
+  "description": "This Bruno collection provides complete API documentation and testing capabilities for the Crypto Dog trading server.",
+  "main": "websocket-test-client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}

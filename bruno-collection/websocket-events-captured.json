@@ -1,0 +1,719 @@
+{
+  "testInfo": {
+    "timestamp": "2025-11-15T23:35:40.484Z",
+    "totalEvents": 11,
+    "duration": "15 seconds",
+    "testDescription": "Basic indicators subscription test"
+  },
+  "capturedEvents": [
+    {
+      "timestamp": "2025-11-15T23:35:25.485Z",
+      "eventNumber": 1,
+      "type": "connected",
+      "clientId": "1763249725472",
+      "message": "Connected to Crypto Dog WebSocket server"
+    },
+    {
+      "timestamp": 1763249725482,
+      "eventNumber": 2,
+      "type": "indicators_initial",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "indicators": {
+        "MultiDivergenceDetector": {
+          "c": 95683.7,
+          "hasDivergence": false,
+          "divergence": [
+            {
+              "indicator": "RSI",
+              "type": "Pending Divergence",
+              "index": 76,
+              "open": 95634.1,
+              "close": 95683.7
+            },
+            {
+              "indicator": "MACD",
+              "type": "Pending Divergence",
+              "index": 76,
+              "open": 95634.1,
+              "close": 95683.7
+            },
+            {
+              "indicator": "Stochastic",
+              "type": "Pending Divergence",
+              "index": 76,
+              "open": 95634.1,
+              "close": 95683.7
+            },
+            {
+              "indicator": "Williams %R",
+              "type": "Pending Divergence",
+              "index": 76,
+              "open": 95634.1,
+              "close": 95683.7
+            }
+          ]
+        },
+        "SuperTrendIndicator": {
+          "trend": "short",
+          "value": 96018.62239120001
+        },
+        "RsiIndicator": 52.38,
+        "AtrIndicator": 580.9754571,
+        "BollingerIndicator": {
+          "middle": 95274.76,
+          "upper": 96315.38858,
+          "lower": 94234.13142,
+          "pb": 0.6964870117
+        },
+        "KeltnerIndicator": {
+          "middle": 95299.38082,
+          "upper": 96461.33173420001,
+          "lower": 94137.4299058
+        },
+        "MacdIndicator": {
+          "MACD": -614.9987179,
+          "signal": -697.8150285,
+          "histogram": 82.81631054
+        },
+        "WilliamsRIndicator": -17.07003521,
+        "KsiIndicator": {
+          "kst": -11.41425834,
+          "signal": -10.83253718
+        },
+        "MfiIndicator": 43.35,
+        "ObvIndicator": -755.8976699999996,
+        "Ema4Indicator_ema8": 95158.43139,
+        "Ema4Indicator_ema13": 95197.91343,
+        "Ema4Indicator_ema21": 95354.86336,
+        "Ema4Indicator_ema55": 96091.35768,
+        "Ema4Indicator_ema100": 97122.40497,
+        "Ema10And20_ema10": 95160.15875,
+        "Ema10And20_ema20": 95334.39019,
+        "Sma3Indicator_sma1": 95829.804,
+        "Sma3Indicator_sma2": 97125.393,
+        "AdlIndicator": -298,
+        "AdxIndicator": {
+          "adx": 22.7568389,
+          "pdi": 21.31646565,
+          "mdi": 20.28661052
+        },
+        "AwesomeOscillatorIndicator": -699.94,
+        "CciIndicator": 59.7286272021394,
+        "StochasticIndicator": {
+          "k": 82.92996479,
+          "d": 57.87453655
+        },
+        "IchimokuCloudIndicator": {
+          "conversion": 94941.85,
+          "base": 95805.75,
+          "spanA": 95373.8,
+          "spanB": 95805.75
+        },
+        "WildersSmoothingWeighteMovingAvg": 96704.38108,
+        "WeighteMovingAvg": 95032.53462,
+        "VolumeProfile": {
+          "rangeStart": 100146.05555555545,
+          "rangeEnd": 100506.99999999988,
+          "bullishVolume": 189.11213700000002,
+          "bearishVolume": 165.973701,
+          "totalVolume": 355.085838
+        },
+        "VolumeWeightedAvgPrice": 96887.93177900073,
+        "TrixIndicator": -0.04523175802,
+        "ForceIndexIndiactor": 1962.13668,
+        "RocIndicator": 0.3285086358,
+        "PsarIndicator": 94309.49795199999,
+        "SmaIndicator": 95829.804,
+        "FloorPivots": {
+          "floor": {
+            "pivot": 95625.73333333332,
+            "r1": 95721.46666666665,
+            "r2": 95784.53333333333,
+            "r3": 95880.26666666665,
+            "s1": 95562.66666666664,
+            "s2": 95466.93333333332,
+            "s3": 95403.86666666664
+          }
+        },
+        "Woodies": {
+          "woodies": {
+            "pivot": 95633.9,
+            "r1": 95737.79999999999,
+            "r2": 95792.70000000001,
+            "s1": 95578.99999999999,
+            "s2": 95475.09999999999
+          }
+        },
+        "ZScore_o": -0.40127125091931637,
+        "ZScore_h": -0.710008810133587,
+        "ZScore_l": -0.04647327681077251,
+        "ZScore_c": -0.30654787718733123,
+        "ZScore_v": -2.117586755112783,
+        "ZEMAIndicator": 95155.90336,
+        "DynamicGridSignals": {
+          "o": 95539,
+          "l": 95530,
+          "h": 95688.8,
+          "c": 95658.4,
+          "v": 36.006714,
+          "grid": [
+            94010,
+            95309.4,
+            96608.8,
+            97908.2,
+            99207.6,
+            100507
+          ]
+        }
+      },
+      "currentCandle": [
+        "1763158500000",
+        "94741.7",
+        "95309.4",
+        "94699.9",
+        "95280.9",
+        "71.689761",
+        "6811753.47795586"
+      ],
+      "klineLength": 100
+    },
+    {
+      "timestamp": "2025-11-15T23:35:25.488Z",
+      "eventNumber": 3,
+      "type": "indicators_subscribed",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "agentKey": "BTCUSDT_15m"
+    },
+    {
+      "timestamp": 1763249728216,
+      "eventNumber": 4,
+      "type": "indicators_update",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "indicators": {
+        "MultiDivergenceDetector": {
+          "c": 95683.7,
+          "hasDivergence": false,
+          "divergence": [
+            {
+              "indicator": "RSI",
+              "type": "Pending Divergence",
+              "index": 76,
+              "open": 95634.1,
+              "close": 95683.7
+            },
+            {
+              "indicator": "MACD",
+              "type": "Pending Divergence",
+              "index": 76,
+              "open": 95634.1,
+              "close": 95683.7
+            },
+            {
+              "indicator": "Stochastic",
+              "type": "Pending Divergence",
+              "index": 76,
+              "open": 95634.1,
+              "close": 95683.7
+            },
+            {
+              "indicator": "Williams %R",
+              "type": "Pending Divergence",
+              "index": 76,
+              "open": 95634.1,
+              "close": 95683.7
+            }
+          ]
+        },
+        "SuperTrendIndicator": {
+          "trend": "short",
+          "value": 96018.62239120001
+        },
+        "RsiIndicator": 52.38,
+        "AtrIndicator": 580.9754571,
+        "BollingerIndicator": {
+          "middle": 95274.76,
+          "upper": 96315.38858,
+          "lower": 94234.13142,
+          "pb": 0.6964870117
+        },
+        "KeltnerIndicator": {
+          "middle": 95299.38082,
+          "upper": 96461.33173420001,
+          "lower": 94137.4299058
+        },
+        "MacdIndicator": {
+          "MACD": -614.9987179,
+          "signal": -697.8150285,
+          "histogram": 82.81631054
+        },
+        "WilliamsRIndicator": -17.07003521,
+        "KsiIndicator": {
+          "kst": -11.41425834,
+          "signal": -10.83253718
+        },
+        "MfiIndicator": 43.35,
+        "ObvIndicator": -755.8976699999996,
+        "Ema4Indicator_ema8": 95158.43139,
+        "Ema4Indicator_ema13": 95197.91343,
+        "Ema4Indicator_ema21": 95354.86336,
+        "Ema4Indicator_ema55": 96091.35768,
+        "Ema4Indicator_ema100": 97122.40497,
+        "Ema10And20_ema10": 95160.15875,
+        "Ema10And20_ema20": 95334.39019,
+        "Sma3Indicator_sma1": 95829.804,
+        "Sma3Indicator_sma2": 97125.393,
+        "AdlIndicator": -298,
+        "AdxIndicator": {
+          "adx": 22.7568389,
+          "pdi": 21.31646565,
+          "mdi": 20.28661052
+        },
+        "AwesomeOscillatorIndicator": -699.94,
+        "CciIndicator": 59.7286272021394,
+        "StochasticIndicator": {
+          "k": 82.92996479,
+          "d": 57.87453655
+        },
+        "IchimokuCloudIndicator": {
+          "conversion": 94941.85,
+          "base": 95805.75,
+          "spanA": 95373.8,
+          "spanB": 95805.75
+        },
+        "WildersSmoothingWeighteMovingAvg": 96704.38108,
+        "WeighteMovingAvg": 95032.53462,
+        "VolumeProfile": {
+          "rangeStart": 100146.05555555545,
+          "rangeEnd": 100506.99999999988,
+          "bullishVolume": 189.11213700000002,
+          "bearishVolume": 165.973701,
+          "totalVolume": 355.085838
+        },
+        "VolumeWeightedAvgPrice": 96887.93177900073,
+        "TrixIndicator": -0.04523175802,
+        "ForceIndexIndiactor": 1962.13668,
+        "RocIndicator": 0.3285086358,
+        "PsarIndicator": 94309.49795199999,
+        "SmaIndicator": 95829.804,
+        "FloorPivots": {
+          "floor": {
+            "pivot": 95625.73333333332,
+            "r1": 95721.46666666665,
+            "r2": 95784.53333333333,
+            "r3": 95880.26666666665,
+            "s1": 95562.66666666664,
+            "s2": 95466.93333333332,
+            "s3": 95403.86666666664
+          }
+        },
+        "Woodies": {
+          "woodies": {
+            "pivot": 95633.9,
+            "r1": 95737.79999999999,
+            "r2": 95792.70000000001,
+            "s1": 95578.99999999999,
+            "s2": 95475.09999999999
+          }
+        },
+        "ZScore_o": -0.40127125091931637,
+        "ZScore_h": -0.710008810133587,
+        "ZScore_l": -0.04647327681077251,
+        "ZScore_c": -0.30654787718733123,
+        "ZScore_v": -2.117586755112783,
+        "ZEMAIndicator": 95155.90336,
+        "DynamicGridSignals": {
+          "o": 95539,
+          "l": 95530,
+          "h": 95688.8,
+          "c": 95658.4,
+          "v": 36.006714,
+          "grid": [
+            94010,
+            95309.4,
+            96608.8,
+            97908.2,
+            99207.6,
+            100507
+          ]
+        }
+      },
+      "currentCandle": [
+        "1763157600000",
+        "95057.8",
+        "95371.9",
+        "94733.2",
+        "94741.7",
+        "88.974336",
+        "8468601.13425689"
+      ],
+      "klineLength": 99
+    },
+    {
+      "timestamp": 1763249732829,
+      "eventNumber": 5,
+      "type": "price_update",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "price": 95684.8
+    },
+    {
+      "timestamp": 1763249733216,
+      "eventNumber": 6,
+      "type": "indicators_update",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "indicators": {
+        "MultiDivergenceDetector": {
+          "c": 95684.8,
+          "hasDivergence": false,
+          "divergence": [
+            {
+              "indicator": "RSI",
+              "type": "Pending Divergence",
+              "index": 73,
+              "open": 95634.1,
+              "close": 95684.8
+            },
+            {
+              "indicator": "MACD",
+              "type": "Pending Divergence",
+              "index": 73,
+              "open": 95634.1,
+              "close": 95684.8
+            },
+            {
+              "indicator": "Stochastic",
+              "type": "Pending Divergence",
+              "index": 73,
+              "open": 95634.1,
+              "close": 95684.8
+            },
+            {
+              "indicator": "Williams %R",
+              "type": "Pending Divergence",
+              "index": 73,
+              "open": 95634.1,
+              "close": 95684.8
+            }
+          ]
+        },
+        "SuperTrendIndicator": {
+          "trend": "short",
+          "value": 96018.62239120001
+        },
+        "RsiIndicator": 51.18,
+        "AtrIndicator": 606.4993279,
+        "BollingerIndicator": {
+          "middle": 95524.785,
+          "upper": 96945.23328,
+          "lower": 94104.33672,
+          "pb": 0.5563255284
+        },
+        "KeltnerIndicator": {
+          "middle": 95427.33427,
+          "upper": 96640.3329258,
+          "lower": 94214.33561420001
+        },
+        "MacdIndicator": {
+          "MACD": -689.1519231,
+          "signal": -584.037963,
+          "histogram": -105.1139601
+        },
+        "WilliamsRIndicator": -25.31187123,
+        "KsiIndicator": {
+          "kst": -11.14852105,
+          "signal": -8.255571221
+        },
+        "MfiIndicator": 38.22,
+        "ObvIndicator": -821.7038559999996,
+        "Ema4Indicator_ema8": 95123.75632,
+        "Ema4Indicator_ema13": 95237.18257,
+        "Ema4Indicator_ema21": 95441.52643,
+        "Ema4Indicator_ema55": 96211.10409,
+        "Ema10And20_ema10": 95160.56007,
+        "Ema10And20_ema20": 95417.79835,
+        "Sma3Indicator_sma1": 95947.204,
+        "AdlIndicator": -289,
+        "AdxIndicator": {
+          "adx": 25.54693192,
+          "pdi": 23.02094481,
+          "mdi": 23.38597856
+        },
+        "AwesomeOscillatorIndicator": -960.43,
+        "CciIndicator": 13.968543752291529,
+        "StochasticIndicator": {
+          "k": 74.68812877,
+          "d": 45.5880205
+        },
+        "IchimokuCloudIndicator": {
+          "conversion": 95094.55,
+          "base": 95805.75,
+          "spanA": 95450.15,
+          "spanB": 95874.95
+        },
+        "WildersSmoothingWeighteMovingAvg": 96808.30842,
+        "WeighteMovingAvg": 95040.33333,
+        "VolumeProfile": {
+          "rangeStart": 100146.05555555545,
+          "rangeEnd": 100506.99999999988,
+          "bullishVolume": 189.11213700000002,
+          "bearishVolume": 165.973701,
+          "totalVolume": 355.085838
+        },
+        "VolumeWeightedAvgPrice": 96912.0233262277,
+        "TrixIndicator": -0.04211139998,
+        "ForceIndexIndiactor": 3179.635882,
+        "RocIndicator": 0.6453051552,
+        "PsarIndicator": 94200,
+        "SmaIndicator": 95947.204,
+        "FloorPivots": {
+          "floor": {
+            "pivot": 95625.73333333332,
+            "r1": 95721.46666666665,
+            "r2": 95784.53333333333,
+            "r3": 95880.26666666665,
+            "s1": 95562.66666666664,
+            "s2": 95466.93333333332,
+            "s3": 95403.86666666664
+          }
+        },
+        "Woodies": {
+          "woodies": {
+            "pivot": 95633.9,
+            "r1": 95737.79999999999,
+            "r2": 95792.70000000001,
+            "s1": 95578.99999999999,
+            "s2": 95475.09999999999
+          }
+        },
+        "ZScore_o": -0.5370675068206802,
+        "ZScore_h": -0.8488744852022762,
+        "ZScore_l": -0.1736436328712856,
+        "ZScore_c": -0.4368535829193643,
+        "ZScore_v": -2.2418723999471966,
+        "ZEMAIndicator": 95139.62218,
+        "DynamicGridSignals": {
+          "o": 95539,
+          "l": 95530,
+          "h": 95688.8,
+          "c": 95658.4,
+          "v": 36.006714,
+          "grid": [
+            94010,
+            95309.4,
+            96608.8,
+            97908.2,
+            99207.6,
+            100507
+          ]
+        }
+      },
+      "currentCandle": [
+        1763249400000,
+        95634.1,
+        95684.8,
+        95620.7,
+        95684.8,
+        4.871512
+      ],
+      "klineLength": 98
+    },
+    {
+      "timestamp": 1763249734876,
+      "eventNumber": 7,
+      "type": "price_update",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "price": 95684.8
+    },
+    {
+      "timestamp": 1763249735798,
+      "eventNumber": 8,
+      "type": "price_update",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "price": 95684.2
+    },
+    {
+      "timestamp": 1763249736772,
+      "eventNumber": 9,
+      "type": "price_update",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "price": 95684.2
+    },
+    {
+      "timestamp": 1763249738220,
+      "eventNumber": 10,
+      "type": "indicators_update",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "indicators": {
+        "MultiDivergenceDetector": {
+          "c": 95684.8,
+          "hasDivergence": false,
+          "divergence": [
+            {
+              "indicator": "RSI",
+              "type": "Pending Divergence",
+              "index": 72,
+              "open": 95634.1,
+              "close": 95684.8
+            },
+            {
+              "indicator": "MACD",
+              "type": "Pending Divergence",
+              "index": 72,
+              "open": 95634.1,
+              "close": 95684.8
+            },
+            {
+              "indicator": "Stochastic",
+              "type": "Pending Divergence",
+              "index": 72,
+              "open": 95634.1,
+              "close": 95684.8
+            },
+            {
+              "indicator": "Williams %R",
+              "type": "Pending Divergence",
+              "index": 72,
+              "open": 95634.1,
+              "close": 95684.8
+            }
+          ]
+        },
+        "SuperTrendIndicator": {
+          "trend": "short",
+          "value": 96018.62239120001
+        },
+        "RsiIndicator": 50.73,
+        "AtrIndicator": 633.1321514,
+        "BollingerIndicator": {
+          "middle": 95623.88,
+          "upper": 97164.46385,
+          "lower": 94083.29615,
+          "pb": 0.5197717249
+        },
+        "KeltnerIndicator": {
+          "middle": 95505.05366,
+          "upper": 96771.3179628,
+          "lower": 94238.7893572
+        },
+        "MacdIndicator": {
+          "MACD": -744.2237179,
+          "signal": -509.7287037,
+          "histogram": -234.4950142
+        },
+        "WilliamsRIndicator": -30.23212104,
+        "KsiIndicator": {
+          "kst": -10.5787127,
+          "signal": -7.204010959
+        },
+        "MfiIndicator": 33.18,
+        "ObvIndicator": -922.6268859999997,
+        "Ema4Indicator_ema8": 95108.50257,
+        "Ema4Indicator_ema13": 95255.82253,
+        "Ema4Indicator_ema21": 95476.53544,
+        "Ema4Indicator_ema55": 96253.90755,
+        "Ema10And20_ema10": 95162.73504,
+        "Ema10And20_ema20": 95451.85481,
+        "Sma3Indicator_sma1": 95988.076,
+        "AdlIndicator": -379,
+        "AdxIndicator": {
+          "adx": 26.27102226,
+          "pdi": 21.9437004,
+          "mdi": 23.63401702
+        },
+        "AwesomeOscillatorIndicator": -1005.04,
+        "CciIndicator": 0.9290994533381332,
+        "StochasticIndicator": {
+          "k": 69.76787896,
+          "d": 41.30890554
+        },
+        "IchimokuCloudIndicator": {
+          "conversion": 95094.55,
+          "base": 95805.75,
+          "spanA": 95450.15,
+          "spanB": 95874.95
+        },
+        "WildersSmoothingWeighteMovingAvg": 96844.29116,
+        "WeighteMovingAvg": 95049.79487,
+        "VolumeProfile": {
+          "rangeStart": 100146.05555555545,
+          "rangeEnd": 100506.99999999988,
+          "bullishVolume": 189.11213700000002,
+          "bearishVolume": 165.973701,
+          "totalVolume": 355.085838
+        },
+        "VolumeWeightedAvgPrice": 96922.76744980343,
+        "TrixIndicator": -0.04011785098,
+        "ForceIndexIndiactor": 4851.430054,
+        "RocIndicator": 0.3159878973,
+        "PsarIndicator": 94200,
+        "SmaIndicator": 95988.076,
+        "FloorPivots": {
+          "floor": {
+            "pivot": 95625.73333333332,
+            "r1": 95721.46666666665,
+            "r2": 95784.53333333333,
+            "r3": 95880.26666666665,
+            "s1": 95562.66666666664,
+            "s2": 95466.93333333332,
+            "s3": 95403.86666666664
+          }
+        },
+        "Woodies": {
+          "woodies": {
+            "pivot": 95633.9,
+            "r1": 95737.79999999999,
+            "r2": 95792.70000000001,
+            "s1": 95578.99999999999,
+            "s2": 95475.09999999999
+          }
+        },
+        "ZScore_o": -0.5966885746181115,
+        "ZScore_h": -0.9119665013819419,
+        "ZScore_l": -0.21868547920220818,
+        "ZScore_c": -0.47902338617200874,
+        "ZScore_v": -2.262866539745721,
+        "ZEMAIndicator": 95133.86773,
+        "DynamicGridSignals": {
+          "o": 95539,
+          "l": 95530,
+          "h": 95688.8,
+          "c": 95658.4,
+          "v": 36.006714,
+          "grid": [
+            94010,
+            95309.4,
+            96608.8,
+            97908.2,
+            99207.6,
+            100507
+          ]
+        }
+      },
+      "currentCandle": [
+        1763249400000,
+        95634.1,
+        95684.8,
+        95620.7,
+        95684.8,
+        4.871892
+      ],
+      "klineLength": 97
+    },
+    {
+      "timestamp": 1763249738870,
+      "eventNumber": 11,
+      "type": "price_update",
+      "symbol": "BTCUSDT",
+      "interval": "15m",
+      "price": 95684.3
+    }
+  ]
+}

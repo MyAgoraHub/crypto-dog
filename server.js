@@ -19,6 +19,7 @@ import {
 } from './core/repository/dbManager.js';
 import { backtestSignal } from './core/cryptoDogBacktest.js';
 import { CryptoDogWebSocketHandler } from './core/clients/cryptoDogWebsocketHandler.js';
+import { cryptoDogTradeBotAgent } from './core/cryptoDogTradeBotAgent.js';
 import {
   rsiMarketData,
   superTrendMarketData,
@@ -602,6 +603,9 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 // Store active WebSocket connections and their subscriptions
 const wsClients = new Map();
 
+// Store active trade bot agents for real-time indicators
+const tradeBotAgents = new Map();
+
 wss.on('connection', (ws) => {
   const clientId = Date.now().toString();
   console.log(`✅ WebSocket client connected: ${clientId}`);
@@ -655,6 +659,85 @@ wss.on('connection', (ws) => {
           topics,
           category
         }));
+      } else if (data.type === 'subscribe_indicators') {
+        // Subscribe to real-time indicators using cryptoDogTradeBotAgent
+        const { symbol = 'BTCUSDT', interval = '15m' } = data;
+        const agentKey = `${symbol}_${interval}`;
+        
+        // Create trade bot agent if not exists
+        if (!tradeBotAgents.has(agentKey)) {
+          console.log(`🤖 Creating trade bot agent for ${symbol} ${interval}`);
+          const agent = new cryptoDogTradeBotAgent();
+          
+          // Set up price update callback
+          agent.onPriceUpdate = (price) => {
+            // Broadcast price updates to all subscribed clients
+            wsClients.forEach((clientData, cId) => {
+              if (clientData.ws.readyState === clientData.ws.OPEN && 
+                  clientData.subscriptions.has(`indicators_${agentKey}`)) {
+                clientData.ws.send(JSON.stringify({
+                  type: 'price_update',
+                  symbol,
+                  interval,
+                  price,
+                  timestamp: Date.now()
+                }));
+              }
+            });
+          };
+          
+          // Start real-time feed
+          await agent.startRealTimeKlineFeed(interval, symbol);
+          tradeBotAgents.set(agentKey, agent);
+          
+          // Set up periodic indicator broadcasts
+          setInterval(() => {
+            if (agent.isKlineDataLoaded()) {
+              const indicators = agent.getIndicatorValues();
+              const currentCandle = agent.getCurrentKlineCandle();
+              
+              // Broadcast to all subscribed clients
+              wsClients.forEach((clientData, cId) => {
+                if (clientData.ws.readyState === clientData.ws.OPEN && 
+                    clientData.subscriptions.has(`indicators_${agentKey}`)) {
+                  clientData.ws.send(JSON.stringify({
+                    type: 'indicators_update',
+                    symbol,
+                    interval,
+                    indicators,
+                    currentCandle,
+                    klineLength: agent.getCurrentKlineLength(),
+                    timestamp: Date.now()
+                  }));
+                }
+              });
+            }
+          }, 5000); // Update every 5 seconds
+        }
+        
+        // Add subscription
+        client.subscriptions.add(`indicators_${agentKey}`);
+        
+        // Send immediate data if available
+        const agent = tradeBotAgents.get(agentKey);
+        if (agent && agent.isKlineDataLoaded()) {
+          ws.send(JSON.stringify({
+            type: 'indicators_initial',
+            symbol,
+            interval,
+            indicators: agent.getIndicatorValues(),
+            currentCandle: agent.getCurrentKlineCandle(),
+            klineLength: agent.getCurrentKlineLength(),
+            timestamp: Date.now()
+          }));
+        }
+        
+        ws.send(JSON.stringify({
+          type: 'indicators_subscribed',
+          symbol,
+          interval,
+          agentKey
+        }));
       } else if (data.type === 'unsubscribe') {
         // Note: Bybit API doesn't support unsubscribe easily, 
         // so we'd need to track and filter on our end
@@ -665,6 +748,57 @@ wss.on('connection', (ws) => {
           type: 'unsubscribed',
           topics
         }));
+      } else if (data.type === 'unsubscribe_indicators') {
+        const { symbol = 'BTCUSDT', interval = '15m' } = data;
+        const agentKey = `${symbol}_${interval}`;
+        
+        client.subscriptions.delete(`indicators_${agentKey}`);
+        
+        ws.send(JSON.stringify({
+          type: 'indicators_unsubscribed',
+          symbol,
+          interval,
+          agentKey
+        }));
+      } else if (data.type === 'get_current_candle') {
+        const { symbol = 'BTCUSDT', interval = '15m' } = data;
+        const agentKey = `${symbol}_${interval}`;
+        const agent = tradeBotAgents.get(agentKey);
+        
+        if (agent && agent.isKlineDataLoaded()) {
+          ws.send(JSON.stringify({
+            type: 'current_candle',
+            symbol,
+            interval,
+            candle: agent.getCurrentKlineCandle(),
+            timestamp: Date.now()
+          }));
+        } else {
+          ws.send(JSON.stringify({
+            type: 'error',
+            error: 'No agent or data available for the requested symbol/interval'
+          }));
+        }
+      } else if (data.type === 'get_indicators') {
+        const { symbol = 'BTCUSDT', interval = '15m' } = data;
+        const agentKey = `${symbol}_${interval}`;
+        const agent = tradeBotAgents.get(agentKey);
+        
+        if (agent && agent.isKlineDataLoaded()) {
+          ws.send(JSON.stringify({
+            type: 'indicators_snapshot',
+            symbol,
+            interval,
+            indicators: agent.getIndicatorValues(),
+            klineLength: agent.getCurrentKlineLength(),
+            timestamp: Date.now()
+          }));
+        } else {
+          ws.send(JSON.stringify({
+            type: 'error',
+            error: 'No agent or data available for the requested symbol/interval'
+          }));
+        }
       }
     } catch (error) {
       console.error('WebSocket message error:', error);
