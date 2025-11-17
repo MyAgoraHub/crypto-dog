@@ -1,0 +1,34 @@
+meta {
+  name: Get Signal Types
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/signal-types
+  body: none
+  auth: none
+}
+
+tests {
+  test("Signal types returned", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('total');
+    expect(res.body).to.have.property('categories');
+    expect(res.body).to.have.property('signals');
+    expect(res.body).to.have.property('grouped');
+    expect(res.body.signals).to.be.an('array');
+    expect(res.body.total).to.be.greaterThan(0);
+  });
+  
+  test("Each signal has required properties", function() {
+    const signal = res.body.signals[0];
+    expect(signal).to.have.property('key');
+    expect(signal).to.have.property('name');
+    expect(signal).to.have.property('description');
+    expect(signal).to.have.property('category');
+    expect(signal).to.have.property('direction');
+    expect(signal).to.have.property('defaultValue');
+    expect(signal).to.have.property('valueType');
+  });
+}

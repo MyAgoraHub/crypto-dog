@@ -1,0 +1,42 @@
+meta {
+  name: Backtest Legacy Format
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/backtest
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "signalType": "INDICATOR_RsiObSignal",
+    "indicator": "RsiIndicator",
+    "value": 70,
+    "symbol": "BTCUSDT",
+    "timeframe": "15",
+    "iterations": 5,
+    "candles": 100,
+    "risk": 2,
+    "reward": 5,
+    "capital": 10000
+  }
+}
+
+tests {
+  test("Legacy backtest successful", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('success', true);
+    expect(res.body).to.have.property('signal');
+    expect(res.body).to.have.property('results');
+  });
+  
+  test("Legacy mapping correct", function() {
+    expect(res.body.signal.signalType).to.equal('INDICATOR_RsiObSignal');
+    expect(res.body.signal.indicator).to.equal('RsiIndicator');
+    expect(res.body.signal.value).to.equal(70);
+    expect(res.body.signal.mappedFrom).to.equal('legacy');
+  });
+}

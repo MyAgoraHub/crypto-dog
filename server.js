@@ -20,6 +20,7 @@ import {
 import { backtestSignal } from './core/cryptoDogBacktest.js';
 import { CryptoDogWebSocketHandler } from './core/clients/cryptoDogWebsocketHandler.js';
 import { cryptoDogTradeBotAgent } from './core/cryptoDogTradeBotAgent.js';
+// Signal mapping utilities removed - using direct signalType to indicator mapping
 import {
   rsiMarketData,
   superTrendMarketData,
@@ -280,6 +281,334 @@ app.get('/api/indicators', (req, res) => {
   });
 });
 
+// Get all available signal types for backtesting  
+app.get('/api/signal-types', (req, res) => {
+  try {
+    // Return all available signal types matching CLI backtest.js
+    const signalTypes = [
+      // RSI Signals
+      { signalType: 'INDICATOR_RsiObSignal', indicator: 'RsiIndicator', category: 'RSI', description: 'RSI Overbought Signal (>70)' },
+      { signalType: 'INDICATOR_RsiOsSignal', indicator: 'RsiIndicator', category: 'RSI', description: 'RSI Oversold Signal (<30)' },
+      
+      // MACD Signals
+      { signalType: 'INDICATOR_MacdBullishSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Bullish Cross' },
+      { signalType: 'INDICATOR_MacdBearishSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Bearish Cross' },
+      { signalType: 'INDICATOR_MacdHistogramPositiveSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Histogram Positive' },
+      { signalType: 'INDICATOR_MacdHistogramNegativeSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Histogram Negative' },
+      
+      // Bollinger Band Signals
+      { signalType: 'INDICATOR_BollingerUpperTouchSignal', indicator: 'BollingerIndicator', category: 'Bollinger Bands', description: 'Price touches upper band' },
+      { signalType: 'INDICATOR_BollingerLowerTouchSignal', indicator: 'BollingerIndicator', category: 'Bollinger Bands', description: 'Price touches lower band' },
+      { signalType: 'INDICATOR_BollingerSqueezeSignal', indicator: 'BollingerIndicator', category: 'Bollinger Bands', description: 'Bollinger Squeeze' },
+      { signalType: 'INDICATOR_BollingerExpansionSignal', indicator: 'BollingerIndicator', category: 'Bollinger Bands', description: 'Bollinger Expansion' },
+      
+      // Stochastic Signals
+      { signalType: 'INDICATOR_StochasticOverboughtSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: 'Stochastic Overbought (>80)' },
+      { signalType: 'INDICATOR_StochasticOversoldSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: 'Stochastic Oversold (<20)' },
+      { signalType: 'INDICATOR_StochasticBullishCrossSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: '%K crosses above %D' },
+      { signalType: 'INDICATOR_StochasticBearishCrossSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: '%K crosses below %D' },
+      
+      // Williams %R Signals
+      { signalType: 'INDICATOR_WilliamsOverboughtSignal', indicator: 'WilliamsRIndicator', category: 'Williams %R', description: 'Williams %R Overbought (>-20)' },
+      { signalType: 'INDICATOR_WilliamsOversoldSignal', indicator: 'WilliamsRIndicator', category: 'Williams %R', description: 'Williams %R Oversold (<-80)' },
+      
+      // CCI Signals
+      { signalType: 'INDICATOR_CciOverboughtSignal', indicator: 'CciIndicator', category: 'CCI', description: 'CCI Overbought (>100)' },
+      { signalType: 'INDICATOR_CciOversoldSignal', indicator: 'CciIndicator', category: 'CCI', description: 'CCI Oversold (<-100)' },
+      
+      // ADX Signals
+      { signalType: 'INDICATOR_AdxStrongTrendSignal', indicator: 'AdxIndicator', category: 'ADX', description: 'ADX Strong Trend (>25)' },
+      { signalType: 'INDICATOR_AdxWeakTrendSignal', indicator: 'AdxIndicator', category: 'ADX', description: 'ADX Weak Trend (<20)' },
+      
+      // MFI Signals
+      { signalType: 'INDICATOR_MfiOverboughtSignal', indicator: 'MfiIndicator', category: 'MFI', description: 'Money Flow Index Overbought (>80)' },
+      { signalType: 'INDICATOR_MfiOversoldSignal', indicator: 'MfiIndicator', category: 'MFI', description: 'Money Flow Index Oversold (<20)' },
+      
+      // ATR Signals
+      { signalType: 'INDICATOR_AtrHighVolatilitySignal', indicator: 'AtrIndicator', category: 'ATR', description: 'ATR High Volatility' },
+      
+      // Parabolic SAR Signals
+      { signalType: 'INDICATOR_ParabolicSarBullishSignal', indicator: 'PsarIndicator', category: 'Parabolic SAR', description: 'PSAR Bullish (below price)' },
+      { signalType: 'INDICATOR_ParabolicSarBearishSignal', indicator: 'PsarIndicator', category: 'Parabolic SAR', description: 'PSAR Bearish (above price)' },
+      
+      // Ichimoku Signals
+      { signalType: 'INDICATOR_IchimokuBullishSignal', indicator: 'IchimokuCloudIndicator', category: 'Ichimoku', description: 'Ichimoku Bullish (above cloud)' },
+      { signalType: 'INDICATOR_IchimokuBearishSignal', indicator: 'IchimokuCloudIndicator', category: 'Ichimoku', description: 'Ichimoku Bearish (below cloud)' },
+      { signalType: 'INDICATOR_IchimokuTkCrossBullishSignal', indicator: 'IchimokuCloudIndicator', category: 'Ichimoku', description: 'Tenkan crosses above Kijun' },
+      { signalType: 'INDICATOR_IchimokuTkCrossBearishSignal', indicator: 'IchimokuCloudIndicator', category: 'Ichimoku', description: 'Tenkan crosses below Kijun' },
+      
+      // SuperTrend Signals
+      { signalType: 'INDICATOR_SuperTrendSignal', indicator: 'SuperTrendIndicator', category: 'SuperTrend', description: 'SuperTrend Signal' },
+      { signalType: 'INDICATOR_UptrendSignal', indicator: 'SuperTrendIndicator', category: 'SuperTrend', description: 'SuperTrend Uptrend' },
+      { signalType: 'INDICATOR_DownTrendSignal', indicator: 'SuperTrendIndicator', category: 'SuperTrend', description: 'SuperTrend Downtrend' },
+      
+      // Moving Average Signals
+      { signalType: 'INDICATOR_GoldenCrossSignal', indicator: 'Ema3Indicator', category: 'Moving Average', description: 'Golden Cross (fast MA > slow MA)' },
+      { signalType: 'INDICATOR_DeathCrossSignal', indicator: 'Ema3Indicator', category: 'Moving Average', description: 'Death Cross (fast MA < slow MA)' },
+      { signalType: 'INDICATOR_MaSupportSignal', indicator: 'EMAIndicator', category: 'Moving Average', description: 'Price finds support at MA' },
+      { signalType: 'INDICATOR_MaResistanceSignal', indicator: 'EMAIndicator', category: 'Moving Average', description: 'Price hits resistance at MA' },
+      { signalType: 'INDICATOR_CrossUpSignal', indicator: 'EMAIndicator', category: 'Moving Average', description: 'EMA Cross Up' },
+      { signalType: 'INDICATOR_CrossDownSignal', indicator: 'EMAIndicator', category: 'Moving Average', description: 'EMA Cross Down' },
+      
+      // Volume Signals
+      { signalType: 'INDICATOR_ObvBullishSignal', indicator: 'ObvIndicator', category: 'Volume', description: 'On Balance Volume Bullish' },
+      { signalType: 'INDICATOR_ObvBearishSignal', indicator: 'ObvIndicator', category: 'Volume', description: 'On Balance Volume Bearish' },
+      { signalType: 'INDICATOR_VolumeSpikeSignal', indicator: 'ObvIndicator', category: 'Volume', description: 'Volume Spike' },
+      
+      // Triple EMA Signals
+      { signalType: 'INDICATOR_TemaBullishSignal', indicator: 'TrixIndicator', category: 'TEMA', description: 'Triple EMA Bullish' },
+      { signalType: 'INDICATOR_TemaBearishSignal', indicator: 'TrixIndicator', category: 'TEMA', description: 'Triple EMA Bearish' },
+      
+      // Pattern Recognition Signals
+      { signalType: 'INDICATOR_CrocodileSignal', indicator: 'Ema3Indicator', category: 'Pattern', description: 'Crocodile Pattern (EMA1>EMA2>EMA3)' },
+      { signalType: 'INDICATOR_CrocodileDiveSignal', indicator: 'Ema3Indicator', category: 'Pattern', description: 'Crocodile Dive (EMA1<EMA2<EMA3)' },
+      { signalType: 'INDICATOR_DivergenceDetector', indicator: 'MultiDivergenceDetector', category: 'Divergence', description: 'Multi-Divergence Detection' },
+      
+      // Support/Resistance Signals
+      { signalType: 'INDICATOR_SupportBreakoutSignal', indicator: 'SupportAndResistance', category: 'Support/Resistance', description: 'Support Level Breakout' },
+      { signalType: 'INDICATOR_ResistanceBreakoutSignal', indicator: 'SupportAndResistance', category: 'Support/Resistance', description: 'Resistance Level Breakout' },
+      
+      // Advanced Signals
+      { signalType: 'INDICATOR_FibonacciRetracementSignal', indicator: 'price', category: 'Fibonacci', description: 'Fibonacci Retracement Levels' },
+      { signalType: 'INDICATOR_Woodies', indicator: 'Woodies', category: 'Pivot Points', description: 'Woodies Pivot Points' },
+      
+      // Channel Breakout Signals
+      { signalType: 'INDICATOR_KeltnerUpperBreakoutSignal', indicator: 'KeltnerIndicator', category: 'Keltner Channels', description: 'Keltner Upper Breakout' },
+      { signalType: 'INDICATOR_KeltnerLowerBreakoutSignal', indicator: 'KeltnerIndicator', category: 'Keltner Channels', description: 'Keltner Lower Breakout' },
+      { signalType: 'INDICATOR_DonchianUpperBreakoutSignal', indicator: 'price', category: 'Donchian Channels', description: 'Donchian Upper Breakout' },
+      { signalType: 'INDICATOR_DonchianLowerBreakoutSignal', indicator: 'price', category: 'Donchian Channels', description: 'Donchian Lower Breakout' },
+      
+      // Elder Impulse Signals
+      { signalType: 'INDICATOR_ElderImpulseBullSignal', indicator: 'MacdIndicator', category: 'Elder Impulse', description: 'Elder Impulse Bull (green bar)' },
+      { signalType: 'INDICATOR_ElderImpulseBearSignal', indicator: 'MacdIndicator', category: 'Elder Impulse', description: 'Elder Impulse Bear (red bar)' },
+      { signalType: 'INDICATOR_ElderImpulseBlueSignal', indicator: 'MacdIndicator', category: 'Elder Impulse', description: 'Elder Impulse Blue (neutral bar)' }
+    ];
+    
+    // Group by category
+    const grouped = signalTypes.reduce((acc, signal) => {
+      if (!acc[signal.category]) {
+        acc[signal.category] = [];
+      }
+      acc[signal.category].push(signal);
+      return acc;
+    }, {});
+
+    res.json({
+      total: signalTypes.length,
+      categories: Object.keys(grouped),
+      signals: signalTypes,
+      grouped: grouped
+    });
+  } catch (error) {
+    console.error('Error fetching signal types:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get signal details by signalType
+app.get('/api/signal-types/:signalType', (req, res) => {
+  try {
+    const { signalType } = req.params;
+    
+    // Comprehensive lookup for signal type details
+    const signalTypeDetails = {
+      // RSI Signals
+      'INDICATOR_RsiObSignal': { 
+        signalType: 'INDICATOR_RsiObSignal', 
+        indicator: 'RsiIndicator', 
+        category: 'RSI', 
+        description: 'RSI Overbought Signal',
+        defaultValue: 70,
+        evaluate: 'signalAgent.ob'
+      },
+      'INDICATOR_RsiOsSignal': { 
+        signalType: 'INDICATOR_RsiOsSignal', 
+        indicator: 'RsiIndicator', 
+        category: 'RSI', 
+        description: 'RSI Oversold Signal',
+        defaultValue: 30,
+        evaluate: 'signalAgent.os'
+      },
+      
+      // MACD Signals
+      'INDICATOR_MacdBullishSignal': {
+        signalType: 'INDICATOR_MacdBullishSignal',
+        indicator: 'MacdIndicator',
+        category: 'MACD',
+        description: 'MACD Bullish Cross',
+        defaultValue: 0,
+        evaluate: 'signalAgent.macdBullish'
+      },
+      'INDICATOR_MacdBearishSignal': {
+        signalType: 'INDICATOR_MacdBearishSignal',
+        indicator: 'MacdIndicator',
+        category: 'MACD',
+        description: 'MACD Bearish Cross',
+        defaultValue: 0,
+        evaluate: 'signalAgent.macdBearish'
+      },
+      
+      // Bollinger Bands
+      'INDICATOR_BollingerUpperTouchSignal': {
+        signalType: 'INDICATOR_BollingerUpperTouchSignal',
+        indicator: 'BollingerIndicator',
+        category: 'Bollinger Bands',
+        description: 'Price touches upper Bollinger Band',
+        defaultValue: 0,
+        evaluate: 'signalAgent.bollingerUpperTouch'
+      },
+      'INDICATOR_BollingerLowerTouchSignal': {
+        signalType: 'INDICATOR_BollingerLowerTouchSignal',
+        indicator: 'BollingerIndicator',
+        category: 'Bollinger Bands',
+        description: 'Price touches lower Bollinger Band',
+        defaultValue: 0,
+        evaluate: 'signalAgent.bollingerLowerTouch'
+      },
+      
+      // Stochastic
+      'INDICATOR_StochasticOverboughtSignal': {
+        signalType: 'INDICATOR_StochasticOverboughtSignal',
+        indicator: 'StochasticIndicator',
+        category: 'Stochastic',
+        description: 'Stochastic Overbought',
+        defaultValue: 80,
+        evaluate: 'signalAgent.stochasticOverbought'
+      },
+      'INDICATOR_StochasticOversoldSignal': {
+        signalType: 'INDICATOR_StochasticOversoldSignal',
+        indicator: 'StochasticIndicator',
+        category: 'Stochastic',
+        description: 'Stochastic Oversold',
+        defaultValue: 20,
+        evaluate: 'signalAgent.stochasticOversold'
+      },
+      
+      // SuperTrend
+      'INDICATOR_SuperTrendSignal': {
+        signalType: 'INDICATOR_SuperTrendSignal',
+        indicator: 'SuperTrendIndicator',
+        category: 'SuperTrend',
+        description: 'SuperTrend Signal',
+        defaultValue: 'long',
+        evaluate: 'signalAgent.superTrend'
+      },
+      
+      // Volume
+      'INDICATOR_VolumeSpikeSignal': {
+        signalType: 'INDICATOR_VolumeSpikeSignal',
+        indicator: 'ObvIndicator',
+        category: 'Volume',
+        description: 'Volume Spike Detection',
+        defaultValue: 0,
+        evaluate: 'signalAgent.volumeSpike'
+      },
+      
+      // Moving Averages
+      'INDICATOR_GoldenCrossSignal': {
+        signalType: 'INDICATOR_GoldenCrossSignal',
+        indicator: 'Ema3Indicator',
+        category: 'Moving Average',
+        description: 'Golden Cross Signal',
+        defaultValue: 0,
+        evaluate: 'signalAgent.goldenCross'
+      },
+      'INDICATOR_DeathCrossSignal': {
+        signalType: 'INDICATOR_DeathCrossSignal',
+        indicator: 'Ema3Indicator',
+        category: 'Moving Average',
+        description: 'Death Cross Signal',
+        defaultValue: 0,
+        evaluate: 'signalAgent.deathCross'
+      },
+      
+      // Bollinger Advanced
+      'INDICATOR_BollingerSqueezeSignal': {
+        signalType: 'INDICATOR_BollingerSqueezeSignal',
+        indicator: 'BollingerIndicator',
+        category: 'Bollinger Bands',
+        description: 'Bollinger Squeeze Detection',
+        defaultValue: 0,
+        evaluate: 'signalAgent.bollingerSqueeze'
+      },
+      'INDICATOR_BollingerExpansionSignal': {
+        signalType: 'INDICATOR_BollingerExpansionSignal',
+        indicator: 'BollingerIndicator',
+        category: 'Bollinger Bands',
+        description: 'Bollinger Expansion Detection',
+        defaultValue: 0,
+        evaluate: 'signalAgent.bollingerExpansion'
+      },
+      
+      // Ichimoku
+      'INDICATOR_IchimokuBullishSignal': {
+        signalType: 'INDICATOR_IchimokuBullishSignal',
+        indicator: 'IchimokuCloudIndicator',
+        category: 'Ichimoku',
+        description: 'Ichimoku Bullish Signal',
+        defaultValue: 0,
+        evaluate: 'signalAgent.ichimokuBullish'
+      },
+      'INDICATOR_IchimokuBearishSignal': {
+        signalType: 'INDICATOR_IchimokuBearishSignal',
+        indicator: 'IchimokuCloudIndicator',
+        category: 'Ichimoku',
+        description: 'Ichimoku Bearish Signal',
+        defaultValue: 0,
+        evaluate: 'signalAgent.ichimokuBearish'
+      },
+      
+      // For any signal not explicitly defined, we can fall back to auto-mapping
+      '_DEFAULT_': {
+        description: 'Signal details can be auto-generated from mapping',
+        defaultValue: 0,
+        evaluate: 'signalAgent.gt'
+      }
+    };
+    
+    let signal = signalTypeDetails[signalType];
+    
+    if (!signal) {
+      // Fall back to auto-mapping if not in detailed lookup
+      const signalTypeToIndicatorMap = {
+        // Same mapping as used in backtest endpoint
+        'INDICATOR_RsiObSignal': 'RsiIndicator',
+        'INDICATOR_RsiOsSignal': 'RsiIndicator',
+        'INDICATOR_MacdBullishSignal': 'MacdIndicator',
+        'INDICATOR_MacdBearishSignal': 'MacdIndicator',
+        'INDICATOR_BollingerSqueezeSignal': 'BollingerIndicator',
+        'INDICATOR_BollingerExpansionSignal': 'BollingerIndicator',
+        'INDICATOR_IchimokuBullishSignal': 'IchimokuCloudIndicator',
+        'INDICATOR_VolumeSpikeSignal': 'ObvIndicator',
+        // Add more as needed
+      };
+      
+      const autoMappedIndicator = signalTypeToIndicatorMap[signalType];
+      if (autoMappedIndicator) {
+        signal = {
+          signalType,
+          indicator: autoMappedIndicator,
+          category: 'Auto-Mapped',
+          description: `Auto-mapped signal using ${autoMappedIndicator}`,
+          defaultValue: 0,
+          evaluate: 'signalAgent.gt',
+          autoMapped: true
+        };
+      } else {
+        return res.status(404).json({ 
+          error: `Signal type '${signalType}' not found`,
+          availableSignalTypes: Object.keys(signalTypeDetails).filter(k => k !== '_DEFAULT_')
+        });
+      }
+    }
+
+    res.json(signal);
+  } catch (error) {
+    console.error('Error fetching signal type:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Cache management endpoints
 app.get('/api/cache/stats', (req, res) => {
   res.json(getCacheStats());
@@ -371,15 +700,15 @@ app.delete('/api/signals/:id', async (req, res) => {
   }
 });
 
-// Backtest endpoint
+// Backtest endpoint (Enhanced with automatic indicator mapping)
 app.post('/api/backtest', async (req, res) => {
   try {
-    const {
-      symbol,
-      timeframe,
+    const { 
       signalType,
-      indicator,
-      value,
+      indicator,           // Optional: will be auto-mapped from signalType if not provided
+      value = 0,
+      symbol = 'BTCUSDT', 
+      timeframe = '15', 
       iterations = 10,
       candles = 200,
       risk = 2,
@@ -387,11 +716,138 @@ app.post('/api/backtest', async (req, res) => {
       capital = 10000
     } = req.body;
 
+    if (!signalType) {
+      return res.status(400).json({ 
+        error: 'signalType is required',
+        example: { 
+          signalType: 'INDICATOR_RsiOsSignal',
+          symbol: 'BTCUSDT',
+          timeframe: '15',
+          value: 30
+        }
+      });
+    }
+
+    // Auto-map indicator from signalType if not provided
+    let finalIndicator = indicator;
+    if (!finalIndicator) {
+      // Create a reverse mapping from signalType to indicator (matching CLI backtest.js)
+      const signalTypeToIndicatorMap = {
+        // RSI Signals
+        'INDICATOR_RsiObSignal': 'RsiIndicator',
+        'INDICATOR_RsiOsSignal': 'RsiIndicator',
+        
+        // MACD Signals
+        'INDICATOR_MacdBullishSignal': 'MacdIndicator',
+        'INDICATOR_MacdBearishSignal': 'MacdIndicator',
+        'INDICATOR_MacdHistogramPositiveSignal': 'MacdIndicator',
+        'INDICATOR_MacdHistogramNegativeSignal': 'MacdIndicator',
+        
+        // Bollinger Band Signals
+        'INDICATOR_BollingerUpperTouchSignal': 'BollingerIndicator',
+        'INDICATOR_BollingerLowerTouchSignal': 'BollingerIndicator',
+        'INDICATOR_BollingerSqueezeSignal': 'BollingerIndicator',
+        'INDICATOR_BollingerExpansionSignal': 'BollingerIndicator',
+        
+        // Stochastic Signals
+        'INDICATOR_StochasticOverboughtSignal': 'StochasticIndicator',
+        'INDICATOR_StochasticOversoldSignal': 'StochasticIndicator',
+        'INDICATOR_StochasticBullishCrossSignal': 'StochasticIndicator',
+        'INDICATOR_StochasticBearishCrossSignal': 'StochasticIndicator',
+        
+        // Williams %R Signals
+        'INDICATOR_WilliamsOverboughtSignal': 'WilliamsRIndicator',
+        'INDICATOR_WilliamsOversoldSignal': 'WilliamsRIndicator',
+        
+        // CCI Signals
+        'INDICATOR_CciOverboughtSignal': 'CciIndicator',
+        'INDICATOR_CciOversoldSignal': 'CciIndicator',
+        
+        // ADX Signals
+        'INDICATOR_AdxStrongTrendSignal': 'AdxIndicator',
+        'INDICATOR_AdxWeakTrendSignal': 'AdxIndicator',
+        
+        // MFI Signals
+        'INDICATOR_MfiOverboughtSignal': 'MfiIndicator',
+        'INDICATOR_MfiOversoldSignal': 'MfiIndicator',
+        
+        // ATR Signals
+        'INDICATOR_AtrHighVolatilitySignal': 'AtrIndicator',
+        
+        // Parabolic SAR Signals
+        'INDICATOR_ParabolicSarBullishSignal': 'PsarIndicator',
+        'INDICATOR_ParabolicSarBearishSignal': 'PsarIndicator',
+        
+        // Ichimoku Signals
+        'INDICATOR_IchimokuBullishSignal': 'IchimokuCloudIndicator',
+        'INDICATOR_IchimokuBearishSignal': 'IchimokuCloudIndicator',
+        'INDICATOR_IchimokuTkCrossBullishSignal': 'IchimokuCloudIndicator',
+        'INDICATOR_IchimokuTkCrossBearishSignal': 'IchimokuCloudIndicator',
+        
+        // SuperTrend Signals
+        'INDICATOR_SuperTrendSignal': 'SuperTrendIndicator',
+        
+        // Moving Average Signals
+        'INDICATOR_GoldenCrossSignal': 'Ema3Indicator',
+        'INDICATOR_DeathCrossSignal': 'Ema3Indicator',
+        'INDICATOR_MaSupportSignal': 'EMAIndicator',
+        'INDICATOR_MaResistanceSignal': 'EMAIndicator',
+        'INDICATOR_CrossUpSignal': 'EMAIndicator',
+        'INDICATOR_CrossDownSignal': 'EMAIndicator',
+        
+        // Volume Signals
+        'INDICATOR_ObvBullishSignal': 'ObvIndicator',
+        'INDICATOR_ObvBearishSignal': 'ObvIndicator',
+        'INDICATOR_VolumeSpikeSignal': 'ObvIndicator',
+        
+        // Triple EMA Signals
+        'INDICATOR_TemaBullishSignal': 'TrixIndicator',
+        'INDICATOR_TemaBearishSignal': 'TrixIndicator',
+        
+        // Trend Signals
+        'INDICATOR_UptrendSignal': 'SuperTrendIndicator',
+        'INDICATOR_DownTrendSignal': 'SuperTrendIndicator',
+        
+        // Support/Resistance Signals
+        'INDICATOR_SupportBreakoutSignal': 'SupportAndResistance',
+        'INDICATOR_ResistanceBreakoutSignal': 'SupportAndResistance',
+        
+        // Advanced Pattern Signals
+        'INDICATOR_FibonacciRetracementSignal': 'price',
+        'INDICATOR_CrocodileSignal': 'Ema3Indicator',
+        'INDICATOR_CrocodileDiveSignal': 'Ema3Indicator',
+        'INDICATOR_DivergenceDetector': 'MultiDivergenceDetector',
+        'INDICATOR_Woodies': 'Woodies',
+        
+        // Channel Breakout Signals
+        'INDICATOR_KeltnerUpperBreakoutSignal': 'KeltnerIndicator',
+        'INDICATOR_KeltnerLowerBreakoutSignal': 'KeltnerIndicator',
+        'INDICATOR_DonchianUpperBreakoutSignal': 'price',
+        'INDICATOR_DonchianLowerBreakoutSignal': 'price',
+        
+        // Elder Impulse Signals
+        'INDICATOR_ElderImpulseBullSignal': 'MacdIndicator',
+        'INDICATOR_ElderImpulseBearSignal': 'MacdIndicator',
+        'INDICATOR_ElderImpulseBlueSignal': 'MacdIndicator'
+      };
+
+      finalIndicator = signalTypeToIndicatorMap[signalType];
+      
+      if (!finalIndicator) {
+        return res.status(400).json({ 
+          error: `Unable to auto-map indicator for signalType: ${signalType}. Please provide the indicator parameter.`,
+          availableSignalTypes: Object.keys(signalTypeToIndicatorMap)
+        });
+      }
+      
+      console.log(`Auto-mapped ${signalType} → ${finalIndicator}`);
+    }
+
     console.log('Running backtest with params:', {
-      symbol,
+      symbol: symbol.toUpperCase(),
       timeframe,
       signalType,
-      indicator,
+      indicator: finalIndicator,
       value,
       iterations,
       candles,
@@ -468,13 +924,13 @@ app.post('/api/backtest', async (req, res) => {
 
     // Create signal object for backtesting
     const signal = {
-      symbol,
+      symbol: symbol.toUpperCase(),
       timeframe,
       signalType,
-      indicator,
+      indicator: finalIndicator,
       value,
-      evaluate: evaluateFunctionMap[signalType] || 'signalAgent.gt', // Add evaluate function
-      indicatorArgs: {}
+      evaluate: evaluateFunctionMap[signalType] || 'signalAgent.gt',
+      indicatorArgs: signalType === 'INDICATOR_CrossUpSignal' || signalType === 'INDICATOR_CrossDownSignal' ? { period: 200 } : {}
     };
 
     // Run backtest
@@ -487,7 +943,14 @@ app.post('/api/backtest', async (req, res) => {
       parseFloat(capital)
     );
 
-    res.json(results);
+    res.json({
+      success: true,
+      signal: {
+        ...signal,
+        autoMappedIndicator: !indicator // Show if indicator was auto-mapped
+      },
+      results
+    });
   } catch (error) {
     console.error('Error running backtest:', error);
     res.status(500).json({ 

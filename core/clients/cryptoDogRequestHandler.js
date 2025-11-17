@@ -33,8 +33,38 @@ export function getIntervals() {
   };
 };
 
-export function getInterval( interval) {
-  return getIntervals()[interval];
+export function getInterval(interval) {
+  const intervals = getIntervals();
+  
+  // Handle direct lookup (e.g., '15m', '1h')
+  if (intervals[interval]) {
+    return intervals[interval];
+  }
+  
+  // Handle numeric format (e.g., '15' -> '15m', '60' -> '1h')
+  const numericInterval = parseInt(interval);
+  if (!isNaN(numericInterval)) {
+    // Map common numeric intervals to their string equivalents
+    const numericMap = {
+      1: '1m',
+      3: '3m', 
+      5: '5m',
+      15: '15m',
+      30: '30m',
+      60: '1h',
+      120: '2h',
+      240: '4h',
+      360: '6h',
+      720: '12h'
+    };
+    
+    if (numericMap[numericInterval]) {
+      return intervals[numericMap[numericInterval]];
+    }
+  }
+  
+  // If no match found, return undefined (will cause the original error to be more descriptive)
+  return undefined;
 };
 
 export async function getTickers(category, symbol) {

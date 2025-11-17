@@ -12,7 +12,11 @@ export const backtestSignal = async (signal, iterations = 10, candles = 200, ris
     console.log(`📥 Fetching ${iterations} iterations × ${candles} candles = ${iterations * candles} total candles expected`);
     
     // Load historical data
-    const interval = getInterval(signal.timeframe).value;
+    const intervalObj = getInterval(signal.timeframe);
+    if (!intervalObj) {
+        throw new Error(`Invalid timeframe: ${signal.timeframe}. Expected formats like '15m', '1h', or numeric values like '15', '60'`);
+    }
+    const interval = intervalObj.value;
     const candleBuffer = await loadCandleData('spot', signal.symbol, interval, iterations, candles);
     const { o, h, l, c, v, buffer } = createIndicatorData(candleBuffer, signal.symbol);
     

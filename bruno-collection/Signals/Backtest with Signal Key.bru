@@ -1,0 +1,49 @@
+meta {
+  name: Backtest with Auto-Mapping
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/backtest
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "signalType": "INDICATOR_RsiOsSignal",
+    "value": 30,
+    "symbol": "BTCUSDT",
+    "timeframe": "15",
+    "iterations": 5,
+    "candles": 100,
+    "risk": 2,
+    "reward": 5,
+    "capital": 10000
+  }
+}
+
+tests {
+  test("Backtest successful", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('success', true);
+    expect(res.body).to.have.property('signal');
+    expect(res.body).to.have.property('results');
+  });
+  
+  test("Signal mapping correct", function() {
+    expect(res.body.signal.key).to.equal('rsi-os');
+    expect(res.body.signal.signalType).to.equal('INDICATOR_RsiOsSignal');
+    expect(res.body.signal.indicator).to.equal('RsiIndicator');
+    expect(res.body.signal.mappedFrom).to.equal('signalKey');
+    expect(res.body.signal.value).to.equal(30); // Default RSI oversold value
+  });
+  
+  test("Results structure", function() {
+    expect(res.body.results).to.have.property('signal');
+    expect(res.body.results).to.have.property('performance');
+    expect(res.body.results).to.have.property('trades');
+    expect(res.body.results).to.have.property('period');
+  });
+}

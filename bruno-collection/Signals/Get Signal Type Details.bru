@@ -1,0 +1,30 @@
+meta {
+  name: Get Signal Type Details
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/signal-types/rsi-os
+  body: none
+  auth: none
+}
+
+tests {
+  test("Signal type details returned", function() {
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.property('key', 'rsi-os');
+    expect(res.body).to.have.property('name');
+    expect(res.body).to.have.property('signalType');
+    expect(res.body).to.have.property('indicator');
+    expect(res.body).to.have.property('evaluateFunction');
+    expect(res.body).to.have.property('defaultValue');
+  });
+  
+  test("Mapping is correct", function() {
+    expect(res.body.signalType).to.equal('INDICATOR_RsiOsSignal');
+    expect(res.body.indicator).to.equal('RsiIndicator');
+    expect(res.body.evaluateFunction).to.equal('signalAgent.os');
+    expect(res.body.defaultValue).to.equal(30);
+  });
+}
