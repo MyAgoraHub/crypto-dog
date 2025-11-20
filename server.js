@@ -284,26 +284,119 @@ app.get('/api/indicators', (req, res) => {
 // Get all available signal types for backtesting  
 app.get('/api/signal-types', (req, res) => {
   try {
-    // Return the available signal types directly from our mapping
+    // Complete list of all available signal types
     const signalTypes = [
+      // RSI Signals
       { signalType: 'INDICATOR_RsiObSignal', indicator: 'RsiIndicator', category: 'RSI', description: 'RSI Overbought Signal' },
       { signalType: 'INDICATOR_RsiOsSignal', indicator: 'RsiIndicator', category: 'RSI', description: 'RSI Oversold Signal' },
-      { signalType: 'INDICATOR_MacdBullishSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Bullish Signal' },
-      { signalType: 'INDICATOR_MacdBearishSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Bearish Signal' },
-      { signalType: 'INDICATOR_BollingerUpperTouchSignal', indicator: 'BollingerBandsIndicator', category: 'Bollinger Bands', description: 'Bollinger Upper Band Touch' },
-      { signalType: 'INDICATOR_BollingerLowerTouchSignal', indicator: 'BollingerBandsIndicator', category: 'Bollinger Bands', description: 'Bollinger Lower Band Touch' },
-      { signalType: 'INDICATOR_StochasticOverboughtSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: 'Stochastic Overbought' },
-      { signalType: 'INDICATOR_StochasticOversoldSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: 'Stochastic Oversold' },
+      
+      // MACD Signals
+      { signalType: 'INDICATOR_MacdBullishSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Bullish Crossover' },
+      { signalType: 'INDICATOR_MacdBearishSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Bearish Crossover' },
+      { signalType: 'INDICATOR_MacdHistogramPositiveSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Histogram Positive' },
+      { signalType: 'INDICATOR_MacdHistogramNegativeSignal', indicator: 'MacdIndicator', category: 'MACD', description: 'MACD Histogram Negative' },
+      
+      // Bollinger Bands Signals
+      { signalType: 'INDICATOR_BollingerUpperTouchSignal', indicator: 'BollingerBandsIndicator', category: 'Bollinger Bands', description: 'Price Touches Upper Band' },
+      { signalType: 'INDICATOR_BollingerLowerTouchSignal', indicator: 'BollingerBandsIndicator', category: 'Bollinger Bands', description: 'Price Touches Lower Band' },
+      { signalType: 'INDICATOR_BollingerSqueezeSignal', indicator: 'BollingerBandsIndicator', category: 'Bollinger Bands', description: 'Bollinger Squeeze (Low Volatility)' },
+      { signalType: 'INDICATOR_BollingerExpansionSignal', indicator: 'BollingerBandsIndicator', category: 'Bollinger Bands', description: 'Bollinger Expansion (High Volatility)' },
+      
+      // Stochastic Signals
+      { signalType: 'INDICATOR_StochasticOverboughtSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: 'Stochastic Overbought (>80)' },
+      { signalType: 'INDICATOR_StochasticOversoldSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: 'Stochastic Oversold (<20)' },
+      { signalType: 'INDICATOR_StochasticBullishCrossSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: '%K Crosses Above %D' },
+      { signalType: 'INDICATOR_StochasticBearishCrossSignal', indicator: 'StochasticIndicator', category: 'Stochastic', description: '%K Crosses Below %D' },
+      
+      // Williams %R Signals
+      { signalType: 'INDICATOR_WilliamsOverboughtSignal', indicator: 'WilliamsRIndicator', category: 'Williams %R', description: 'Williams %R Overbought (>-20)' },
+      { signalType: 'INDICATOR_WilliamsOversoldSignal', indicator: 'WilliamsRIndicator', category: 'Williams %R', description: 'Williams %R Oversold (<-80)' },
+      
+      // CCI Signals
+      { signalType: 'INDICATOR_CciOverboughtSignal', indicator: 'CciIndicator', category: 'CCI', description: 'CCI Overbought (>100)' },
+      { signalType: 'INDICATOR_CciOversoldSignal', indicator: 'CciIndicator', category: 'CCI', description: 'CCI Oversold (<-100)' },
+      
+      // ADX Signals
+      { signalType: 'INDICATOR_AdxStrongTrendSignal', indicator: 'AdxIndicator', category: 'ADX', description: 'ADX Strong Trend (>25)' },
+      { signalType: 'INDICATOR_AdxWeakTrendSignal', indicator: 'AdxIndicator', category: 'ADX', description: 'ADX Weak Trend (<20)' },
+      
+      // MFI Signals
+      { signalType: 'INDICATOR_MfiOverboughtSignal', indicator: 'MfiIndicator', category: 'MFI', description: 'Money Flow Index Overbought (>80)' },
+      { signalType: 'INDICATOR_MfiOversoldSignal', indicator: 'MfiIndicator', category: 'MFI', description: 'Money Flow Index Oversold (<20)' },
+      
+      // ATR Signals
+      { signalType: 'INDICATOR_AtrHighVolatilitySignal', indicator: 'AtrIndicator', category: 'ATR', description: 'ATR High Volatility' },
+      
+      // Parabolic SAR Signals
+      { signalType: 'INDICATOR_ParabolicSarBullishSignal', indicator: 'ParabolicSarIndicator', category: 'Parabolic SAR', description: 'PSAR Below Price (Bullish)' },
+      { signalType: 'INDICATOR_ParabolicSarBearishSignal', indicator: 'ParabolicSarIndicator', category: 'Parabolic SAR', description: 'PSAR Above Price (Bearish)' },
+      
+      // Ichimoku Signals
+      { signalType: 'INDICATOR_IchimokuBullishSignal', indicator: 'IchimokuIndicator', category: 'Ichimoku', description: 'Ichimoku Bullish Setup' },
+      { signalType: 'INDICATOR_IchimokuBearishSignal', indicator: 'IchimokuIndicator', category: 'Ichimoku', description: 'Ichimoku Bearish Setup' },
+      { signalType: 'INDICATOR_IchimokuTkCrossBullishSignal', indicator: 'IchimokuIndicator', category: 'Ichimoku', description: 'Tenkan Crosses Above Kijun' },
+      { signalType: 'INDICATOR_IchimokuTkCrossBearishSignal', indicator: 'IchimokuIndicator', category: 'Ichimoku', description: 'Tenkan Crosses Below Kijun' },
+      
+      // SuperTrend Signals
       { signalType: 'INDICATOR_SuperTrendSignal', indicator: 'SuperTrendIndicator', category: 'SuperTrend', description: 'SuperTrend Signal' },
-      { signalType: 'INDICATOR_GoldenCrossSignal', indicator: 'EmaIndicator', category: 'Moving Average', description: 'Golden Cross Signal' },
-      { signalType: 'INDICATOR_DeathCrossSignal', indicator: 'EmaIndicator', category: 'Moving Average', description: 'Death Cross Signal' },
+      
+      // Moving Average Signals
+      { signalType: 'INDICATOR_GoldenCrossSignal', indicator: 'EmaIndicator', category: 'Moving Average', description: 'Golden Cross (Fast MA > Slow MA)' },
+      { signalType: 'INDICATOR_DeathCrossSignal', indicator: 'EmaIndicator', category: 'Moving Average', description: 'Death Cross (Fast MA < Slow MA)' },
+      { signalType: 'INDICATOR_MaSupportSignal', indicator: 'EmaIndicator', category: 'Moving Average', description: 'Price Finds Support at MA' },
+      { signalType: 'INDICATOR_MaResistanceSignal', indicator: 'EmaIndicator', category: 'Moving Average', description: 'Price Hits Resistance at MA' },
+      { signalType: 'INDICATOR_CrossUpSignal', indicator: 'EmaIndicator', category: 'Moving Average', description: 'EMA Cross Up' },
+      { signalType: 'INDICATOR_CrossDownSignal', indicator: 'EmaIndicator', category: 'Moving Average', description: 'EMA Cross Down' },
+      
+      // Volume Signals
+      { signalType: 'INDICATOR_VolumeSpikeSignal', indicator: 'VolumeIndicator', category: 'Volume', description: 'Volume Spike (2x Average)' },
+      { signalType: 'INDICATOR_ObvBullishSignal', indicator: 'ObvIndicator', category: 'Volume', description: 'OBV Bullish Trend' },
+      { signalType: 'INDICATOR_ObvBearishSignal', indicator: 'ObvIndicator', category: 'Volume', description: 'OBV Bearish Trend' },
+      
+      // TEMA Signals
+      { signalType: 'INDICATOR_TemaBullishSignal', indicator: 'TripleEmaIndicator', category: 'TEMA', description: 'Triple EMA Bullish' },
+      { signalType: 'INDICATOR_TemaBearishSignal', indicator: 'TripleEmaIndicator', category: 'TEMA', description: 'Triple EMA Bearish' },
+      
+      // Trend Signals
+      { signalType: 'INDICATOR_UptrendSignal', indicator: 'TrendlineIndicator', category: 'Trend', description: 'Uptrend Detected' },
+      { signalType: 'INDICATOR_DownTrendSignal', indicator: 'TrendlineIndicator', category: 'Trend', description: 'Downtrend Detected' },
+      
+      // Support/Resistance Signals
+      { signalType: 'INDICATOR_SupportBreakoutSignal', indicator: 'SupportResistanceIndicator', category: 'Support/Resistance', description: 'Price Breaks Above Support' },
+      { signalType: 'INDICATOR_ResistanceBreakoutSignal', indicator: 'SupportResistanceIndicator', category: 'Support/Resistance', description: 'Price Breaks Above Resistance' },
+      
+      // Fibonacci Signals
+      { signalType: 'INDICATOR_FibonacciRetracementSignal', indicator: 'FibonacciIndicator', category: 'Fibonacci', description: 'Price at Fibonacci Level' },
+      
+      // Crocodile Signals
+      { signalType: 'INDICATOR_CrocodileSignal', indicator: 'CrocodileIndicator', category: 'Crocodile', description: 'Crocodile Bullish (EMA1>EMA2>EMA3)' },
+      { signalType: 'INDICATOR_CrocodileDiveSignal', indicator: 'CrocodileIndicator', category: 'Crocodile', description: 'Crocodile Dive Bearish (EMA1<EMA2<EMA3)' },
+      
+      // Divergence Signals
+      { signalType: 'INDICATOR_DivergenceDetector', indicator: 'MultiDivergenceIndicator', category: 'Divergence', description: 'Multi-Divergence Detection' },
+      
+      // Woodies Signals
+      { signalType: 'INDICATOR_Woodies', indicator: 'WoodiesIndicator', category: 'Woodies', description: 'Woodies Pivot Points' },
+      
+      // Keltner Channel Signals
+      { signalType: 'INDICATOR_KeltnerUpperBreakoutSignal', indicator: 'KeltnerChannelsIndicator', category: 'Keltner Channels', description: 'Price Breaks Above Upper Channel' },
+      { signalType: 'INDICATOR_KeltnerLowerBreakoutSignal', indicator: 'KeltnerChannelsIndicator', category: 'Keltner Channels', description: 'Price Breaks Below Lower Channel' },
+      
+      // Donchian Channel Signals
+      { signalType: 'INDICATOR_DonchianUpperBreakoutSignal', indicator: 'DonchianChannelsIndicator', category: 'Donchian Channels', description: 'Price Breaks Channel High' },
+      { signalType: 'INDICATOR_DonchianLowerBreakoutSignal', indicator: 'DonchianChannelsIndicator', category: 'Donchian Channels', description: 'Price Breaks Channel Low' },
+      
+      // Elder Impulse Signals
+      { signalType: 'INDICATOR_ElderImpulseBullSignal', indicator: 'ElderImpulseIndicator', category: 'Elder Impulse', description: 'Elder Impulse Bull (Green Bar)' },
+      { signalType: 'INDICATOR_ElderImpulseBearSignal', indicator: 'ElderImpulseIndicator', category: 'Elder Impulse', description: 'Elder Impulse Bear (Red Bar)' },
+      { signalType: 'INDICATOR_ElderImpulseBlueSignal', indicator: 'ElderImpulseIndicator', category: 'Elder Impulse', description: 'Elder Impulse Neutral (Blue Bar)' },
       
       // Price Action Signals
-      { signalType: 'PRICE_ACTION_GT', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price Above Level' },
-      { signalType: 'PRICE_ACTION_LT', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price Below Level' },
-      { signalType: 'PRICE_ACTION_GTE', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price At/Above Level' },
-      { signalType: 'PRICE_ACTION_LTE', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price At/Below Level' },
-      { signalType: 'PRICE_ACTION_EQ', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price Equal to Level' }
+      { signalType: 'PRICE_ACTION_GT', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price Above Level (>)' },
+      { signalType: 'PRICE_ACTION_LT', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price Below Level (<)' },
+      { signalType: 'PRICE_ACTION_GTE', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price At/Above Level (>=)' },
+      { signalType: 'PRICE_ACTION_LTE', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price At/Below Level (<=)' },
+      { signalType: 'PRICE_ACTION_EQ', indicator: 'PriceIndicator', category: 'Price Action', description: 'Price Equal to Level (==)' }
     ];
     
     // Group by category
