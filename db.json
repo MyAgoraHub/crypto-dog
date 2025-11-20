@@ -29,6 +29,30 @@
       "indicatorArgs": {},
       "triggerCount": 0,
       "createdAt": 1700000000000
+    },
+    {
+      "id": "signal-new-1234",
+      "symbol": "BTCUSDT",
+      "timeframe": "15",
+      "signalType": "PRICE_ACTION_GTE",
+      "value": 10000,
+      "evaluate": "gte",
+      "active": true,
+      "indicatorArgs": {},
+      "triggerCount": 0,
+      "createdAt": 1700000000000
+    },
+    {
+      "id": "signal-new-1234",
+      "symbol": "BTCUSDT",
+      "timeframe": "15",
+      "signalType": "PRICE_ACTION_GTE",
+      "value": 10000,
+      "evaluate": "(data, model) => {\n        return data.value >= model.value;\n    }",
+      "active": true,
+      "indicatorArgs": {},
+      "triggerCount": 0,
+      "createdAt": 1700000000000
     }
   ],
   "settings": {},
