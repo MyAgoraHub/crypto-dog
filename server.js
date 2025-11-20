@@ -666,10 +666,11 @@ app.get('/api/signals/:id', async (req, res) => {
 
 app.post('/api/signals', async (req, res) => {
   try {
-    const signal = req.body;
+    const inputSignal = req.body;
     
     // Map evaluate function to actual function reference, then convert to string
-    if (signal.evaluate && typeof signal.evaluate === 'string') {
+    let evaluateFunction = null;
+    if (inputSignal.evaluate && typeof inputSignal.evaluate === 'string') {
       // Map string references like 'ob', 'gte', etc. to actual functions
       const evaluateFunctionMap = {
         'ob': signalAgent.ob,
@@ -736,12 +737,36 @@ app.post('/api/signals', async (req, res) => {
         'elderImpulseBlue': signalAgent.elderImpulseBlue
       };
       
-      const evalFunc = evaluateFunctionMap[signal.evaluate];
+      const evalFunc = evaluateFunctionMap[inputSignal.evaluate];
       if (evalFunc && typeof evalFunc === 'function') {
         // Convert function to string representation
-        signal.evaluate = evalFunc.toString();
+        evaluateFunction = evalFunc.toString();
+      } else {
+        evaluateFunction = inputSignal.evaluate;
       }
+    } else {
+      evaluateFunction = inputSignal.evaluate;
     }
+    
+    // Create signal using CLI-compatible structure (matches getSignalModel)
+    const now = new Date();
+    const signal = {
+      id: inputSignal.id || `${inputSignal.symbol}-${inputSignal.timeframe}-${inputSignal.indicator || inputSignal.signalType}`,
+      symbol: inputSignal.symbol || null,
+      timeframe: inputSignal.timeframe || null,
+      indicator: inputSignal.indicator || null,
+      signalType: inputSignal.signalType || null,
+      value: inputSignal.value || null,
+      createdOn: inputSignal.createdOn || now,
+      updatedOn: inputSignal.updatedOn || now,
+      lastExecuted: inputSignal.lastExecuted || now,
+      isActive: inputSignal.isActive !== undefined ? inputSignal.isActive : (inputSignal.active !== undefined ? inputSignal.active : true),
+      nextInvocation: inputSignal.nextInvocation || now,
+      maxTriggerTimes: inputSignal.maxTriggerTimes || 3,
+      triggerCount: inputSignal.triggerCount || 0,
+      evaluate: evaluateFunction,
+      indicatorArgs: inputSignal.indicatorArgs || {}
+    };
     
     await saveSignal(signal);
     res.json({ success: true, message: 'Signal created', signal });

@@ -12,13 +12,12 @@ post {
 
 body:json {
   {
-    "id": "signal-new-123",
+    "id": "signal-new-1234",
     "symbol": "BTCUSDT",
     "timeframe": "15",
-    "signalType": "INDICATOR_RsiObSignal",
-    "indicator": "rsi",
-    "value": 70,
-    "evaluate": "signalAgent.ob",
+    "signalType": "PRICE_ACTION_GTE",
+    "value": 10000,
+    "evaluate": "gte",
     "active": true,
     "indicatorArgs": {},
     "triggerCount": 0,
