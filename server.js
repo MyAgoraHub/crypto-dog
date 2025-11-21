@@ -21,6 +21,10 @@ import { backtestSignal } from './core/cryptoDogBacktest.js';
 import { CryptoDogWebSocketHandler } from './core/clients/cryptoDogWebsocketHandler.js';
 import { cryptoDogTradeBotAgent } from './core/cryptoDogTradeBotAgent.js';
 import { signalAgent } from './core/cryptoDogSignalAgent.js';
+import { createCryptoDogAiContext as createAiContext } from './core/cryptoDogAiContext.js';
+import fs, { createReadStream } from 'fs';
+import { promises as fsPromises } from 'fs';
+import path from 'path';
 // Signal mapping utilities removed - using direct signalType to indicator mapping
 import {
   rsiMarketData,
@@ -1118,6 +1122,262 @@ app.post('/api/indicators/calculate-all', async (req, res) => {
   } catch (error) {
     console.error('❌ Error calculating indicators:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// AI Context CSV Generation Endpoints
+app.post('/api/ai/generate-csv', async (req, res) => {
+  try {
+    const { 
+      symbol = 'BTCUSDT', 
+      timeframe = '15m',
+      iterations = 200,
+      candles = 500
+    } = req.body;
+    
+    console.log(`📊 Generating AI context CSV for ${symbol}/${timeframe}...`);
+    console.log(`   Iterations: ${iterations}, Candles: ${candles}`);
+    
+    // Create AI context and generate CSV
+    const signal = { symbol, timeframe };
+    const aiContext = createAiContext(signal, iterations, candles);
+    
+    // Load data and generate CSV
+    await aiContext.loadData();
+    aiContext.writeIndicatorCsvData();
+    
+    // Construct file path
+    const fileName = `cryptoDogAiContext_${symbol}_${timeframe}.csv`;
+    const csvPath = path.join(process.cwd(), fileName);
+    
+    // Check if file exists and get stats
+    const stats = await fsPromises.stat(csvPath);
+    
+    res.json({
+      success: true,
+      symbol,
+      timeframe,
+      iterations,
+      candles,
+      filePath: csvPath,
+      fileName: fileName,
+      fileSize: stats.size,
+      fileSizeReadable: `${(stats.size / 1024 / 1024).toFixed(2)} MB`,
+      downloadUrl: `/api/ai/csv/${symbol}/${timeframe}`,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error generating CSV:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// Stream CSV file endpoint
+app.get('/api/ai/csv/:symbol/:timeframe', async (req, res) => {
+  try {
+    const { symbol, timeframe } = req.params;
+    
+    // Construct expected file path (match the cryptoDogAiContext.js output format)
+    const fileName = `cryptoDogAiContext_${symbol}_${timeframe}.csv`;
+    const csvPath = path.join(process.cwd(), fileName);
+    
+    // Check if file exists
+    try {
+      await fsPromises.access(csvPath);
+    } catch (error) {
+      return res.status(404).json({ 
+        error: 'CSV file not found',
+        symbol,
+        timeframe,
+        expectedPath: csvPath,
+        hint: 'Generate the CSV first using POST /api/ai/generate-csv'
+      });
+    }
+    
+    // Get file stats
+    const stats = await fsPromises.stat(csvPath);
+    
+    // Set headers for CSV download
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', stats.size);
+    
+    // Stream the file
+    const readStream = createReadStream(csvPath);
+    
+    readStream.on('error', (error) => {
+      console.error('❌ Error streaming CSV:', error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Error streaming file' });
+      }
+    });
+    
+    readStream.pipe(res);
+    
+  } catch (error) {
+    console.error('❌ Error in CSV endpoint:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// List all available AI context CSV files
+app.get('/api/ai/csv-files', async (req, res) => {
+  try {
+    const files = await fsPromises.readdir(process.cwd());
+    const csvFiles = files
+      .filter(f => f.startsWith('cryptoDogAiContext_') && f.endsWith('.csv'))
+      .map(f => {
+        const match = f.match(/cryptoDogAiContext_([A-Z]+)_(\d+[mhd])\.csv/);
+        if (match) {
+          return {
+            fileName: f,
+            symbol: match[1],
+            timeframe: match[2],
+            downloadUrl: `/api/ai/csv/${match[1]}/${match[2]}`
+          };
+        }
+        return null;
+      })
+      .filter(f => f !== null);
+    
+    // Get file stats for each CSV
+    const csvFilesWithStats = await Promise.all(
+      csvFiles.map(async (file) => {
+        try {
+          const filePath = path.join(process.cwd(), file.fileName);
+          const stats = await fsPromises.stat(filePath);
+          return {
+            ...file,
+            fileSize: stats.size,
+            fileSizeReadable: `${(stats.size / 1024 / 1024).toFixed(2)} MB`,
+            lastModified: stats.mtime
+          };
+        } catch (error) {
+          return file;
+        }
+      })
+    );
+    
+    res.json({
+      count: csvFilesWithStats.length,
+      files: csvFilesWithStats
+    });
+    
+  } catch (error) {
+    console.error('❌ Error listing CSV files:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete AI context CSV file
+app.delete('/api/ai/csv/:symbol/:timeframe', async (req, res) => {
+  try {
+    const { symbol, timeframe } = req.params;
+    
+    // Construct file path
+    const fileName = `cryptoDogAiContext_${symbol}_${timeframe}.csv`;
+    const csvPath = path.join(process.cwd(), fileName);
+    
+    // Check if file exists
+    try {
+      await fsPromises.access(csvPath);
+    } catch (error) {
+      return res.status(404).json({ 
+        error: 'CSV file not found',
+        symbol,
+        timeframe,
+        fileName,
+        hint: 'File does not exist or was already deleted'
+      });
+    }
+    
+    // Get file stats before deletion
+    const stats = await fsPromises.stat(csvPath);
+    const fileSize = stats.size;
+    const fileSizeReadable = `${(fileSize / 1024 / 1024).toFixed(2)} MB`;
+    
+    // Delete the file
+    await fsPromises.unlink(csvPath);
+    
+    console.log(`🗑️  Deleted CSV file: ${fileName} (${fileSizeReadable})`);
+    
+    res.json({
+      success: true,
+      deleted: true,
+      symbol,
+      timeframe,
+      fileName,
+      fileSize,
+      fileSizeReadable,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error deleting CSV file:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
+
+// Delete all AI context CSV files
+app.delete('/api/ai/csv-files', async (req, res) => {
+  try {
+    const files = await fsPromises.readdir(process.cwd());
+    const csvFiles = files.filter(f => f.startsWith('cryptoDogAiContext_') && f.endsWith('.csv'));
+    
+    if (csvFiles.length === 0) {
+      return res.json({
+        success: true,
+        deleted: 0,
+        message: 'No CSV files found to delete'
+      });
+    }
+    
+    // Delete all CSV files
+    const deleteResults = await Promise.allSettled(
+      csvFiles.map(async (fileName) => {
+        const filePath = path.join(process.cwd(), fileName);
+        const stats = await fsPromises.stat(filePath);
+        await fsPromises.unlink(filePath);
+        return {
+          fileName,
+          fileSize: stats.size,
+          fileSizeReadable: `${(stats.size / 1024 / 1024).toFixed(2)} MB`
+        };
+      })
+    );
+    
+    const deleted = deleteResults.filter(r => r.status === 'fulfilled').map(r => r.value);
+    const failed = deleteResults.filter(r => r.status === 'rejected').map(r => r.reason);
+    
+    console.log(`🗑️  Deleted ${deleted.length} CSV files`);
+    if (failed.length > 0) {
+      console.error(`❌ Failed to delete ${failed.length} files:`, failed);
+    }
+    
+    res.json({
+      success: true,
+      deleted: deleted.length,
+      failed: failed.length,
+      files: deleted,
+      errors: failed.length > 0 ? failed : undefined,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error deleting CSV files:', error);
+    res.status(500).json({ 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
